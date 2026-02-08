@@ -20,10 +20,6 @@ models:
         description: 男性人口計
       - name: '"女性"'
         description: 女性人口計
-      - name: '"世帯数"'
-        description: 世帯数
-      - name: '"備考"'
-        description: 備考
       - name: '"0-4歳の男性"'
         description: 0-4歳の男性人口
       - name: '"0-4歳の女性"'
@@ -96,6 +92,10 @@ models:
         description: 85歳以上の男性人口
       - name: '"85歳以上の女性"'
         description: 85歳以上の女性人口
+      - name: '"世帯数"'
+        description: 世帯数
+      - name: '"備考"'
+        description: 備考
 
   - name: raw_tsukuba_population_20240501
     description: つくば市人口データ（2024年5月1日時点）の生データ
