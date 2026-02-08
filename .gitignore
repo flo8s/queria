@@ -1,0 +1,21 @@
+# 環境変数
+.env
+
+# dbt
+transform/target/
+transform/dbt_packages/
+transform/logs/
+
+# DuckLake
+transform/*.ducklake
+transform/*.ducklake.files/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+
+# Node.js
+node_modules/
+dist/
+build/
