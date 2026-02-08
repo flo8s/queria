@@ -1,0 +1,66 @@
+{#
+  つくば市人口CSV読み込みマクロ
+
+  read_csv_auto ではカラム順が正しく検出されず、
+  末尾4カラムが以下のようにずれる:
+    誤: ..., 80-84歳の女性, 世帯数, 備考, 85歳以上の男性, 85歳以上の女性
+    正: ..., 80-84歳の女性, 85歳以上の男性, 85歳以上の女性, 世帯数, 備考
+
+  このマクロでは read_csv に明示的な columns 定義を渡し、
+  CSVの実データ順に合わせて正しくマッピングする。
+#}
+{% macro read_tsukuba_population_csv(url) %}
+read_csv(
+    '{{ url }}',
+    header = true,
+    encoding = 'shift_jis',
+    columns = {
+        '全国地方公共団体コード': 'VARCHAR',
+        '地域コード': 'VARCHAR',
+        '地方公共団体名': 'VARCHAR',
+        '調査年月日': 'VARCHAR',
+        '地域名': 'VARCHAR',
+        '総人口': 'INTEGER',
+        '男性': 'INTEGER',
+        '女性': 'INTEGER',
+        '0-4歳の男性': 'INTEGER',
+        '0-4歳の女性': 'INTEGER',
+        '5-9歳の男性': 'INTEGER',
+        '5-9歳の女性': 'INTEGER',
+        '10-14歳の男性': 'INTEGER',
+        '10-14歳の女性': 'INTEGER',
+        '15-19歳の男性': 'INTEGER',
+        '15-19歳の女性': 'INTEGER',
+        '20-24歳の男性': 'INTEGER',
+        '20-24歳の女性': 'INTEGER',
+        '25-29歳の男性': 'INTEGER',
+        '25-29歳の女性': 'INTEGER',
+        '30-34歳の男性': 'INTEGER',
+        '30-34歳の女性': 'INTEGER',
+        '35-39歳の男性': 'INTEGER',
+        '35-39歳の女性': 'INTEGER',
+        '40-44歳の男性': 'INTEGER',
+        '40-44歳の女性': 'INTEGER',
+        '45-49歳の男性': 'INTEGER',
+        '45-49歳の女性': 'INTEGER',
+        '50-54歳の男性': 'INTEGER',
+        '50-54歳の女性': 'INTEGER',
+        '55-59歳の男性': 'INTEGER',
+        '55-59歳の女性': 'INTEGER',
+        '60-64歳の男性': 'INTEGER',
+        '60-64歳の女性': 'INTEGER',
+        '65-69歳の男性': 'INTEGER',
+        '65-69歳の女性': 'INTEGER',
+        '70-74歳の男性': 'INTEGER',
+        '70-74歳の女性': 'INTEGER',
+        '75-79歳の男性': 'INTEGER',
+        '75-79歳の女性': 'INTEGER',
+        '80-84歳の男性': 'INTEGER',
+        '80-84歳の女性': 'INTEGER',
+        '85歳以上の男性': 'INTEGER',
+        '85歳以上の女性': 'INTEGER',
+        '世帯数': 'INTEGER',
+        '備考': 'VARCHAR'
+    }
+)
+{% endmacro %}
