@@ -5,8 +5,11 @@
 transform/target/
 transform/dbt_packages/
 transform/logs/
+logs/
 
-# DuckLake
+# DuckDB / DuckLake
+transform/*.duckdb
+transform/*.duckdb.wal
 transform/*.ducklake
 transform/*.ducklake.files/
 
