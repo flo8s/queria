@@ -1,7 +1,7 @@
-name: 'transform'
-version: '1.0.0'
+name: "transform"
+version: "1.0.0"
 
-profile: 'transform'
+profile: "transform"
 
 model-paths: ["models"]
 analysis-paths: ["analyses"]
@@ -16,9 +16,18 @@ clean-targets:
 
 models:
   transform:
+    +persist_docs:
+      relation: true
+      columns: true
     raw:
       +materialized: table
     stg:
       +materialized: view
+      +persist_docs:
+        relation: true
+        columns: false
     mart:
       +materialized: view
+      +persist_docs:
+        relation: true
+        columns: false

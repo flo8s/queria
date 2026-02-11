@@ -1,0 +1,10 @@
+transform:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: "{{ env_var('DBT_DATABASE_PATH', 'ducklake:queria.ducklake') }}"
+      threads: 1
+      extensions:
+        - httpfs
+        - ducklake

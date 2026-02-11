@@ -24,5 +24,10 @@ npx wrangler r2 object put "${R2_BUCKET}/queria.ducklake" --file="transform/quer
 rm transform/queria.ducklake.public
 
 echo ""
+echo "=== カタログメタデータをアップロード ==="
+npx wrangler r2 object put "${R2_BUCKET}/catalog.json" \
+  --file="transform/target/catalog_meta.json" --remote
+
+echo ""
 echo "=== デプロイ完了 ==="
 echo "アクセス: duckdb \"ducklake:${R2_PUBLIC_URL}/queria.ducklake\""
