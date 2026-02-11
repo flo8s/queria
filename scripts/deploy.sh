@@ -1,4 +1,10 @@
 #!/bin/bash
+# ビルド済みアーティファクトを Cloudflare R2 にデプロイする
+# - Parquetファイル
+# - DuckLakeメタデータ (data_pathをR2のURLに書き換え)
+# - カタログメタデータ (catalog_meta.json)
+#
+# 事前に ./scripts/build.sh を実行してください
 set -e
 
 cd "$(dirname "$0")/.."

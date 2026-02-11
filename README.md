@@ -70,7 +70,8 @@ queria/
 │   ├── queria.ducklake        # DuckLakeメタデータ
 │   └── queria.ducklake.files/ # Parquetファイル
 ├── scripts/
-│   └── deploy.sh              # R2デプロイスクリプト
+│   ├── build.sh               # ビルド (dbt run + カタログメタデータ生成)
+│   └── deploy.sh              # R2デプロイ
 └── pyproject.toml
 ```
 
@@ -94,17 +95,12 @@ transform:
 ### デプロイ
 
 ```bash
-# dbtでDuckLakeを構築
-cd transform && uv run dbt run
+# ビルド (dbt run + カタログメタデータ生成)
+./scripts/build.sh
 
 # R2にアップロード
 ./scripts/deploy.sh
 ```
-
-deploy.shは以下を行います:
-1. ParquetファイルをR2にアップロード
-2. メタデータのdata_pathをR2のURLに書き換え
-3. メタデータをR2にアップロード
 
 ### R2 CORS設定
 
