@@ -33,3 +33,12 @@ models:
         +persist_docs:
           relation: true
           columns: false
+    e_stat:
+      +database: e_stat
+      raw:
+        +materialized: table
+      mart:
+        +materialized: view
+        +persist_docs:
+          relation: true
+          columns: false

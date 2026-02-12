@@ -17,6 +17,14 @@ transform:
           options:
             DATA_PATH: "tsukuba.ducklake.files/"
             OVERRIDE_DATA_PATH: true
+        - path: "ducklake:e_stat.ducklake"
+          alias: e_stat
+          is_ducklake: true
+          options:
+            DATA_PATH: "e_stat.ducklake.files/"
+            OVERRIDE_DATA_PATH: true
+        - path: "ducklake:https://data.oxon-data.work/fdl_experiment/dwh.ducklake"
+          alias: dwh
     prd:
       type: duckdb
       path: ":memory:"
@@ -39,3 +47,11 @@ transform:
           options:
             DATA_PATH: "{{ env_var('R2_S3_BUCKET_PATH') }}/tsukuba/ducklake.duckdb.files/"
             OVERRIDE_DATA_PATH: true
+        - path: "ducklake:e_stat.ducklake"
+          alias: e_stat
+          is_ducklake: true
+          options:
+            DATA_PATH: "{{ env_var('R2_S3_BUCKET_PATH') }}/e_stat/ducklake.duckdb.files/"
+            OVERRIDE_DATA_PATH: true
+        - path: "ducklake:https://data.oxon-data.work/fdl_experiment/dwh.ducklake"
+          alias: dwh
