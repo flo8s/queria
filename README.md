@@ -68,8 +68,7 @@ queria/
 │   ├── queria.ducklake        # DuckLakeメタデータ
 │   └── queria.ducklake.files/ # Parquetファイル (dev時)
 ├── scripts/
-│   ├── dev.sh                 # ローカル開発用ビルド
-│   ├── deploy.sh              # 本番デプロイ (R2書き込み + メタデータアップロード)
+│   ├── build.sh               # ビルド (--target dev|prod)
 │   └── maintenance.sh         # DuckLakeメンテナンス (不要スナップショット・ファイル削除)
 └── pyproject.toml
 ```
@@ -79,27 +78,20 @@ queria/
 profiles.yml はリポジトリに含まれています (`transform/profiles.yml`)。
 
 - dev target: ローカルにParquetを書き込み (`queria.ducklake.files/`)
-- prod target: R2のS3パスに直接書き込み (環境変数 `R2_S3_DATA_PATH` が必要)
+- prd target: R2のS3パスに直接書き込み (環境変数 `R2_S3_DATA_PATH` が必要)
 
 いずれの target も DuckLake の永続 data_path は公開HTTPS URLに固定されています。
 OVERRIDE_DATA_PATH で書き込み先だけを切り替える構成です。
 
-### ローカル開発
+### ビルド
 
 ```bash
-./scripts/dev.sh
+# ローカル開発
+./scripts/build.sh
+
+# 本番デプロイ (R2書き込み + メタデータアップロード)
+./scripts/build.sh --target prod
 ```
-
-DuckLake初期化 → dbt run (dev target) → カタログメタデータ生成を実行します。
-Parquetは `transform/queria.ducklake.files/` にローカル生成されます。
-
-### デプロイ
-
-```bash
-./scripts/deploy.sh
-```
-
-dbt run (prod target) で R2 に Parquet を直接書き込み、メタデータをアップロードします。
 
 以下の環境変数が必要です (.env で設定):
 

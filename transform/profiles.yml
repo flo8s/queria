@@ -17,7 +17,7 @@ transform:
           options:
             DATA_PATH: "queria.ducklake.files/"
             OVERRIDE_DATA_PATH: true
-    prod:
+    prd:
       type: duckdb
       path: ":memory:"
       database: queria
