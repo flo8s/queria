@@ -2,8 +2,10 @@
 # DuckLake ビルドスクリプト
 #
 # 使い方:
-#   ./scripts/build.sh                # ローカルビルド (dev)
-#   ./scripts/build.sh --target prd   # R2に書き込み + メタデータアップロード
+#   ./scripts/build.sh                       # 全データソースをローカルビルド (dev)
+#   ./scripts/build.sh tsukuba               # 指定データソースのみビルド
+#   ./scripts/build.sh --target prd          # 全データソースを prd ビルド
+#   ./scripts/build.sh tsukuba --target prd  # 指定データソースのみ prd ビルド
 #
 # prd の場合、以下の環境変数が必要 (.env で設定):
 #   R2_ACCESS_KEY_ID       - Cloudflare R2 アクセスキー
@@ -13,23 +15,44 @@
 set -e
 cd "$(dirname "$0")/.."
 
-# --target の値を取得 (デフォルト: dev)
+# 引数をパース (第1引数: データソース名, --target: ビルドターゲット)
 TARGET="dev"
+DATASOURCE_FILTER=""
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --target) TARGET="$2"; shift 2 ;;
-        *) echo "不明なオプション: $1" >&2; exit 1 ;;
+        -*) echo "不明なオプション: $1" >&2; exit 1 ;;
+        *) DATASOURCE_FILTER="$1"; shift ;;
     esac
 done
 
 # models/ 配下の _catalog.yml を持つディレクトリをデータソースとして検出
-DATASOURCES=()
+ALL_DATASOURCES=()
 for catalog_yml in transform/models/*/_catalog.yml; do
-  DATASOURCES+=("$(basename "$(dirname "${catalog_yml}")")")
+  ALL_DATASOURCES+=("$(basename "$(dirname "${catalog_yml}")")")
 done
-if [ ${#DATASOURCES[@]} -eq 0 ]; then
+if [ ${#ALL_DATASOURCES[@]} -eq 0 ]; then
   echo "Error: データソースが見つかりません (transform/models/*/_catalog.yml)" >&2
   exit 1
+fi
+
+# データソースのフィルタリング
+if [ -n "${DATASOURCE_FILTER}" ]; then
+  found=false
+  for ds in "${ALL_DATASOURCES[@]}"; do
+    if [ "${ds}" = "${DATASOURCE_FILTER}" ]; then
+      found=true
+      break
+    fi
+  done
+  if ! $found; then
+    echo "Error: データソース '${DATASOURCE_FILTER}' が見つかりません" >&2
+    echo "利用可能: ${ALL_DATASOURCES[*]}" >&2
+    exit 1
+  fi
+  DATASOURCES=("${DATASOURCE_FILTER}")
+else
+  DATASOURCES=("${ALL_DATASOURCES[@]}")
 fi
 
 R2_BUCKET="${R2_BUCKET:-queria-dev}"
@@ -50,7 +73,11 @@ for ds in "${DATASOURCES[@]}"; do
 done
 
 echo "=== dbt run (${TARGET}) ==="
-(cd transform && uv run dbt run --target "${TARGET}")
+if [ -n "${DATASOURCE_FILTER}" ]; then
+  (cd transform && uv run dbt run --target "${TARGET}" --select "${DATASOURCE_FILTER}")
+else
+  (cd transform && uv run dbt run --target "${TARGET}")
+fi
 
 echo "=== カタログメタデータを生成 ==="
 uv run python scripts/build_catalog.py
