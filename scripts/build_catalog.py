@@ -107,13 +107,19 @@ def build_catalog(catalog_yml: dict, models: list[dict]) -> dict:
             "tables": tables,
         }
 
-    return {
+    catalog = {
         "title": catalog_yml.get("title", ""),
         "description": catalog_yml.get("description", ""),
         "tags": catalog_yml.get("tags", []),
         "ducklake_url": catalog_yml.get("ducklake_url", ""),
         "schemas": schemas,
     }
+
+    dependencies = catalog_yml.get("dependencies")
+    if dependencies:
+        catalog["dependencies"] = dependencies
+
+    return catalog
 
 
 def main() -> None:
