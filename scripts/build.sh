@@ -79,6 +79,9 @@ else
   (cd transform && uv run dbt run --target "${TARGET}")
 fi
 
+echo "=== dbt docs generate ==="
+(cd transform && uv run dbt docs generate --target "${TARGET}")
+
 echo "=== カタログメタデータを生成 ==="
 uv run python scripts/build_catalog.py
 
@@ -89,7 +92,8 @@ if [ "${TARGET}" = "prd" ]; then
       --file="transform/${ds}.ducklake" --remote
 
     npx wrangler r2 object put "${R2_BUCKET}/${ds}/catalog.json" \
-      --file="transform/target/${ds}_catalog_meta.json" --remote
+      --file="transform/target/${ds}_catalog_meta.json" \
+      --content-type "application/json; charset=utf-8" --remote
   done
 
   echo "=== デプロイ完了 ==="
