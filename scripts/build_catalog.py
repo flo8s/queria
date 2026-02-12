@@ -17,6 +17,7 @@ import yaml
 
 ROOT = Path(__file__).resolve().parent.parent
 MANIFEST_PATH = ROOT / "transform" / "target" / "manifest.json"
+CATALOG_PATH = ROOT / "transform" / "target" / "catalog.json"
 MODELS_DIR = ROOT / "transform" / "models"
 
 
@@ -25,6 +26,13 @@ def load_manifest() -> dict:
         print(f"Error: {MANIFEST_PATH} が見つかりません。先に dbt run を実行してください。", file=sys.stderr)
         sys.exit(1)
     with open(MANIFEST_PATH) as f:
+        return json.load(f)
+
+
+def load_dbt_catalog() -> dict:
+    if not CATALOG_PATH.exists():
+        return {}
+    with open(CATALOG_PATH) as f:
         return json.load(f)
 
 
@@ -42,7 +50,7 @@ def discover_catalog_ymls() -> dict[str, tuple[Path, dict]]:
     return result
 
 
-def extract_models(manifest: dict, datasource: str) -> list[dict]:
+def extract_models(manifest: dict, dbt_catalog: dict, datasource: str) -> list[dict]:
     """manifest.json から指定データソースの public なモデルの情報を抽出する。"""
     models = []
     for node_id, node in manifest.get("nodes", {}).items():
@@ -58,11 +66,17 @@ def extract_models(manifest: dict, datasource: str) -> list[dict]:
         if not meta.get("public", False):
             continue
 
+        # dbt catalog からカラム型を取得
+        catalog_node = dbt_catalog.get("nodes", {}).get(node_id, {})
+        catalog_columns = catalog_node.get("columns", {})
+
         columns = []
         for col_name, col_info in node.get("columns", {}).items():
+            cat_col = catalog_columns.get(col_name, {})
             columns.append({
                 "name": col_name,
                 "description": col_info.get("description", ""),
+                "data_type": cat_col.get("type", ""),
             })
 
         model = {
@@ -124,6 +138,7 @@ def build_catalog(catalog_yml: dict, models: list[dict]) -> dict:
 
 def main() -> None:
     manifest = load_manifest()
+    dbt_catalog = load_dbt_catalog()
     catalog_ymls = discover_catalog_ymls()
 
     if not catalog_ymls:
@@ -134,7 +149,7 @@ def main() -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
 
     for datasource, (yml_path, catalog_yml) in sorted(catalog_ymls.items()):
-        models = extract_models(manifest, datasource)
+        models = extract_models(manifest, dbt_catalog, datasource)
         catalog = build_catalog(catalog_yml, models)
 
         output_path = output_dir / f"{datasource}_catalog_meta.json"
