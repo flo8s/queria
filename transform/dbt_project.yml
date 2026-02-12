@@ -36,7 +36,10 @@ models:
     e_stat:
       +database: e_stat
       raw:
-        +materialized: table
+        +materialized: view
+        +persist_docs:
+          relation: true
+          columns: false
       mart:
         +materialized: view
         +persist_docs:
