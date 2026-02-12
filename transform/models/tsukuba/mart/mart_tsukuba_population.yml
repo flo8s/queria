@@ -4,11 +4,10 @@ models:
   - name: mart_tsukuba_population
     description: つくば市の全期間人口データを統合したマートテーブル
     meta:
-      display_name:
-        ja: "つくば市人口統計"
-        en: "Tsukuba City Population Statistics"
+      title: "つくば市人口統計"
       tags: ["人口", "つくば市", "統計"]
       license: "CC BY 4.0"
+      license_url: "https://creativecommons.org/licenses/by/4.0/"
       source_url: "https://www.city.tsukuba.lg.jp/"
       public: true
     columns:
