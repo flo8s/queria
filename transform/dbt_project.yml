@@ -45,3 +45,7 @@ models:
         +persist_docs:
           relation: true
           columns: false
+        municipal:
+          +schema: municipal
+        pref:
+          +schema: pref

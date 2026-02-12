@@ -9,3 +9,7 @@ dependencies:
 schemas:
   main:
     title: "メイン"
+  main_municipal:
+    title: "市区町村統計"
+  main_pref:
+    title: "都道府県統計"
