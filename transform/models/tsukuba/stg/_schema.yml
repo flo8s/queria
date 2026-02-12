@@ -14,16 +14,6 @@ models:
         description: データの調査年月日
       - name: area_name
         description: 地域の名称
-      - name: total_population
-        description: 総人口
-      - name: male_total
-        description: 男性人口計
-      - name: female_total
-        description: 女性人口計
-      - name: households
-        description: 世帯数
-      - name: note
-        description: 備考
       - name: sex
         description: 性別（male/female）
       - name: age_group

@@ -6,11 +6,6 @@ WITH renamed AS (
         "地方公共団体名" as lg_name,
         "調査年月日"::date as reference_date,
         "地域名" as area_name,
-        "総人口" as total_population,
-        "男性" as male_total,
-        "女性" as female_total,
-        "世帯数" as households,
-        "備考" as note,
         "0-4歳の男性" as male_0_4, "0-4歳の女性" as female_0_4,
         "5-9歳の男性" as male_5_9, "5-9歳の女性" as female_5_9,
         "10-14歳の男性" as male_10_14, "10-14歳の女性" as female_10_14,
@@ -33,7 +28,6 @@ WITH renamed AS (
 )
 SELECT
     lg_code, area_code, lg_name, reference_date, area_name,
-    total_population, male_total, female_total, households, note,
     CASE WHEN age_sex LIKE 'male_%' THEN 'male' ELSE 'female' END as sex,
     CASE
         WHEN age_sex LIKE '%_0_4' THEN '0-4'
