@@ -66,6 +66,10 @@ def extract_models(manifest: dict, dbt_catalog: dict, datasource: str) -> list[d
         if not meta.get("public", False):
             continue
 
+        materialized = node.get("config", {}).get("materialized", "table")
+        model_type = "view" if materialized == "view" else "table"
+        compiled_code = node.get("compiled_code", "").strip()
+
         # dbt catalog からカラム型を取得
         catalog_node = dbt_catalog.get("nodes", {}).get(node_id, {})
         catalog_columns = catalog_node.get("columns", {})
@@ -88,10 +92,13 @@ def extract_models(manifest: dict, dbt_catalog: dict, datasource: str) -> list[d
             "license": meta.get("license", ""),
             "source_url": meta.get("source_url", ""),
             "columns": columns,
+            "type": model_type,
         }
         license_url = meta.get("license_url", "")
         if license_url:
             model["license_url"] = license_url
+        if compiled_code:
+            model["sql"] = compiled_code
 
         models.append(model)
     return models
@@ -112,9 +119,12 @@ def build_catalog(catalog_yml: dict, models: list[dict]) -> dict:
                 "license": model["license"],
                 "source_url": model["source_url"],
                 "columns": model["columns"],
+                "type": model["type"],
             }
             if "license_url" in model:
                 table["license_url"] = model["license_url"]
+            if "sql" in model:
+                table["sql"] = model["sql"]
             tables.append(table)
         schemas[schema_name] = {
             "title": schema_info.get("title", ""),
