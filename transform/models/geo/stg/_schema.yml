@@ -1,0 +1,42 @@
+version: 2
+
+models:
+  - name: stg_mlit_simplified
+    description: 国土数値情報 行政区域ポリゴン（Visvalingam 簡略化済み）
+    columns:
+      - name: N03_001
+        description: 都道府県名
+      - name: N03_002
+        description: 支庁・振興局名
+      - name: N03_003
+        description: 郡・政令市名
+      - name: N03_004
+        description: 市区町村名
+      - name: N03_007
+        description: 行政区域コード（5桁）
+      - name: geom
+        description: 簡略化済みポリゴンジオメトリ（EPSG:4326）
+
+  - name: stg_mst_city
+    description: 市区町村マスター（デジタル庁アドレス・ベース・レジストリから構築）
+    columns:
+      - name: lg_code
+        description: 全国地方公共団体コード（6桁）
+      - name: lg_code_5
+        description: 全国地方公共団体コード（5桁）
+      - name: prefecture_code
+        description: 都道府県コード（2桁）
+      - name: pref
+        description: 都道府県名
+      - name: county
+        description: 郡名
+      - name: city
+        description: 市区町村名
+      - name: ward
+        description: 政令指定都市の区名
+      - name: municipality_code
+        description: 市区町村統合コード（政令指定都市は市コードに統合）
+      - name: is_local_gov
+        description: 基礎自治体フラグ（区でない場合 true）
+      - name: is_hoppo_city
+        description: 北方領土6村フラグ

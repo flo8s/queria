@@ -10,6 +10,7 @@ transform:
       extensions:
         - httpfs
         - ducklake
+        - spatial
       attach:
         - path: "ducklake:tsukuba.ducklake"
           alias: tsukuba
@@ -25,6 +26,12 @@ transform:
           options:
             DATA_PATH: "e_stat.ducklake.files/"
             OVERRIDE_DATA_PATH: true
+        - path: "ducklake:geo.ducklake"
+          alias: geo
+          is_ducklake: true
+          options:
+            DATA_PATH: "geo.ducklake.files/"
+            OVERRIDE_DATA_PATH: true
     prd:
       type: duckdb
       path: ":memory:"
@@ -34,6 +41,7 @@ transform:
       extensions:
         - httpfs
         - ducklake
+        - spatial
       settings:
         s3_url_style: path
         s3_access_key_id: "{{ env_var('R2_ACCESS_KEY_ID') }}"
@@ -54,4 +62,10 @@ transform:
           is_ducklake: true
           options:
             DATA_PATH: "{{ env_var('R2_S3_BUCKET_PATH') }}/e_stat/ducklake.duckdb.files/"
+            OVERRIDE_DATA_PATH: true
+        - path: "ducklake:geo.ducklake"
+          alias: geo
+          is_ducklake: true
+          options:
+            DATA_PATH: "{{ env_var('R2_S3_BUCKET_PATH') }}/geo/ducklake.duckdb.files/"
             OVERRIDE_DATA_PATH: true

@@ -1,0 +1,54 @@
+version: 2
+
+models:
+  - name: raw_mlit_boundary
+    description: 国土交通省 国土数値情報 行政区域データ（2025年1月1日時点）
+    columns:
+      - name: N03_001
+        description: 都道府県名
+      - name: N03_002
+        description: 支庁・振興局名
+      - name: N03_003
+        description: 郡・政令市名
+      - name: N03_004
+        description: 市区町村名
+      - name: N03_007
+        description: 行政区域コード（全国地方公共団体コード5桁）
+      - name: geom
+        description: ポリゴンジオメトリ
+
+  - name: raw_da_abr_city
+    description: デジタル庁 アドレス・ベース・レジストリ 市区町村マスター
+    columns:
+      - name: lg_code
+        description: 全国地方公共団体コード（6桁）
+      - name: pref_name
+        description: 都道府県名
+      - name: pref_name_kana
+        description: 都道府県名（カナ）
+      - name: pref_name_roma
+        description: 都道府県名（ローマ字）
+      - name: county_name
+        description: 郡名
+      - name: county_name_kana
+        description: 郡名（カナ）
+      - name: county_name_roma
+        description: 郡名（ローマ字）
+      - name: city_name
+        description: 市区町村名
+      - name: city_name_kana
+        description: 市区町村名（カナ）
+      - name: city_name_roma
+        description: 市区町村名（ローマ字）
+      - name: od_city_name
+        description: 政令指定都市名
+      - name: od_city_name_kana
+        description: 政令指定都市名（カナ）
+      - name: od_city_name_roma
+        description: 政令指定都市名（ローマ字）
+      - name: efct_date
+        description: 効力発生日
+      - name: ablt_date
+        description: 廃止日
+      - name: remarks
+        description: 備考

@@ -1,0 +1,8 @@
+title: "日本行政区域 GeoParquet"
+description: "国土数値情報の行政区域データを GeoParquet 化したデータセット"
+tags: ["GeoParquet", "行政区域", "地図"]
+ducklake_url: "https://pub-0292714ad4094bd0aaf8d36835b0972a.r2.dev/geo/ducklake.duckdb"
+
+schemas:
+  main:
+    title: "メイン"

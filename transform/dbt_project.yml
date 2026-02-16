@@ -49,3 +49,11 @@ models:
           +schema: municipal
         pref:
           +schema: pref
+    geo:
+      +database: geo
+      raw:
+        +materialized: table
+      stg:
+        +materialized: table
+      mart:
+        +materialized: table

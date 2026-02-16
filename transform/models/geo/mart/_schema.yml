@@ -1,0 +1,59 @@
+version: 2
+
+_meta: &meta
+  license: "CC BY 4.0"
+  license_url: "https://creativecommons.org/licenses/by/4.0/"
+  source_url: "https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-N03-2025.html"
+  public: true
+  tags: ["行政区域", "GeoParquet"]
+
+models:
+  - name: mart_municipality
+    description: 市区町村ポリゴン（Visvalingam 簡略化済み、約1741市区町村）
+    meta:
+      <<: *meta
+      title: "市区町村ポリゴン"
+    columns:
+      - name: lg_code
+        description: 全国地方公共団体コード
+        tests:
+          - unique
+          - not_null
+      - name: lg_code_5
+        description: 全国地方公共団体コード（5桁）
+      - name: prefecture_code
+        description: 都道府県コード（2桁）
+        tests:
+          - not_null
+      - name: prefecture_name
+        description: 都道府県名
+        tests:
+          - not_null
+      - name: county_name
+        description: 郡名
+      - name: city_name
+        description: 市区町村名
+        tests:
+          - not_null
+      - name: is_hoppo_city
+        description: 北方領土6村フラグ
+      - name: geom
+        description: ポリゴンジオメトリ（EPSG:4326, Visvalingam 簡略化済み）
+
+  - name: mart_prefecture
+    description: 都道府県ポリゴン（市区町村ポリゴンの ST_Union、47都道府県）
+    meta:
+      <<: *meta
+      title: "都道府県ポリゴン"
+    columns:
+      - name: prefecture_code
+        description: 都道府県コード（2桁）
+        tests:
+          - unique
+          - not_null
+      - name: prefecture_name
+        description: 都道府県名
+        tests:
+          - not_null
+      - name: geom
+        description: ポリゴンジオメトリ（EPSG:4326, 市区町村ポリゴンの ST_Union）
