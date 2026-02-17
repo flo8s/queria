@@ -706,16 +706,18 @@ wheels = [
 [[package]]
 name = "queria"
 version = "0.1.0"
-source = { virtual = "." }
+source = { editable = "." }
 dependencies = [
     { name = "dbt-core" },
     { name = "dbt-duckdb" },
+    { name = "pyyaml" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "dbt-core", specifier = ">=1.11.2" },
     { name = "dbt-duckdb", specifier = ">=1.10.0" },
+    { name = "pyyaml", specifier = ">=6.0" },
 ]
 
 [[package]]

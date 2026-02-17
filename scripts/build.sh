@@ -85,7 +85,10 @@ for ds in "${DATASOURCES[@]}"; do
 done
 
 echo "=== カタログメタデータを生成 ==="
-uv run python scripts/build_catalog.py
+for ds in "${DATASOURCES[@]}"; do
+  echo "--- ${ds} ---"
+  uv run queria-build catalog --datasource "${ds}"
+done
 
 if [ "${TARGET}" = "prd" ]; then
   echo "=== メタデータをアップロード ==="

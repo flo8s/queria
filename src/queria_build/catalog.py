@@ -1,22 +1,10 @@
-"""manifest.json と _catalog.yml を統合して catalog_meta.json を生成する。
-
-datasets/ 配下の _catalog.yml を自動検出し、データソースごとに
-{datasource}_catalog_meta.json を出力する。
-
-使い方:
-    cd /path/to/queria
-    uv run dbt run           # manifest.json を生成
-    uv run python scripts/build_catalog.py
-"""
+"""manifest.json と _catalog.yml を統合して catalog_meta.json を生成する。"""
 
 import json
 import sys
 from pathlib import Path
 
 import yaml
-
-ROOT = Path(__file__).resolve().parent.parent
-DATASETS_DIR = ROOT / "datasets"
 
 
 def load_json(path: Path) -> dict:
@@ -25,20 +13,6 @@ def load_json(path: Path) -> dict:
         sys.exit(1)
     with open(path) as f:
         return json.load(f)
-
-
-def discover_catalog_ymls() -> dict[str, tuple[Path, dict]]:
-    """datasets/ 配下の _catalog.yml を検出し、データソース名とともに返す。
-
-    データソース名は _catalog.yml の親ディレクトリ名から取得する。
-    """
-    result = {}
-    for yml_path in sorted(DATASETS_DIR.glob("*/_catalog.yml")):
-        datasource = yml_path.parent.name
-        with open(yml_path) as f:
-            data = yaml.safe_load(f)
-        result[datasource] = (yml_path, data)
-    return result
 
 
 def extract_models(manifest: dict, dbt_catalog: dict, datasource: str) -> list[dict]:
@@ -137,39 +111,37 @@ def build_catalog(catalog_yml: dict, models: list[dict]) -> dict:
     return catalog
 
 
-def main() -> None:
-    catalog_ymls = discover_catalog_ymls()
-
-    if not catalog_ymls:
-        print("Error: _catalog.yml が見つかりません。", file=sys.stderr)
+def generate_catalog(datasets_dir: Path, datasource: str) -> None:
+    """指定データソースのカタログメタデータを生成する。"""
+    catalog_yml_path = datasets_dir / datasource / "_catalog.yml"
+    if not catalog_yml_path.exists():
+        print(f"Error: {catalog_yml_path} が見つかりません。", file=sys.stderr)
         sys.exit(1)
 
-    for datasource, (yml_path, catalog_yml) in sorted(catalog_ymls.items()):
-        manifest_path = DATASETS_DIR / datasource / "transform" / "target" / "manifest.json"
-        catalog_path = DATASETS_DIR / datasource / "transform" / "target" / "catalog.json"
+    with open(catalog_yml_path) as f:
+        catalog_yml = yaml.safe_load(f)
 
-        manifest = load_json(manifest_path)
-        dbt_catalog = {}
-        if catalog_path.exists():
-            with open(catalog_path) as f:
-                dbt_catalog = json.load(f)
+    manifest_path = datasets_dir / datasource / "transform" / "target" / "manifest.json"
+    catalog_path = datasets_dir / datasource / "transform" / "target" / "catalog.json"
 
-        models = extract_models(manifest, dbt_catalog, datasource)
-        catalog = build_catalog(catalog_yml, models)
+    manifest = load_json(manifest_path)
+    dbt_catalog = {}
+    if catalog_path.exists():
+        with open(catalog_path) as f:
+            dbt_catalog = json.load(f)
 
-        output_dir = DATASETS_DIR / datasource / "transform" / "target"
-        output_dir.mkdir(parents=True, exist_ok=True)
-        output_path = output_dir / f"{datasource}_catalog_meta.json"
-        with open(output_path, "w") as f:
-            json.dump(catalog, f, ensure_ascii=False, indent=2)
+    models = extract_models(manifest, dbt_catalog, datasource)
+    catalog = build_catalog(catalog_yml, models)
 
-        total_tables = sum(
-            len(s.get("tables", []))
-            for s in catalog["schemas"].values()
-        )
-        print(f"カタログを生成しました: {output_path}")
-        print(f"  データソース: {datasource} / 公開テーブル数: {total_tables}")
+    output_dir = datasets_dir / datasource / "transform" / "target"
+    output_dir.mkdir(parents=True, exist_ok=True)
+    output_path = output_dir / f"{datasource}_catalog_meta.json"
+    with open(output_path, "w") as f:
+        json.dump(catalog, f, ensure_ascii=False, indent=2)
 
-
-if __name__ == "__main__":
-    main()
+    total_tables = sum(
+        len(s.get("tables", []))
+        for s in catalog["schemas"].values()
+    )
+    print(f"カタログを生成しました: {output_path}")
+    print(f"  データソース: {datasource} / 公開テーブル数: {total_tables}")
