@@ -1,0 +1,42 @@
+version: 2
+
+models:
+  - name: stg_tsukuba_population_20240401
+    description: つくば市人口データ（2024年4月1日時点）をUNPIVOTして正規化
+    columns: &stg_columns
+      - name: lg_code
+        description: 全国地方公共団体コード
+      - name: area_code
+        description: 地域を識別するコード
+      - name: lg_name
+        description: 地方公共団体の名称
+      - name: reference_date
+        description: データの調査年月日
+      - name: area_name
+        description: 地域の名称
+      - name: sex
+        description: 性別（male/female）
+      - name: age_group
+        description: 年齢層（0-4, 5-9, ..., 85+）
+      - name: population
+        description: 該当性別・年齢層の人口
+
+  - name: stg_tsukuba_population_20240501
+    description: つくば市人口データ（2024年5月1日時点）をUNPIVOTして正規化
+    columns: *stg_columns
+
+  - name: stg_tsukuba_population_20241001
+    description: つくば市人口データ（2024年10月1日時点）をUNPIVOTして正規化
+    columns: *stg_columns
+
+  - name: stg_tsukuba_population_20250401
+    description: つくば市人口データ（2025年4月1日時点）をUNPIVOTして正規化
+    columns: *stg_columns
+
+  - name: stg_tsukuba_population_20250501
+    description: つくば市人口データ（2025年5月1日時点）をUNPIVOTして正規化
+    columns: *stg_columns
+
+  - name: stg_tsukuba_population_20251001
+    description: つくば市人口データ（2025年10月1日時点）をUNPIVOTして正規化
+    columns: *stg_columns

@@ -1,0 +1,8 @@
+title: "つくば市オープンデータ"
+description: "つくば市が公開している統計データ"
+tags: ["オープンデータ", "つくば市"]
+ducklake_url: "https://pub-0292714ad4094bd0aaf8d36835b0972a.r2.dev/tsukuba/ducklake.duckdb"
+
+schemas:
+  main:
+    title: "メイン"

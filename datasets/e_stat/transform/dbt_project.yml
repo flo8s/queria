@@ -1,0 +1,36 @@
+name: "e_stat"
+version: "1.0.0"
+
+profile: "e_stat"
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+models:
+  e_stat:
+    +database: e_stat
+    +persist_docs:
+      relation: true
+      columns: true
+    raw:
+      +materialized: view
+      +persist_docs:
+        relation: true
+        columns: false
+    mart:
+      +materialized: view
+      +persist_docs:
+        relation: true
+        columns: false
+      municipal:
+        +schema: municipal
+      pref:
+        +schema: pref

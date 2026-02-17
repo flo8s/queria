@@ -1,0 +1,15 @@
+title: "E-Stat 統計データ"
+description: "e-Stat API から取得した統計データ"
+tags: ["e-stat", "統計"]
+ducklake_url: "https://pub-0292714ad4094bd0aaf8d36835b0972a.r2.dev/e_stat/ducklake.duckdb"
+dependencies:
+  - alias: "dwh"
+    ducklake_url: "https://data.oxon-data.work/fdl_experiment/dwh.ducklake"
+
+schemas:
+  main:
+    title: "メイン"
+  main_municipal:
+    title: "市区町村統計"
+  main_pref:
+    title: "都道府県統計"

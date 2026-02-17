@@ -1,0 +1,118 @@
+version: 2
+
+models:
+  - name: raw_tsukuba_population_20240401
+    description: つくば市人口データ（2024年4月1日時点）の生データ
+    columns: &raw_columns
+      - name: '"全国地方公共団体コード"'
+        description: 全国地方公共団体コード
+      - name: '"地域コード"'
+        description: 地域を識別するコード
+      - name: '"地方公共団体名"'
+        description: 地方公共団体の名称
+      - name: '"調査年月日"'
+        description: データの調査年月日
+      - name: '"地域名"'
+        description: 地域の名称
+      - name: '"総人口"'
+        description: 総人口
+      - name: '"男性"'
+        description: 男性人口計
+      - name: '"女性"'
+        description: 女性人口計
+      - name: '"0-4歳の男性"'
+        description: 0-4歳の男性人口
+      - name: '"0-4歳の女性"'
+        description: 0-4歳の女性人口
+      - name: '"5-9歳の男性"'
+        description: 5-9歳の男性人口
+      - name: '"5-9歳の女性"'
+        description: 5-9歳の女性人口
+      - name: '"10-14歳の男性"'
+        description: 10-14歳の男性人口
+      - name: '"10-14歳の女性"'
+        description: 10-14歳の女性人口
+      - name: '"15-19歳の男性"'
+        description: 15-19歳の男性人口
+      - name: '"15-19歳の女性"'
+        description: 15-19歳の女性人口
+      - name: '"20-24歳の男性"'
+        description: 20-24歳の男性人口
+      - name: '"20-24歳の女性"'
+        description: 20-24歳の女性人口
+      - name: '"25-29歳の男性"'
+        description: 25-29歳の男性人口
+      - name: '"25-29歳の女性"'
+        description: 25-29歳の女性人口
+      - name: '"30-34歳の男性"'
+        description: 30-34歳の男性人口
+      - name: '"30-34歳の女性"'
+        description: 30-34歳の女性人口
+      - name: '"35-39歳の男性"'
+        description: 35-39歳の男性人口
+      - name: '"35-39歳の女性"'
+        description: 35-39歳の女性人口
+      - name: '"40-44歳の男性"'
+        description: 40-44歳の男性人口
+      - name: '"40-44歳の女性"'
+        description: 40-44歳の女性人口
+      - name: '"45-49歳の男性"'
+        description: 45-49歳の男性人口
+      - name: '"45-49歳の女性"'
+        description: 45-49歳の女性人口
+      - name: '"50-54歳の男性"'
+        description: 50-54歳の男性人口
+      - name: '"50-54歳の女性"'
+        description: 50-54歳の女性人口
+      - name: '"55-59歳の男性"'
+        description: 55-59歳の男性人口
+      - name: '"55-59歳の女性"'
+        description: 55-59歳の女性人口
+      - name: '"60-64歳の男性"'
+        description: 60-64歳の男性人口
+      - name: '"60-64歳の女性"'
+        description: 60-64歳の女性人口
+      - name: '"65-69歳の男性"'
+        description: 65-69歳の男性人口
+      - name: '"65-69歳の女性"'
+        description: 65-69歳の女性人口
+      - name: '"70-74歳の男性"'
+        description: 70-74歳の男性人口
+      - name: '"70-74歳の女性"'
+        description: 70-74歳の女性人口
+      - name: '"75-79歳の男性"'
+        description: 75-79歳の男性人口
+      - name: '"75-79歳の女性"'
+        description: 75-79歳の女性人口
+      - name: '"80-84歳の男性"'
+        description: 80-84歳の男性人口
+      - name: '"80-84歳の女性"'
+        description: 80-84歳の女性人口
+      - name: '"85歳以上の男性"'
+        description: 85歳以上の男性人口
+      - name: '"85歳以上の女性"'
+        description: 85歳以上の女性人口
+      - name: '"世帯数"'
+        description: 世帯数
+      - name: '"備考"'
+        description: 備考
+
+  - name: raw_tsukuba_population_20240501
+    description: つくば市人口データ（2024年5月1日時点）の生データ
+    columns: *raw_columns
+
+  - name: raw_tsukuba_population_20241001
+    description: つくば市人口データ（2024年10月1日時点）の生データ
+    columns: *raw_columns
+
+  - name: raw_tsukuba_population_20250401
+    description: つくば市人口データ（2025年4月1日時点）の生データ
+    columns: *raw_columns
+
+  - name: raw_tsukuba_population_20250501
+    description: つくば市人口データ（2025年5月1日時点）の生データ
+    columns: *raw_columns
+
+  - name: raw_tsukuba_population_20251001
+    description: つくば市人口データ（2025年10月1日時点）の生データ
+    columns: *raw_columns
