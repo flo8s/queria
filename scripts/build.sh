@@ -26,13 +26,13 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# models/ 配下の _catalog.yml を持つディレクトリをデータソースとして検出
+# datasets/ 配下の _catalog.yml を持つディレクトリをデータソースとして検出
 ALL_DATASOURCES=()
-for catalog_yml in transform/models/*/_catalog.yml; do
+for catalog_yml in datasets/*/_catalog.yml; do
   ALL_DATASOURCES+=("$(basename "$(dirname "${catalog_yml}")")")
 done
 if [ ${#ALL_DATASOURCES[@]} -eq 0 ]; then
-  echo "Error: データソースが見つかりません (transform/models/*/_catalog.yml)" >&2
+  echo "Error: データソースが見つかりません (datasets/*/_catalog.yml)" >&2
   exit 1
 fi
 
@@ -60,7 +60,7 @@ R2_PUBLIC_URL="${R2_PUBLIC_URL:-https://pub-0292714ad4094bd0aaf8d36835b0972a.r2.
 
 echo "=== DuckLake 初期化チェック ==="
 for ds in "${DATASOURCES[@]}"; do
-  DUCKLAKE_FILE="transform/${ds}.ducklake"
+  DUCKLAKE_FILE="datasets/${ds}/transform/${ds}.ducklake"
   if [ ! -f "${DUCKLAKE_FILE}" ]; then
     echo "DuckLake を作成します: ${ds} (data_path: ${R2_PUBLIC_URL}/${ds}/ducklake.duckdb.files/)"
     duckdb -c "
@@ -73,14 +73,16 @@ for ds in "${DATASOURCES[@]}"; do
 done
 
 echo "=== dbt run (${TARGET}) ==="
-if [ -n "${DATASOURCE_FILTER}" ]; then
-  (cd transform && uv run dbt run --target "${TARGET}" --select "${DATASOURCE_FILTER}")
-else
-  (cd transform && uv run dbt run --target "${TARGET}")
-fi
+for ds in "${DATASOURCES[@]}"; do
+  echo "--- ${ds} ---"
+  (cd "datasets/${ds}/transform" && uv run dbt deps && uv run dbt run --target "${TARGET}")
+done
 
 echo "=== dbt docs generate ==="
-(cd transform && uv run dbt docs generate --target "${TARGET}")
+for ds in "${DATASOURCES[@]}"; do
+  echo "--- ${ds} ---"
+  (cd "datasets/${ds}/transform" && uv run dbt docs generate --target "${TARGET}")
+done
 
 echo "=== カタログメタデータを生成 ==="
 uv run python scripts/build_catalog.py
@@ -89,10 +91,10 @@ if [ "${TARGET}" = "prd" ]; then
   echo "=== メタデータをアップロード ==="
   for ds in "${DATASOURCES[@]}"; do
     npx wrangler r2 object put "${R2_BUCKET}/${ds}/ducklake.duckdb" \
-      --file="transform/${ds}.ducklake" --remote
+      --file="datasets/${ds}/transform/${ds}.ducklake" --remote
 
     npx wrangler r2 object put "${R2_BUCKET}/${ds}/catalog.json" \
-      --file="transform/target/${ds}_catalog_meta.json" \
+      --file="datasets/${ds}/transform/target/${ds}_catalog_meta.json" \
       --content-type "application/json; charset=utf-8" --remote
   done
 

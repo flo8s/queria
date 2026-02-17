@@ -1,15 +1,15 @@
 # 環境変数
 .env
 
-# dbt
-transform/target/
-transform/dbt_packages/
-transform/logs/
-transform/.user.yml
+# dbt (各データセット)
+datasets/*/transform/target/
+datasets/*/transform/dbt_packages/
+datasets/*/transform/logs/
+datasets/*/transform/.user.yml
 
 # DuckLake
-transform/*.ducklake
-transform/*.ducklake.files/
+datasets/*/transform/*.ducklake
+datasets/*/transform/*.ducklake.files/
 
 # Python
 __pycache__/

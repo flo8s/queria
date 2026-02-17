@@ -1,6 +1,6 @@
 """manifest.json と _catalog.yml を統合して catalog_meta.json を生成する。
 
-models/ 配下の _catalog.yml を自動検出し、データソースごとに
+datasets/ 配下の _catalog.yml を自動検出し、データソースごとに
 {datasource}_catalog_meta.json を出力する。
 
 使い方:
@@ -16,33 +16,24 @@ from pathlib import Path
 import yaml
 
 ROOT = Path(__file__).resolve().parent.parent
-MANIFEST_PATH = ROOT / "transform" / "target" / "manifest.json"
-CATALOG_PATH = ROOT / "transform" / "target" / "catalog.json"
-MODELS_DIR = ROOT / "transform" / "models"
+DATASETS_DIR = ROOT / "datasets"
 
 
-def load_manifest() -> dict:
-    if not MANIFEST_PATH.exists():
-        print(f"Error: {MANIFEST_PATH} が見つかりません。先に dbt run を実行してください。", file=sys.stderr)
+def load_json(path: Path) -> dict:
+    if not path.exists():
+        print(f"Error: {path} が見つかりません。先に dbt run を実行してください。", file=sys.stderr)
         sys.exit(1)
-    with open(MANIFEST_PATH) as f:
-        return json.load(f)
-
-
-def load_dbt_catalog() -> dict:
-    if not CATALOG_PATH.exists():
-        return {}
-    with open(CATALOG_PATH) as f:
+    with open(path) as f:
         return json.load(f)
 
 
 def discover_catalog_ymls() -> dict[str, tuple[Path, dict]]:
-    """models/ 配下の _catalog.yml を検出し、データソース名とともに返す。
+    """datasets/ 配下の _catalog.yml を検出し、データソース名とともに返す。
 
     データソース名は _catalog.yml の親ディレクトリ名から取得する。
     """
     result = {}
-    for yml_path in MODELS_DIR.rglob("_catalog.yml"):
+    for yml_path in sorted(DATASETS_DIR.glob("*/_catalog.yml")):
         datasource = yml_path.parent.name
         with open(yml_path) as f:
             data = yaml.safe_load(f)
@@ -57,9 +48,9 @@ def extract_models(manifest: dict, dbt_catalog: dict, datasource: str) -> list[d
         if node.get("resource_type") != "model":
             continue
 
-        # fqn でデータソースをフィルタリング (例: ["transform", "tsukuba", "mart", "model_name"])
+        # fqn でデータソースをフィルタリング (例: ["tsukuba", "mart", "model_name"])
         fqn = node.get("fqn", [])
-        if len(fqn) < 2 or fqn[1] != datasource:
+        if len(fqn) < 1 or fqn[0] != datasource:
             continue
 
         meta = node.get("meta", {})
@@ -147,21 +138,27 @@ def build_catalog(catalog_yml: dict, models: list[dict]) -> dict:
 
 
 def main() -> None:
-    manifest = load_manifest()
-    dbt_catalog = load_dbt_catalog()
     catalog_ymls = discover_catalog_ymls()
 
     if not catalog_ymls:
         print("Error: _catalog.yml が見つかりません。", file=sys.stderr)
         sys.exit(1)
 
-    output_dir = MANIFEST_PATH.parent
-    output_dir.mkdir(parents=True, exist_ok=True)
-
     for datasource, (yml_path, catalog_yml) in sorted(catalog_ymls.items()):
+        manifest_path = DATASETS_DIR / datasource / "transform" / "target" / "manifest.json"
+        catalog_path = DATASETS_DIR / datasource / "transform" / "target" / "catalog.json"
+
+        manifest = load_json(manifest_path)
+        dbt_catalog = {}
+        if catalog_path.exists():
+            with open(catalog_path) as f:
+                dbt_catalog = json.load(f)
+
         models = extract_models(manifest, dbt_catalog, datasource)
         catalog = build_catalog(catalog_yml, models)
 
+        output_dir = DATASETS_DIR / datasource / "transform" / "target"
+        output_dir.mkdir(parents=True, exist_ok=True)
         output_path = output_dir / f"{datasource}_catalog_meta.json"
         with open(output_path, "w") as f:
             json.dump(catalog, f, ensure_ascii=False, indent=2)
