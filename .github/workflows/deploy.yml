@@ -36,6 +36,7 @@ jobs:
 
       - name: Build catalog
         run: |
+          uv run queria fetch datasets/catalog
           uv run queria run datasets/catalog --target prd
           uv run queria freeze datasets/catalog
         env:
