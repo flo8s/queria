@@ -1,0 +1,62 @@
+version: 2
+
+models:
+  - name: mart_zipcode
+    description: 日本郵便の全国郵便番号データ
+    access: public
+    config:
+      contract:
+        enforced: true
+    meta:
+      title: "全国郵便番号データ"
+      tags: ["郵便番号", "住所", "日本郵便"]
+      license: "自由利用"
+      license_url: "https://www.post.japanpost.jp/zipcode/dl/utf-readme.html"
+      source_url: "https://www.post.japanpost.jp/zipcode/dl/utf-zip.html"
+      public: true
+    columns:
+      - name: lg_code
+        description: 全国地方公共団体コード（JIS X0401, X0402）
+        data_type: VARCHAR
+      - name: old_zipcode
+        description: 旧郵便番号（5桁）
+        data_type: VARCHAR
+      - name: zipcode
+        description: 郵便番号（7桁）
+        data_type: VARCHAR
+      - name: prefecture_kana
+        description: 都道府県名カタカナ
+        data_type: VARCHAR
+      - name: city_kana
+        description: 市区町村名カタカナ
+        data_type: VARCHAR
+      - name: town_kana
+        description: 町域名カタカナ
+        data_type: VARCHAR
+      - name: prefecture
+        description: 都道府県名漢字
+        data_type: VARCHAR
+      - name: city
+        description: 市区町村名漢字
+        data_type: VARCHAR
+      - name: town
+        description: 町域名漢字
+        data_type: VARCHAR
+      - name: has_multiple_zipcodes
+        description: 一町域複数郵便番号フラグ（0/1）
+        data_type: INTEGER
+      - name: has_koaza_banchi
+        description: 小字毎番地フラグ（0/1）
+        data_type: INTEGER
+      - name: has_chome
+        description: 丁目有無フラグ（0/1）
+        data_type: INTEGER
+      - name: has_multiple_towns
+        description: 複数町域フラグ（0/1）
+        data_type: INTEGER
+      - name: update_status
+        description: 更新表示（0=変更なし、1=変更あり、2=廃止）
+        data_type: INTEGER
+      - name: update_reason
+        description: 変更理由（0=変更なし、1=市政施行、2=住居表示、3=区画整理、4=郵便区調整、5=訂正、6=廃止）
+        data_type: INTEGER

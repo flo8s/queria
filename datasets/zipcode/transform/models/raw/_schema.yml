@@ -1,0 +1,36 @@
+version: 2
+
+models:
+  - name: raw_zipcode
+    description: 日本郵便の郵便番号データ（utf_ken_all.csv）の生データ
+    columns:
+      - name: lg_code
+        description: 全国地方公共団体コード（JIS X0401, X0402）
+      - name: old_zipcode
+        description: 旧郵便番号（5桁）
+      - name: zipcode
+        description: 郵便番号（7桁）
+      - name: prefecture_kana
+        description: 都道府県名カタカナ
+      - name: city_kana
+        description: 市区町村名カタカナ
+      - name: town_kana
+        description: 町域名カタカナ
+      - name: prefecture
+        description: 都道府県名漢字
+      - name: city
+        description: 市区町村名漢字
+      - name: town
+        description: 町域名漢字
+      - name: has_multiple_zipcodes
+        description: 一町域複数郵便番号フラグ（0/1）
+      - name: has_koaza_banchi
+        description: 小字毎番地フラグ（0/1）
+      - name: has_chome
+        description: 丁目有無フラグ（0/1）
+      - name: has_multiple_towns
+        description: 複数町域フラグ（0/1）
+      - name: update_status
+        description: 更新表示（0=変更なし、1=変更あり、2=廃止）
+      - name: update_reason
+        description: 変更理由（0=変更なし、1=市政施行、2=住居表示、3=区画整理、4=郵便区調整、5=訂正、6=廃止）
