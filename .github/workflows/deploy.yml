@@ -31,6 +31,8 @@ jobs:
           curl -sSL --retry 3 -o datasets/e_stat/transform/dwh.ducklake \
             https://data.oxon-data.work/fdl_experiment/dwh.ducklake
           ls -la datasets/e_stat/transform/dwh.ducklake
+          file datasets/e_stat/transform/dwh.ducklake
+          head -c 16 datasets/e_stat/transform/dwh.ducklake | xxd
 
       - name: Build datasets
         env:
