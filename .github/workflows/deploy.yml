@@ -28,8 +28,9 @@ jobs:
       # https://github.com/duckdb/ducklake/issues/782
       - name: Download DuckLake dependencies
         run: |
-          curl -sfo datasets/e_stat/transform/dwh.ducklake \
+          curl -sSL --retry 3 -o datasets/e_stat/transform/dwh.ducklake \
             https://data.oxon-data.work/fdl_experiment/dwh.ducklake
+          ls -la datasets/e_stat/transform/dwh.ducklake
 
       - name: Build datasets
         env:
