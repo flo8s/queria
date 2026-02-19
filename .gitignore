@@ -8,9 +8,12 @@ datasets/*/transform/logs/
 datasets/*/transform/.user.yml
 
 # DuckLake
-datasets/*/transform/ducklake.duckdb
-datasets/*/transform/ducklake.duckdb.files/
-datasets/*/transform/ducklake.duckdb.wal
+datasets/*/**/ducklake.duckdb
+datasets/*/**/ducklake.duckdb.files/
+datasets/*/**/ducklake.duckdb.wal
+datasets/*/**/*.ducklake
+datasets/*/**/*.ducklake.files/
+datasets/*/**/*.ducklake.wal
 
 # Generated files
 datasets/*/metadata.json
