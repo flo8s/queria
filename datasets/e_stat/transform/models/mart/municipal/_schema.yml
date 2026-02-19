@@ -28,6 +28,7 @@ _meta: &meta
 models:
   - name: municipal_population
     description: 人口（市区町村）
+    access: public
     meta:
       <<: *meta
       title: "人口（市区町村）"
@@ -35,6 +36,7 @@ models:
 
   - name: municipal_land
     description: 土地（市区町村）
+    access: public
     meta:
       <<: *meta
       title: "土地（市区町村）"
@@ -42,6 +44,7 @@ models:
 
   - name: municipal_economy
     description: 経済基盤（市区町村）
+    access: public
     meta:
       <<: *meta
       title: "経済基盤（市区町村）"
@@ -49,6 +52,7 @@ models:
 
   - name: municipal_administration
     description: 行財政（市区町村）
+    access: public
     meta:
       <<: *meta
       title: "行財政（市区町村）"
@@ -56,6 +60,7 @@ models:
 
   - name: municipal_education
     description: 教育（市区町村）
+    access: public
     meta:
       <<: *meta
       title: "教育（市区町村）"
@@ -63,6 +68,7 @@ models:
 
   - name: municipal_labor
     description: 労働（市区町村）
+    access: public
     meta:
       <<: *meta
       title: "労働（市区町村）"
@@ -70,6 +76,7 @@ models:
 
   - name: municipal_culture
     description: 文化・スポーツ（市区町村）
+    access: public
     meta:
       <<: *meta
       title: "文化・スポーツ（市区町村）"
@@ -77,6 +84,7 @@ models:
 
   - name: municipal_housing
     description: 居住（市区町村）
+    access: public
     meta:
       <<: *meta
       title: "居住（市区町村）"
@@ -84,6 +92,7 @@ models:
 
   - name: municipal_health
     description: 健康・医療（市区町村）
+    access: public
     meta:
       <<: *meta
       title: "健康・医療（市区町村）"
@@ -91,6 +100,7 @@ models:
 
   - name: municipal_welfare
     description: 社会保障（市区町村）
+    access: public
     meta:
       <<: *meta
       title: "社会保障（市区町村）"
@@ -98,6 +108,7 @@ models:
 
   - name: municipal_safety
     description: 安全（市区町村）
+    access: public
     meta:
       <<: *meta
       title: "安全（市区町村）"

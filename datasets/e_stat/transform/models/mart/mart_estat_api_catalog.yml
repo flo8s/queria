@@ -3,6 +3,7 @@ version: 2
 models:
   - name: mart_estat_api_catalog
     description: E-Stat API カタログ（統計表メタデータ一覧）
+    access: public
     meta:
       title: "E-Stat API カタログ"
       tags: ["e-stat", "カタログ"]

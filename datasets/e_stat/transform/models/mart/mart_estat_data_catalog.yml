@@ -3,6 +3,7 @@ version: 2
 models:
   - name: mart_estat_data_catalog
     description: E-Stat データカタログ（データセット・リソース情報）
+    access: public
     meta:
       title: "E-Stat データカタログ"
       tags: ["e-stat", "カタログ"]

@@ -3,6 +3,7 @@ version: 2
 models:
   - name: estat_items
     description: 分類事項カタログ
+    access: public
     meta:
       title: "分類事項カタログ"
       tags: ["e-stat", "カタログ"]

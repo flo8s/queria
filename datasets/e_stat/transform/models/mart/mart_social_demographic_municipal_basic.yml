@@ -3,6 +3,7 @@ version: 2
 models:
   - name: mart_social_demographic_municipal_basic
     description: 社会人口統計・市区町村基本データ
+    access: protected
     meta:
       title: "社会人口統計（市区町村）"
       tags: ["e-stat", "人口", "市区町村"]
