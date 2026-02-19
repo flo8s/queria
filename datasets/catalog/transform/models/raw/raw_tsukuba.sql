@@ -7,7 +7,7 @@
 
 SELECT 'tsukuba' AS datasource, *
 FROM read_json(
-    'https://pub-0292714ad4094bd0aaf8d36835b0972a.r2.dev/tsukuba/build/metadata.json',
+    '{{ var("storage_base_url") }}/tsukuba/build/metadata.json',
     columns={
         title: 'VARCHAR',
         description: 'VARCHAR',

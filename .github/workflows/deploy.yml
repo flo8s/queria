@@ -24,6 +24,57 @@ jobs:
 
       - run: uv sync
 
+      - name: Debug DuckLake HTTPS attach
+        run: |
+          uv run python -c "
+          import duckdb, platform, tempfile
+          print(f'DuckDB: {duckdb.__version__}')
+          print(f'Platform: {platform.system()} {platform.machine()}')
+
+          conn = duckdb.connect(':memory:')
+
+          # Step 1: Install and load extensions
+          conn.execute('INSTALL httpfs; LOAD httpfs;')
+          conn.execute('INSTALL ducklake; LOAD ducklake;')
+          exts = conn.execute(\"SELECT extension_name, installed, loaded FROM duckdb_extensions() WHERE extension_name IN ('httpfs','ducklake')\").fetchall()
+          for e in exts: print(f'  ext: {e}')
+
+          # Step 2: Test plain HTTPS file access
+          try:
+              size = conn.execute(\"SELECT length(content) FROM read_blob('https://data.oxon-data.work/fdl_experiment/dwh.ducklake')\").fetchone()
+              print(f'HTTPS blob read OK: {size[0]} bytes')
+          except Exception as e:
+              print(f'HTTPS blob read FAILED: {e}')
+
+          # Step 3: Test DuckLake HTTPS attach (the actual failing operation)
+          try:
+              conn.execute(\"ATTACH IF NOT EXISTS 'ducklake:https://data.oxon-data.work/fdl_experiment/dwh.ducklake' AS dwh\")
+              result = conn.execute('SELECT COUNT(*) FROM dwh.estat_api.estat_api_catalog').fetchone()
+              print(f'DuckLake HTTPS attach OK: {result[0]} rows')
+          except Exception as e:
+              print(f'DuckLake HTTPS attach FAILED: {e}')
+
+          # Step 4: Test with S3 settings applied (like prd target)
+          conn2 = duckdb.connect(':memory:')
+          conn2.execute('INSTALL httpfs; LOAD httpfs;')
+          conn2.execute('INSTALL ducklake; LOAD ducklake;')
+          import os
+          conn2.execute(f\"SET s3_url_style = 'path'\")
+          conn2.execute(f\"SET s3_access_key_id = '{os.environ.get('S3_ACCESS_KEY_ID', '')}'\")
+          conn2.execute(f\"SET s3_secret_access_key = '{os.environ.get('S3_SECRET_ACCESS_KEY', '')}'\")
+          conn2.execute(f\"SET s3_endpoint = '{os.environ.get('S3_ENDPOINT', '')}'\")
+          conn2.execute(f\"SET s3_region = 'auto'\")
+          try:
+              conn2.execute(\"ATTACH IF NOT EXISTS 'ducklake:https://data.oxon-data.work/fdl_experiment/dwh.ducklake' AS dwh\")
+              result = conn2.execute('SELECT COUNT(*) FROM dwh.estat_api.estat_api_catalog').fetchone()
+              print(f'DuckLake HTTPS attach with S3 settings OK: {result[0]} rows')
+          except Exception as e:
+              print(f'DuckLake HTTPS attach with S3 settings FAILED: {e}')
+
+          conn.close()
+          conn2.close()
+          "
+
       - name: Build datasets
         run: |
           datasets=()
@@ -39,3 +90,10 @@ jobs:
           uv run queria fetch datasets/catalog
           uv run queria run datasets/catalog --target prd
           uv run queria freeze datasets/catalog
+
+      - name: Notify Discord on failure
+        if: failure()
+        run: |
+          curl -s -H "Content-Type: application/json" \
+            -d "{\"embeds\": [{\"title\": \"Deploy Failed\", \"url\": \"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\", \"color\": 15158332, \"fields\": [{\"name\": \"Repository\", \"value\": \"${{ github.repository }}\"}, {\"name\": \"Branch\", \"value\": \"${{ github.ref_name }}\"}, {\"name\": \"Commit\", \"value\": \"${{ github.sha }}\"}]}]}" \
+            "${{ secrets.DISCORD_WEBHOOK_URL }}"

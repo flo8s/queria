@@ -254,7 +254,7 @@ def generate_metadata(dataset_dir: Path) -> None:
     print(f"  Datasource: {datasource} / Public tables: {total_tables}")
 
 
-def build_datasource(dataset_dir: Path, target: str) -> None:
+def build_datasource(dataset_dir: Path, target: str, *, dbt_vars: str | None = None) -> None:
     """Build pipeline for a single datasource.
 
     init_ducklake -> dbt deps -> dbt run -> dbt docs generate -> generate_metadata
@@ -264,12 +264,14 @@ def build_datasource(dataset_dir: Path, target: str) -> None:
 
     init_ducklake(dataset_dir)
 
+    extra_args = ["--vars", dbt_vars] if dbt_vars else []
+
     print(f"--- dbt deps + run ({datasource}, {target}) ---")
     run_dbt(transform_dir, ["deps"])
-    run_dbt(transform_dir, ["run", "--target", target])
+    run_dbt(transform_dir, ["run", "--target", target, *extra_args])
 
     print(f"--- dbt docs generate ({datasource}) ---")
-    run_dbt(transform_dir, ["docs", "generate", "--target", target])
+    run_dbt(transform_dir, ["docs", "generate", "--target", target, *extra_args])
 
     print(f"--- Generating metadata ({datasource}) ---")
     generate_metadata(dataset_dir)

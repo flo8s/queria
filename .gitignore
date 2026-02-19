@@ -23,6 +23,9 @@ __pycache__/
 *.py[cod]
 .venv/
 
+# Local dev server
+.dev-serve/
+
 # Node.js
 node_modules/
 dist/

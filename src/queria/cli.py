@@ -27,11 +27,12 @@ def init(
 def run(
     path: Path = typer.Argument(..., help="Path to the dataset directory"),
     target: str = typer.Option("dev", help="dbt target (defined in profiles.yml)"),
+    vars: Optional[str] = typer.Option(None, help="dbt vars (JSON string)"),
 ) -> None:
     """Build a dataset"""
     from queria.run import build_datasource
 
-    build_datasource(path.resolve(), target)
+    build_datasource(path.resolve(), target, dbt_vars=vars)
 
 
 @app.command()
