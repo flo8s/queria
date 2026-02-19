@@ -1,0 +1,7 @@
+title: "Queriaカタログ"
+description: "Queriaで公開している全データセット・テーブルのメタデータ"
+tags: ["カタログ"]
+ducklake_url: "https://pub-0292714ad4094bd0aaf8d36835b0972a.r2.dev/catalog/ducklake.duckdb"
+schemas:
+  main:
+    title: "メイン"

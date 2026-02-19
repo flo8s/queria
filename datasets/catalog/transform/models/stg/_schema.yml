@@ -1,0 +1,106 @@
+version: 2
+
+models:
+  - name: stg_catalog
+    description: 全データセットの metadata.json を UNION ALL で統合
+    columns:
+      - name: datasource
+        description: データセット名
+      - name: title
+        description: データセットのタイトル
+      - name: description
+        description: データセットの説明
+      - name: tags
+        description: タグ（JSON 配列）
+      - name: ducklake_url
+        description: DuckLake の公開 URL
+      - name: schemas
+        description: スキーマ情報（JSON）
+      - name: dependencies
+        description: 依存関係（JSON 配列）
+
+  - name: stg_datasets
+    description: metadata.json のトップレベル情報を正規化
+    columns:
+      - name: datasource
+        description: データセット名
+      - name: title
+        description: データセットのタイトル
+      - name: description
+        description: データセットの説明
+      - name: ducklake_url
+        description: DuckLake の公開 URL
+      - name: tags_json
+        description: タグ（JSON 配列）
+
+  - name: stg_dataset_schemas
+    description: metadata.json の schemas を展開
+    columns:
+      - name: datasource
+        description: データセット名
+      - name: schema_name
+        description: スキーマ名
+      - name: title
+        description: スキーマのタイトル
+
+  - name: stg_dataset_dependencies
+    description: metadata.json の dependencies を展開
+    columns:
+      - name: datasource
+        description: データセット名
+      - name: alias
+        description: 依存先のエイリアス
+      - name: ducklake_url
+        description: 依存先の DuckLake URL
+
+  - name: stg_models
+    description: metadata.json の schemas.*.tables 配列を展開
+    columns:
+      - name: datasource
+        description: データセット名
+      - name: node_id
+        description: 合成ノード ID
+      - name: node_index
+        description: モデルの定義順序
+      - name: name
+        description: モデル名
+      - name: schema_name
+        description: スキーマ名
+      - name: description
+        description: モデルの説明
+      - name: materialized
+        description: マテリアライゼーション種別（table/view/incremental）
+      - name: title
+        description: モデルのタイトル
+      - name: license
+        description: ライセンス
+      - name: license_url
+        description: ライセンス URL
+      - name: source_url
+        description: データソース URL
+      - name: is_public
+        description: 公開フラグ
+      - name: tags_json
+        description: タグ（JSON 配列）
+      - name: sql
+        description: コンパイル済み SQL
+      - name: columns_json
+        description: カラム情報（JSON 配列）
+
+  - name: stg_columns
+    description: metadata.json の schemas.*.tables.*.columns を展開
+    columns:
+      - name: datasource
+        description: データセット名
+      - name: node_id
+        description: 合成ノード ID
+      - name: table_name
+        description: テーブル名
+      - name: column_name
+        description: カラム名
+      - name: column_index
+        description: カラムの定義順序
+      - name: description
+        description: カラムの説明
+      - name: data_type
+        description: データ型

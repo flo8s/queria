@@ -1,0 +1,158 @@
+version: 2
+
+models:
+  - name: mart_datasets
+    description: データセット一覧
+    access: public
+    config:
+      contract:
+        enforced: true
+    meta:
+      title: "データセット一覧"
+      tags: ["カタログ"]
+      public: true
+    columns:
+      - name: datasource
+        description: データセット識別子
+        data_type: VARCHAR
+      - name: title
+        description: データセットのタイトル
+        data_type: VARCHAR
+      - name: description
+        description: データセットの説明
+        data_type: VARCHAR
+      - name: ducklake_url
+        description: DuckLake の公開 URL
+        data_type: VARCHAR
+      - name: tags_json
+        description: タグ（JSON 配列）
+        data_type: JSON
+
+  - name: mart_schemas
+    description: データセットのスキーマ一覧
+    access: public
+    config:
+      contract:
+        enforced: true
+    meta:
+      title: "スキーマ一覧"
+      tags: ["カタログ"]
+      public: true
+    columns:
+      - name: datasource
+        description: データセット識別子
+        data_type: VARCHAR
+      - name: schema_name
+        description: スキーマ名
+        data_type: VARCHAR
+      - name: title
+        description: スキーマのタイトル
+        data_type: VARCHAR
+
+  - name: mart_tables
+    description: テーブル・ビュー一覧
+    access: public
+    config:
+      contract:
+        enforced: true
+    meta:
+      title: "テーブル一覧"
+      tags: ["カタログ"]
+      public: true
+    columns:
+      - name: datasource
+        description: データセット識別子
+        data_type: VARCHAR
+      - name: node_id
+        description: dbt ノード ID
+        data_type: VARCHAR
+      - name: node_index
+        description: manifest.json 内の出現順序
+        data_type: INTEGER
+      - name: name
+        description: テーブル名
+        data_type: VARCHAR
+      - name: schema_name
+        description: スキーマ名
+        data_type: VARCHAR
+      - name: description
+        description: テーブルの説明
+        data_type: VARCHAR
+      - name: materialized
+        description: マテリアライゼーション種別（table/view/incremental）
+        data_type: VARCHAR
+      - name: title
+        description: テーブルのタイトル
+        data_type: VARCHAR
+      - name: license
+        description: ライセンス
+        data_type: VARCHAR
+      - name: license_url
+        description: ライセンス URL
+        data_type: VARCHAR
+      - name: source_url
+        description: データソース URL
+        data_type: VARCHAR
+      - name: is_public
+        description: 公開フラグ
+        data_type: BOOLEAN
+      - name: tags_json
+        description: タグ（JSON 配列）
+        data_type: JSON
+      - name: sql
+        description: コンパイル済み SQL
+        data_type: VARCHAR
+
+  - name: mart_columns
+    description: カラム定義一覧
+    access: public
+    config:
+      contract:
+        enforced: true
+    meta:
+      title: "カラム一覧"
+      tags: ["カタログ"]
+      public: true
+    columns:
+      - name: datasource
+        description: データセット識別子
+        data_type: VARCHAR
+      - name: node_id
+        description: dbt ノード ID
+        data_type: VARCHAR
+      - name: table_name
+        description: テーブル名
+        data_type: VARCHAR
+      - name: column_name
+        description: カラム名
+        data_type: VARCHAR
+      - name: column_index
+        description: カラムの定義順序
+        data_type: INTEGER
+      - name: description
+        description: カラムの説明
+        data_type: VARCHAR
+      - name: data_type
+        description: データ型
+        data_type: VARCHAR
+
+  - name: mart_dependencies
+    description: データセット間の依存関係
+    access: public
+    config:
+      contract:
+        enforced: true
+    meta:
+      title: "データセット依存関係"
+      tags: ["カタログ"]
+      public: true
+    columns:
+      - name: datasource
+        description: データセット識別子
+        data_type: VARCHAR
+      - name: alias
+        description: 依存先のエイリアス
+        data_type: VARCHAR
+      - name: ducklake_url
+        description: 依存先の DuckLake URL
+        data_type: VARCHAR
