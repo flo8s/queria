@@ -1,35 +1,35 @@
-# マルチデータソース設計
+# Multi-Datasource Design
 
-複数のデータソースを扱うためのアーキテクチャ設計。
+Architecture design for handling multiple datasources.
 
-## 基本モデル
+## Basic Model
 
-1データソース = 1 DuckLake。
-1バケットに複数データソースをパスプレフィックスで格納する。
+1 datasource = 1 DuckLake.
+Multiple datasources are stored in a single bucket using path prefixes.
 
-データソースの粒度は都市単位とは限らない。
-複数都市を1データソースにまとめる判断もありうる。
+The granularity of a datasource is not necessarily per city.
+It may be appropriate to combine multiple cities into one datasource.
 
-## R2 バケット構造
+## R2 Bucket Structure
 
-バケット内でデータソースごとにパスプレフィックスで分離する。
+Datasources are separated within the bucket using path prefixes.
 
 ```
 s3://queria-dev/
 ├── tsukuba/
-│   ├── ducklake.duckdb            メタデータ (DuckDB)
-│   ├── ducklake.duckdb.files/     Parquet 実体 (DuckLake が自動管理)
-│   └── catalog.json               カタログメタデータ
+│   ├── ducklake.duckdb            Metadata (DuckDB)
+│   ├── ducklake.duckdb.files/     Parquet data (managed by DuckLake)
+│   └── metadata.json               Catalog metadata
 └── tsuchiura/
     ├── ducklake.duckdb
     ├── ducklake.duckdb.files/
-    └── catalog.json
+    └── metadata.json
 ```
 
-## dbt プロジェクト構成
+## dbt Project Structure
 
-単一プロジェクトにデータソースごとのサブディレクトリを置く。
-共有マクロはプロジェクト直下の `macros/` に配置。
+A single project with subdirectories for each datasource.
+Shared macros are placed in the project root's `macros/` directory.
 
 ```
 transform/
@@ -39,23 +39,23 @@ transform/
 │   └── transform_population.sql
 └── models/
     ├── tsukuba/
-    │   ├── _catalog.yml
+    │   ├── dataset.yml
     │   ├── raw/
     │   ├── stg/
     │   └── mart/
     └── tsuchiura/
-        ├── _catalog.yml
+        ├── dataset.yml
         ├── raw/
         ├── stg/
         └── mart/
 ```
 
-各データソースのカタログ定義 (`_catalog.yml`) はそのサブディレクトリに置く。
+Each datasource's catalog definition (`dataset.yml`) is placed in its subdirectory.
 
-## ターゲットとモデルの紐付け
+## Target-Model Binding
 
-dbt_project.yml でデータソースごとに `+database` を指定し、
-対応する DuckLake に書き込む。
+Specify `+database` per datasource in dbt_project.yml
+to write to the corresponding DuckLake.
 
 ```yaml
 models:
@@ -66,35 +66,35 @@ models:
       +database: tsuchiura
 ```
 
-profiles.yml の attach でデータソースごとの DuckLake を定義する。
-`dbt run` 1回で全データソースをビルドできる。
+Define per-datasource DuckLake in profiles.yml's attach section.
+A single `dbt run` builds all datasources.
 
-## ビルドとデプロイ
+## Build and Deploy
 
-`build.sh` は `DATASOURCES` 配列で全データソースを管理し、一括ビルドする。
+`build.sh` manages all datasources in the `DATASOURCES` array and builds them in batch.
 
 ```bash
-./scripts/build.sh                # dev ビルド (全データソース)
-./scripts/build.sh --target prd   # prd ビルド + R2 アップロード
+./scripts/build.sh                # dev build (all datasources)
+./scripts/build.sh --target prd   # prd build + R2 upload
 ```
 
-## フロントエンド連携
+## Frontend Integration
 
-データソースの一覧はフロントエンド (queria-web) のコード内で管理する。
-各データソースの catalog.json URL を設定として保持し、fetch で取得する。
-データソースの追加時はフロントエンドの設定変更 + 再デプロイで対応する。
+The list of datasources is managed in the frontend (queria-web) code.
+Each datasource's metadata.json URL is stored as a configuration and fetched.
+When adding a datasource, update the frontend configuration and redeploy.
 
-集中管理用の index.json は設けない。
-データソース数が増えて運用が困難になった時点で再検討する。
+No centralized index.json is used.
+This will be reconsidered when the number of datasources grows to the point where it becomes difficult to manage.
 
-## 将来の分割パス
+## Future Splitting Path
 
-データソースごとに ingest 方法が異なる場合 (dbt 以外に dlt 等)、
-データソースを独立したリポジトリに分割できる。
+If datasources require different ingestion methods (e.g., dlt instead of dbt),
+they can be split into independent repositories.
 
-分割時の契約:
-- 出力フォーマット: DuckLake + catalog.json (catalog-spec.md に準拠)
-- デプロイ先: バケット内のパスプレフィックスで分離
+Contract for splitting:
+- Output format: DuckLake + metadata.json (conforming to metadata-spec.md)
+- Deployment target: separated by path prefix within the bucket
 
-共有マクロが必要な場合は dbt package として切り出す。
-現時点では単一プロジェクトで十分なので、分割は必要になるまで行わない。
+If shared macros are needed, extract them as a dbt package.
+Currently, a single project is sufficient, so splitting is deferred until necessary.

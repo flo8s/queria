@@ -1,112 +1,130 @@
 # queria
 
-dbt + DuckLake + Cloudflare R2 を使ったオープンデータ公開基盤。
+An open data publishing platform using dbt + DuckLake + Cloudflare R2.
 
-つくば市の人口データを取り込み、変換し、Frozen DuckLake としてR2に公開します。
+Ingests open data, transforms it, and publishes it as Frozen DuckLake on R2.
 
-## アーキテクチャ
+## Architecture
 
 ```
-オープンデータ (CSV)
+Open Data (CSV)
     ↓
-dbt-duckdb (ローカル)
+dbt-duckdb (local)
     ↓
-DuckLake (Parquet + メタデータ)
+DuckLake (Parquet + metadata)
     ↓
-Cloudflare R2 (公開)
+Cloudflare R2 (public)
     ↓
-DuckDB WASM / CLI (クエリ)
+DuckDB WASM / CLI (query)
 ```
 
-## クイックスタート
+## Quick Start
 
-### 公開データにアクセス
+### Access Published Data
 
-DuckDB CLIから:
+From DuckDB CLI:
 
 ```sql
-ATTACH 'ducklake:https://pub-0292714ad4094bd0aaf8d36835b0972a.r2.dev/queria.ducklake' AS queria;
-SELECT * FROM queria.main.mart_tsukuba_population LIMIT 10;
+ATTACH 'ducklake:https://pub-0292714ad4094bd0aaf8d36835b0972a.r2.dev/tsukuba/ducklake.duckdb' AS tsukuba;
+SELECT * FROM tsukuba.main.mart_tsukuba_population LIMIT 10;
 ```
 
-または:
+Or:
 
 ```bash
-duckdb "ducklake:https://pub-0292714ad4094bd0aaf8d36835b0972a.r2.dev/queria.ducklake" \
+duckdb "ducklake:https://pub-0292714ad4094bd0aaf8d36835b0972a.r2.dev/tsukuba/ducklake.duckdb" \
     -c "SELECT COUNT(*) FROM mart_tsukuba_population"
 ```
 
-DuckDB WASMからも同様にアクセス可能です。
+DuckDB WASM can access the data in the same way.
 
-## 開発
+## Development
 
-### 前提条件
+### Prerequisites
 
 - Python 3.13+
 - uv
-- DuckDB CLI
-- Node.js (wrangler用)
 
-### セットアップ
+### Setup
 
 ```bash
-# 依存関係インストール
+# Install dependencies
 uv sync
 ```
 
-### プロジェクト構成
+### Project Structure
 
 ```
 queria/
-├── transform/                  # dbtプロジェクト
-│   ├── models/
-│   │   ├── raw/               # 外部CSVの取り込み
-│   │   ├── stg/               # データ変換
-│   │   └── mart/              # 公開用ビュー
-│   ├── macros/                # 共通マクロ
-│   ├── profiles.yml           # dbtプロファイル (dev/prod)
-│   ├── queria.ducklake        # DuckLakeメタデータ
-│   └── queria.ducklake.files/ # Parquetファイル (dev時)
-├── scripts/
-│   ├── build.sh               # ビルド (--target dev|prod)
-│   └── maintenance.sh         # DuckLakeメンテナンス (不要スナップショット・ファイル削除)
+├── datasets/
+│   ├── tsukuba/               # Tsukuba city datasource
+│   │   ├── dataset.yml        # Dataset metadata definition
+│   │   └── transform/         # dbt project
+│   │       ├── models/
+│   │       │   ├── raw/       # External CSV ingestion
+│   │       │   ├── stg/       # Data transformation
+│   │       │   └── mart/      # Public views
+│   │       └── profiles.yml   # dbt profiles (dev/prd)
+│   └── e_stat/                # e-Stat datasource
+│       ├── dataset.yml
+│       └── transform/
+├── src/
+│   └── queria/                # Build & deploy CLI tool
+│       ├── cli.py             # CLI entry point
+│       ├── run.py             # DuckLake init + dbt execution + metadata generation
+│       ├── freeze.py          # R2 upload / local copy
+│       └── models.py          # Pydantic model definitions for catalog output
 └── pyproject.toml
 ```
 
-### dbtプロファイル
+### dbt Profiles
 
-profiles.yml はリポジトリに含まれています (`transform/profiles.yml`)。
+profiles.yml is included in each datasource's transform/ directory.
 
-- dev target: ローカルにParquetを書き込み (`queria.ducklake.files/`)
-- prd target: R2のS3パスに直接書き込み (環境変数 `R2_S3_DATA_PATH` が必要)
+- dev target: writes Parquet locally
+- prd target: writes directly to R2 S3 path (requires environment variables)
 
-いずれの target も DuckLake の永続 data_path は公開HTTPS URLに固定されています。
-OVERRIDE_DATA_PATH で書き込み先だけを切り替える構成です。
-
-### ビルド
+### Pipeline Execution
 
 ```bash
-# ローカル開発
-./scripts/build.sh
+# Build a specific datasource locally
+uv run queria run datasets/tsukuba
 
-# 本番デプロイ (R2書き込み + メタデータアップロード)
-./scripts/build.sh --target prod
+# Production build + deploy
+uv run queria run datasets/tsukuba --target prd
+uv run queria freeze datasets/tsukuba --bucket queria-dev
+
+# Freeze to local directory
+uv run queria freeze datasets/tsukuba --output-dir ./out
 ```
 
-以下の環境変数が必要です (.env で設定):
+The pipeline is split into two commands: `run` and `freeze`:
+- `queria run <path>`: DuckLake init -> dbt deps/run/docs -> metadata generation. Does not touch R2
+- `queria freeze <path>`: Uploads to R2 or copies locally
 
-| 変数名 | 説明 | 例 |
+The catalog dataset reads metadata from other datasources on R2, so run it last:
+
+```bash
+uv run queria run datasets/tsukuba --target prd
+uv run queria run datasets/e_stat --target prd
+uv run queria freeze datasets/tsukuba
+uv run queria freeze datasets/e_stat
+uv run queria run datasets/catalog --target prd
+uv run queria freeze datasets/catalog
+```
+
+The `freeze` command and prd target require the following environment variables:
+
+| Variable | Description | Example |
 | --- | --- | --- |
-| R2_ACCESS_KEY_ID | Cloudflare R2 アクセスキー | |
-| R2_SECRET_ACCESS_KEY | Cloudflare R2 シークレットキー | |
-| CLOUDFLARE_ACCOUNT_ID | Cloudflare アカウントID | |
-| R2_S3_DATA_PATH | S3パス | s3://queria-dev/queria.ducklake.files/ |
+| S3_ENDPOINT | S3-compatible endpoint | `<account_id>.r2.cloudflarestorage.com` |
+| S3_ACCESS_KEY_ID | Access key | |
+| S3_SECRET_ACCESS_KEY | Secret key | |
+| S3_BUCKET | Bucket name | queria-dev |
 
-R2認証は profiles.yml の settings で ACCOUNT_ID からエンドポイントを構築し、DuckDB に渡されます。
+### R2 CORS Configuration
 
-### R2 CORS設定
-
-DuckDB WASMからアクセスする場合、R2バケットにCORS設定が必要です:
+When accessing from DuckDB WASM, the R2 bucket requires CORS configuration:
 
 ```json
 [
@@ -118,10 +136,11 @@ DuckDB WASMからアクセスする場合、R2バケットにCORS設定が必要
 ]
 ```
 
-## データソース
+## Datasources
 
-- つくば市オープンデータ: 町丁字別人口データ
+- tsukuba: Tsukuba city open data (population by area)
+- e_stat: e-Stat (Japanese government statistics)
 
-## ライセンス
+## License
 
 MIT

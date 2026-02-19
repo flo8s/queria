@@ -1,74 +1,74 @@
-# ポストモーテム: 地域・年齢別人口データのカラムマッピング不整合
+# Postmortem: Column Mapping Inconsistency in Population by Area/Age Data
 
-日付: 2026-02-09
+Date: 2026-02-09
 
-## 概要
+## Summary
 
-つくば市の「地域・年齢別人口」オープンデータを取り込むパイプラインにおいて、CSVのカラム順序の定義誤りにより、4つのカラムの値がずれて格納されていた。全6時点（2024年4月〜2025年10月）・全303地域で同一の不具合が再現していた。
+In the pipeline for ingesting Tsukuba city's "Population by Area/Age" open data, a column ordering error in the CSV definition caused values in four columns to be shifted. The same issue was reproduced across all 6 time points (April 2024 – October 2025) and all 303 areas.
 
-## 影響範囲
+## Impact
 
-以下のデータが不正な状態だった:
+The following data was in an incorrect state:
 
-- 85歳以上・女性の人口が全件欠落（1,818行分）
-- 85歳以上・男性の人口に世帯数の値が格納されていた
-- 世帯数に85歳以上・男性の人口が格納されていた
-- 人口合計が約11万人分過大に集計されていた（実際261,771人に対し372,325人）
+- Population of females aged 85+ was entirely missing (1,818 rows)
+- Population of males aged 85+ contained the household count values
+- Household count contained the population of males aged 85+
+- Total population was overstated by approximately 110,000 (372,325 vs. actual 261,771)
 
-カラムのずれ方:
+Column shift pattern:
 
-| カラム名 | 格納されていた値 | 本来の値 |
+| Column | Stored Value | Expected Value |
 |---|---|---|
-| 世帯数 | 85歳以上の男性人口 | 世帯数 |
-| 備考 | 85歳以上の女性人口 | 備考 |
-| 85歳以上の男性 | 世帯数 | 85歳以上の男性人口 |
-| 85歳以上の女性 | NULL（読み取り範囲外） | 85歳以上の女性人口 |
+| Households | Males aged 85+ population | Households |
+| Remarks | Females aged 85+ population | Remarks |
+| Males aged 85+ | Households | Males aged 85+ population |
+| Females aged 85+ | NULL (outside read range) | Females aged 85+ population |
 
-## 根本原因
+## Root Cause
 
-DuckDB の `read_csv` 関数に渡す `columns` パラメータの仕様が原因。
+The issue was caused by the behavior of the `columns` parameter in DuckDB's `read_csv` function.
 
-`columns` パラメータはCSVのヘッダー行を無視し、指定した順序でカラムを位置ベースでマッピングする。パイプラインの実装では `世帯数` と `備考` を年齢別カラムの前（9-10番目）に配置していたが、実際のCSVでは年齢別カラムの後（45-46番目）に配置されていた。
+The `columns` parameter ignores the CSV header row and maps columns positionally in the specified order. The pipeline implementation placed `Households` and `Remarks` before the age-group columns (positions 9-10), but in the actual CSV they were placed after the age-group columns (positions 45-46).
 
-CSVの実際のカラム順序:
+Actual column order in the CSV:
 ```
-..., 80-84歳の女性, 85歳以上の男性, 85歳以上の女性, 世帯数, 備考
-```
-
-パイプラインが想定していたカラム順序:
-```
-..., 女性, 世帯数, 備考, 0-4歳の男性, ..., 85歳以上の男性, 85歳以上の女性
+..., Females 80-84, Males 85+, Females 85+, Households, Remarks
 ```
 
-この結果、9番目以降のすべてのカラムが2つずつずれ、末尾の2カラム（85歳以上の女性、世帯数/備考の入れ替え）で不整合が表面化した。
+Column order assumed by the pipeline:
+```
+..., Females, Households, Remarks, Males 0-4, ..., Males 85+, Females 85+
+```
 
-## 修正内容
+As a result, all columns from position 9 onward were shifted by two, with the inconsistency surfacing at the last two columns (females aged 85+, households/remarks swap).
 
-`read_population_csv` マクロの CSV 読み込み方式を変更した。
+## Fix
 
-修正前: `columns` パラメータで全46カラムの名前と型を位置ベースで明示指定
-修正後: `dtypes` パラメータで型推論が不安定なカラムのみ型を指定し、カラム名はCSVヘッダーから自動取得
+Changed the CSV reading approach in the `read_population_csv` macro.
 
-型を明示指定したカラム:
-- 全国地方公共団体コード: VARCHAR（先頭ゼロの保持）
-- 地域コード: VARCHAR（同上）
-- 調査年月日: DATE
-- 備考: VARCHAR（空カラムの型推論が不安定なため）
+Before: explicitly specified names and types for all 46 columns positionally using the `columns` parameter
+After: used the `dtypes` parameter to specify types only for columns with unstable type inference, with column names auto-detected from the CSV header
 
-## 検証結果
+Columns with explicitly specified types:
+- Local government code: VARCHAR (to preserve leading zeros)
+- Area code: VARCHAR (same reason)
+- Survey date: DATE
+- Remarks: VARCHAR (unstable type inference for empty columns)
 
-修正後、以下の検証をすべてパスした:
+## Verification Results
 
-1. 85歳以上・女性の行数: 1,818行（全area×date分）
-2. 全area×dateの行数: 36行（18年齢区分 × 2性別）× 1,818グループ
-3. 年齢別人口の合計と総人口の一致: 全6時点で完全一致
-4. 世帯あたり平均人口: 2.25人（妥当な範囲）
+After the fix, all of the following checks passed:
 
-## 再発防止策
+1. Rows for females aged 85+: 1,818 rows (for all area × date combinations)
+2. Rows per area × date: 36 rows (18 age groups × 2 sexes) × 1,818 groups
+3. Sum of age-group populations matches total population: exact match across all 6 time points
+4. Average population per household: 2.25 (within a reasonable range)
 
-`columns` パラメータ（位置ベース）から `dtypes` パラメータ（ヘッダーベース）への切り替えにより、CSVのカラム順序に依存しない読み込みを実現した。今後CSVの仕様が変更されても、カラム名が維持される限り順序ズレは発生しない。
+## Prevention Measures
 
-## 参考
+By switching from the `columns` parameter (position-based) to the `dtypes` parameter (header-based), CSV reading no longer depends on column order. Even if the CSV specification changes in the future, misalignment will not occur as long as column names are maintained.
 
-- 自治体標準オープンデータセット「地域・年齢別人口」: https://www.digital.go.jp/resources/open_data/municipal-standard-data-set-test
-- つくば市オープンデータ: https://www.city.tsukuba.lg.jp/soshikikarasagasu/shiminbuicthokensuishinka/gyomuannai/8/4/index.html
+## References
+
+- Municipal Standard Open Data Set "Population by Area/Age": https://www.digital.go.jp/resources/open_data/municipal-standard-data-set-test
+- Tsukuba City Open Data: https://www.city.tsukuba.lg.jp/soshikikarasagasu/shiminbuicthokensuishinka/gyomuannai/8/4/index.html
