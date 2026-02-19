@@ -24,23 +24,14 @@ jobs:
 
       - run: uv sync
 
-      # Workaround: DuckLake cannot ATTACH metadata from HTTPS on Linux
-      # https://github.com/duckdb/ducklake/issues/782
-      - name: Download DuckLake dependencies
-        run: |
-          curl -sSL --retry 3 -o datasets/e_stat/transform/dwh.ducklake \
-            https://data.oxon-data.work/fdl_experiment/dwh.ducklake
-          ls -la datasets/e_stat/transform/dwh.ducklake
-          file datasets/e_stat/transform/dwh.ducklake
-          head -c 16 datasets/e_stat/transform/dwh.ducklake | xxd
-
       - name: Build datasets
-        env:
-          DWH_DUCKLAKE_PATH: dwh.ducklake
         run: |
           datasets=()
           for d in datasets/*/; do
-            [ -f "$d/dataset.yml" ] && [ "$(basename "$d")" != "catalog" ] && datasets+=("$d")
+            name="$(basename "$d")"
+            # TODO: e_stat は dwh 依存先の Cloudflare 問題が解決するまでスキップ
+            [ "$name" = "e_stat" ] && continue
+            [ -f "$d/dataset.yml" ] && [ "$name" != "catalog" ] && datasets+=("$d")
           done
           for d in "${datasets[@]}"; do uv run queria fetch "$d"; done
           for d in "${datasets[@]}"; do uv run queria run "$d" --target prd; done
