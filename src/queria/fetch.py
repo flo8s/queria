@@ -1,0 +1,37 @@
+"""Fetch: download ducklake.duckdb from S3."""
+
+from pathlib import Path
+
+from botocore.exceptions import ClientError
+
+from queria import DUCKLAKE_FILE, TRANSFORM_DIR
+from queria.freeze import create_s3_client
+from queria.run import load_dataset_config
+
+
+def fetch_from_s3(client, bucket: str, dataset_dir: Path, datasource: str) -> None:
+    """Download ducklake.duckdb from S3."""
+    transform_dir = dataset_dir / TRANSFORM_DIR
+    transform_dir.mkdir(parents=True, exist_ok=True)
+
+    key = f"{datasource}/ducklake.duckdb"
+    dest = transform_dir / DUCKLAKE_FILE
+
+    try:
+        print(f"  {key}")
+        client.download_file(bucket, key, str(dest))
+    except ClientError as e:
+        if e.response["Error"]["Code"] == "404":
+            print(f"  {key} not found in S3, skipping")
+            return
+        raise
+
+
+def fetch_datasource(dataset_dir: Path, *, bucket: str) -> None:
+    """Fetch ducklake.duckdb from S3."""
+    datasource = load_dataset_config(dataset_dir).name
+
+    print(f"--- fetch: {datasource} ---")
+
+    client = create_s3_client()
+    fetch_from_s3(client, bucket, dataset_dir, datasource)

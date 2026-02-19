@@ -35,6 +35,17 @@ def run(
 
 
 @app.command()
+def fetch(
+    path: Path = typer.Argument(..., help="Path to the dataset directory"),
+    bucket: str = typer.Option(..., envvar="S3_BUCKET", help="S3 bucket name"),
+) -> None:
+    """Fetch ducklake.duckdb from S3"""
+    from queria.fetch import fetch_datasource
+
+    fetch_datasource(path.resolve(), bucket=bucket)
+
+
+@app.command()
 def freeze(
     path: Path = typer.Argument(..., help="Path to the dataset directory"),
     bucket: Optional[str] = typer.Option(None, envvar="S3_BUCKET", help="S3 bucket name"),
