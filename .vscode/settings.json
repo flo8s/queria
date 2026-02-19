@@ -1,0 +1,5 @@
+{
+  "files.associations": {
+    "datasets/**/transform/models/**/*.sql": "jinja-sql"
+  }
+}
