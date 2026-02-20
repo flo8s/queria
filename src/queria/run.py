@@ -14,8 +14,8 @@ from dbt.artifacts.schemas.manifest import WritableManifest
 from dbt.cli.main import dbtRunner
 
 from queria import DATASET_YML, DUCKLAKE_FILE, METADATA_JSON, TRANSFORM_DIR
-from queria.config import DatasetConfig
-from queria.metadata import (
+from queria.config_schema import DatasetConfig
+from queria.metadata_schema import (
     ColumnInfo,
     DatasetMetadata,
     LineageInfo,
