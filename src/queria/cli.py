@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Optional
 
 import typer
+from typer.main import Typer
 
 app = typer.Typer()
 
@@ -24,6 +25,17 @@ def init(
 
 
 @app.command()
+def fetch(
+    path: Path = typer.Argument(..., help="Path to the dataset directory"),
+    bucket: str = typer.Option(..., envvar="S3_BUCKET", help="S3 bucket name"),
+) -> None:
+    """Fetch ducklake.duckdb from S3"""
+    from queria.fetch import fetch_datasource
+
+    fetch_datasource(path.resolve(), bucket=bucket)
+
+
+@app.command()
 def run(
     path: Path = typer.Argument(..., help="Path to the dataset directory"),
     target: str = typer.Option("dev", help="dbt target (defined in profiles.yml)"),
@@ -36,20 +48,11 @@ def run(
 
 
 @app.command()
-def fetch(
-    path: Path = typer.Argument(..., help="Path to the dataset directory"),
-    bucket: str = typer.Option(..., envvar="S3_BUCKET", help="S3 bucket name"),
-) -> None:
-    """Fetch ducklake.duckdb from S3"""
-    from queria.fetch import fetch_datasource
-
-    fetch_datasource(path.resolve(), bucket=bucket)
-
-
-@app.command()
 def freeze(
     path: Path = typer.Argument(..., help="Path to the dataset directory"),
-    bucket: Optional[str] = typer.Option(None, envvar="S3_BUCKET", help="S3 bucket name"),
+    bucket: Optional[str] = typer.Option(
+        None, envvar="S3_BUCKET", help="S3 bucket name"
+    ),
     output_dir: Optional[Path] = typer.Option(None, help="Local output directory"),
 ) -> None:
     """Deploy build artifacts"""
@@ -62,7 +65,7 @@ def freeze(
     freeze_datasource(path.resolve(), bucket=bucket, output_dir=output_dir)
 
 
-main = app
+main: Typer = app
 
 if __name__ == "__main__":
     main()
