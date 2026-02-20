@@ -18,7 +18,7 @@ done
 
 echo ""
 echo "=== Building catalog ==="
-uv run python "$REPO_DIR/scripts/generate_catalog_sources.py"
+uv run python "$REPO_DIR/datasets/catalog/generate_sources.py"
 uv run queria run "$REPO_DIR/datasets/catalog" --target dev \
   --vars "{\"storage_base_url\": \"$OUTPUT_DIR\"}"
 uv run queria freeze "$REPO_DIR/datasets/catalog" --output-dir "$OUTPUT_DIR"
