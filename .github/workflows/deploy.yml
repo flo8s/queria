@@ -24,24 +24,8 @@ jobs:
 
       - run: uv sync
 
-      - name: Build datasets
-        run: |
-          datasets=()
-          for d in datasets/*/; do
-            name="$(basename "$d")"
-            # TODO: e_stat は dwh 依存先の Cloudflare 問題が解決するまでスキップ
-            [ "$name" = "e_stat" ] && continue
-            [ -f "$d/dataset.yml" ] && [ "$name" != "catalog" ] && datasets+=("$d")
-          done
-          for d in "${datasets[@]}"; do uv run queria fetch "$d"; done
-          for d in "${datasets[@]}"; do uv run queria run "$d" --target prd; done
-          for d in "${datasets[@]}"; do uv run queria freeze "$d"; done
-
-      - name: Build catalog
-        run: |
-          uv run queria fetch datasets/catalog
-          uv run queria run datasets/catalog --target prd
-          uv run queria freeze datasets/catalog
+      - name: Build and deploy
+        run: bash scripts/prd-deploy.sh
 
       - name: Notify Discord on failure
         if: failure()

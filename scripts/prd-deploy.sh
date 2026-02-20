@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+REPO_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+
+# Required env vars check
+for var in S3_BUCKET S3_ENDPOINT S3_ACCESS_KEY_ID S3_SECRET_ACCESS_KEY; do
+  if [ -z "${!var:-}" ]; then
+    echo "Error: $var is not set" >&2
+    exit 1
+  fi
+done
+
+# Clean local DuckLake files (dev build artifacts)
+echo "=== Cleaning local DuckLake files ==="
+for ds in "$REPO_DIR"/datasets/*/; do
+  [ ! -f "$ds/dataset.yml" ] && continue
+  rm -f "$ds/transform/ducklake.duckdb"
+  rm -rf "$ds/transform/ducklake.duckdb.files"
+done
+
+# Collect non-catalog datasets
+datasets=()
+for ds in "$REPO_DIR"/datasets/*/; do
+  name="$(basename "$ds")"
+  [ ! -f "$ds/dataset.yml" ] && continue
+  # TODO: e_stat は dwh 依存先の Cloudflare 問題が解決するまでスキップ
+  [ "$name" = "e_stat" ] && continue
+  [ "$name" = "catalog" ] && continue
+  datasets+=("$ds")
+done
+
+# Fetch
+echo ""
+echo "=== Fetching datasets ==="
+for ds in "${datasets[@]}"; do
+  echo "--- $(basename "$ds") ---"
+  uv run queria fetch "$ds"
+done
+
+# Build and freeze non-catalog datasets
+echo ""
+echo "=== Building datasets ==="
+for ds in "${datasets[@]}"; do
+  echo ""
+  echo "--- $(basename "$ds") ---"
+  uv run queria run "$ds" --target prd
+  uv run queria freeze "$ds"
+done
+
+# Build and freeze catalog (depends on other datasets' metadata on R2)
+echo ""
+echo "=== Building catalog ==="
+uv run python "$REPO_DIR/scripts/generate_catalog_sources.py"
+uv run queria fetch "$REPO_DIR/datasets/catalog"
+uv run queria run "$REPO_DIR/datasets/catalog" --target prd
+uv run queria freeze "$REPO_DIR/datasets/catalog"
+
+echo ""
+echo "Done."
