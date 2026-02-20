@@ -21,11 +21,20 @@ def create_s3_client():
     )
 
 
-def _upload(client, bucket: str, key: str, file_path: Path, content_type: str | None = None) -> None:
+def _upload(
+    client,
+    bucket: str,
+    key: str,
+    file_path: Path,
+    content_type: str | None = None,
+    cache_control: str | None = None,
+) -> None:
     """Upload a single file to S3."""
     extra_args = {}
     if content_type:
         extra_args["ContentType"] = content_type
+    if cache_control:
+        extra_args["CacheControl"] = cache_control
 
     print(f"  {key}")
     client.upload_file(str(file_path), bucket, key, ExtraArgs=extra_args or None)
@@ -39,6 +48,7 @@ def freeze_to_s3(client, bucket: str, dataset_dir: Path, datasource: str) -> Non
         client, bucket,
         f"{datasource}/ducklake.duckdb",
         transform_dir / DUCKLAKE_FILE,
+        cache_control="no-cache",
     )
 
     _upload(
