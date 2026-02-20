@@ -1,0 +1,9 @@
+datasources:
+  - name: e_stat
+    description: E-Stat データセットの metadata.json を HTTP 経由で読み込んだ生データ
+
+  - name: tsukuba
+    description: つくば市データセットの metadata.json を HTTP 経由で読み込んだ生データ
+
+  - name: zipcode
+    description: 郵便番号データセットの metadata.json を HTTP 経由で読み込んだ生データ
