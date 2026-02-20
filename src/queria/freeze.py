@@ -43,7 +43,7 @@ def freeze_to_s3(client, bucket: str, dataset_dir: Path, datasource: str) -> Non
 
     _upload(
         client, bucket,
-        f"{datasource}/build/{METADATA_JSON}",
+        f"{datasource}/{METADATA_JSON}",
         dataset_dir / METADATA_JSON,
         content_type="application/json; charset=utf-8",
     )
@@ -86,9 +86,7 @@ def freeze_to_local(output_dir: Path, dataset_dir: Path, datasource: str) -> Non
             shutil.rmtree(dest_data)
         shutil.copytree(data_dir, dest_data)
 
-    build_dir = dest / "build"
-    build_dir.mkdir(exist_ok=True)
-    shutil.copy2(dataset_dir / METADATA_JSON, build_dir / METADATA_JSON)
+    shutil.copy2(dataset_dir / METADATA_JSON, dest / METADATA_JSON)
 
     docs_dir = dest / "docs"
     docs_dir.mkdir(exist_ok=True)

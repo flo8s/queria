@@ -2,7 +2,7 @@
 
 SELECT '{{ datasource }}' AS datasource, *
 FROM read_json(
-    '{{ var("storage_base_url") }}/{{ datasource }}/build/metadata.json',
+    '{{ var("storage_base_url") }}/{{ datasource }}/metadata.json',
     columns={
         title: 'VARCHAR',
         description: 'VARCHAR',
