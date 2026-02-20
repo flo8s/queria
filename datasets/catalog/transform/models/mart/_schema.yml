@@ -136,6 +136,33 @@ models:
         description: データ型
         data_type: VARCHAR
 
+  - name: mart_search_entries
+    description: 全文検索用エントリ
+    access: public
+    meta:
+      title: "検索エントリ"
+      tags: ["カタログ"]
+      public: true
+    columns:
+      - name: entry_type
+        description: エントリ種別（table/column）
+      - name: datasource
+        description: データセット識別子
+      - name: schema_name
+        description: スキーマ名
+      - name: table_name
+        description: テーブル名
+      - name: table_title
+        description: テーブルタイトル
+      - name: column_name
+        description: カラム名
+      - name: description
+        description: 説明文
+      - name: search_text
+        description: 検索対象テキスト（生テキスト連結）
+      - name: href
+        description: リンクパス
+
   - name: mart_dependencies
     description: データセット間の依存関係
     access: public
