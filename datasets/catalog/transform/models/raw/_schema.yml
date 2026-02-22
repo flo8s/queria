@@ -7,3 +7,5 @@ models:
   description: つくば市データセット
 - name: raw_zipcode
   description: 郵便番号データセット
+- name: raw_catalog
+  description: Queriaカタログ

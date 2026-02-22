@@ -6,3 +6,5 @@ UNION ALL
 SELECT * FROM {{ ref('raw_tsukuba') }}
 UNION ALL
 SELECT * FROM {{ ref('raw_zipcode') }}
+UNION ALL
+SELECT * FROM {{ ref('raw_catalog') }}
