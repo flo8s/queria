@@ -11,11 +11,11 @@ e_stat:
         - httpfs
         - ducklake
       attach:
-        - path: "ducklake:ducklake.duckdb"
+        - path: "ducklake:../dist/ducklake.duckdb"
           alias: e_stat
           is_ducklake: true
           options:
-            DATA_PATH: "ducklake.duckdb.files/"
+            DATA_PATH: "../dist/ducklake.duckdb.files/"
             OVERRIDE_DATA_PATH: true
         - path: "ducklake:{{ env_var('DWH_DUCKLAKE_PATH', 'https://data.oxon-data.work/fdl_experiment/dwh.ducklake') }}"
           alias: dwh
@@ -35,7 +35,7 @@ e_stat:
         s3_endpoint: "{{ env_var('S3_ENDPOINT') }}"
         s3_region: auto
       attach:
-        - path: "ducklake:ducklake.duckdb"
+        - path: "ducklake:../dist/ducklake.duckdb"
           alias: e_stat
           is_ducklake: true
           options:

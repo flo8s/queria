@@ -11,14 +11,9 @@ for var in S3_BUCKET S3_ENDPOINT S3_ACCESS_KEY_ID S3_SECRET_ACCESS_KEY; do
   fi
 done
 
-# Clean local DuckLake files (dev build artifacts)
-echo "=== Cleaning local DuckLake files ==="
-for ds in "$REPO_DIR"/datasets/*/; do
-  # dataset.yml を持たないディレクトリはデータセットではないのでスキップ
-  [ ! -f "$ds/dataset.yml" ] && continue
-  rm -f "$ds/transform/ducklake.duckdb"
-  rm -rf "$ds/transform/ducklake.duckdb.files"
-done
+# Clean build artifacts
+echo "=== Cleaning dist/ ==="
+rm -rf "$REPO_DIR"/datasets/*/dist
 
 # Collect non-catalog datasets
 datasets=()

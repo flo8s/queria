@@ -4,18 +4,18 @@ from pathlib import Path
 
 from botocore.exceptions import ClientError
 
-from queria import DUCKLAKE_FILE, TRANSFORM_DIR
+from queria import DIST_DIR, DUCKLAKE_FILE
 from queria.freeze import create_s3_client
 from queria.run import load_dataset_config
 
 
 def fetch_from_s3(client, bucket: str, dataset_dir: Path, datasource: str) -> None:
     """Download ducklake.duckdb from S3."""
-    transform_dir = dataset_dir / TRANSFORM_DIR
-    transform_dir.mkdir(parents=True, exist_ok=True)
+    dist_dir = dataset_dir / DIST_DIR
+    dist_dir.mkdir(parents=True, exist_ok=True)
 
     key = f"{datasource}/ducklake.duckdb"
-    dest = transform_dir / DUCKLAKE_FILE
+    dest = dist_dir / DUCKLAKE_FILE
 
     try:
         print(f"  {key}")

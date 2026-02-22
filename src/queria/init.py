@@ -142,11 +142,11 @@ def _profiles_yml(name: str) -> str:
         - httpfs
         - ducklake
       attach:
-        - path: "ducklake:{DUCKLAKE_FILE}"
+        - path: "ducklake:../dist/{DUCKLAKE_FILE}"
           alias: {name}
           is_ducklake: true
           options:
-            DATA_PATH: "{DUCKLAKE_FILE}.files/"
+            DATA_PATH: "../dist/{DUCKLAKE_FILE}.files/"
             OVERRIDE_DATA_PATH: true
 '''
 

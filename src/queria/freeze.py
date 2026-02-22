@@ -4,7 +4,7 @@ import os
 import shutil
 from pathlib import Path
 
-from queria import DUCKLAKE_FILE, METADATA_JSON, TRANSFORM_DIR
+from queria import DIST_DIR, DUCKLAKE_FILE, METADATA_JSON
 from queria.run import load_dataset_config
 
 
@@ -42,67 +42,67 @@ def _upload(
 
 def freeze_to_s3(client, bucket: str, dataset_dir: Path, datasource: str) -> None:
     """Upload artifacts to S3."""
-    transform_dir = dataset_dir / TRANSFORM_DIR
+    dist_dir = dataset_dir / DIST_DIR
 
     _upload(
         client, bucket,
         f"{datasource}/ducklake.duckdb",
-        transform_dir / DUCKLAKE_FILE,
+        dist_dir / DUCKLAKE_FILE,
         cache_control="no-cache",
     )
 
     _upload(
         client, bucket,
         f"{datasource}/{METADATA_JSON}",
-        dataset_dir / METADATA_JSON,
+        dist_dir / METADATA_JSON,
         content_type="application/json; charset=utf-8",
     )
 
-    target_dir = transform_dir / "target"
+    docs_dir = dist_dir / "docs"
     _upload(
         client, bucket,
         f"{datasource}/docs/index.html",
-        target_dir / "index.html",
+        docs_dir / "index.html",
         content_type="text/html; charset=utf-8",
     )
     _upload(
         client, bucket,
         f"{datasource}/docs/manifest.json",
-        target_dir / "manifest.json",
+        docs_dir / "manifest.json",
         content_type="application/json; charset=utf-8",
     )
     _upload(
         client, bucket,
         f"{datasource}/docs/catalog.json",
-        target_dir / "catalog.json",
+        docs_dir / "catalog.json",
         content_type="application/json; charset=utf-8",
     )
 
 
 def freeze_to_local(output_dir: Path, dataset_dir: Path, datasource: str) -> None:
     """Copy artifacts to a local directory."""
-    transform_dir = dataset_dir / TRANSFORM_DIR
+    dist_dir = dataset_dir / DIST_DIR
     dest = output_dir / datasource
     dest.mkdir(parents=True, exist_ok=True)
 
-    shutil.copy2(transform_dir / DUCKLAKE_FILE, dest / DUCKLAKE_FILE)
+    shutil.copy2(dist_dir / DUCKLAKE_FILE, dest / DUCKLAKE_FILE)
 
     # Data files (ducklake.duckdb.files/)
     ducklake_data_dir = f"{DUCKLAKE_FILE}.files"
-    data_dir = transform_dir / ducklake_data_dir
+    data_dir = dist_dir / ducklake_data_dir
     if data_dir.exists():
         dest_data = dest / ducklake_data_dir
         if dest_data.exists():
             shutil.rmtree(dest_data)
         shutil.copytree(data_dir, dest_data)
 
-    shutil.copy2(dataset_dir / METADATA_JSON, dest / METADATA_JSON)
+    shutil.copy2(dist_dir / METADATA_JSON, dest / METADATA_JSON)
 
     docs_dir = dest / "docs"
     docs_dir.mkdir(exist_ok=True)
-    target_dir = transform_dir / "target"
+    src_docs_dir = dist_dir / "docs"
     for name in ("index.html", "manifest.json", "catalog.json"):
-        src = target_dir / name
+        src = src_docs_dir / name
         if src.exists():
             shutil.copy2(src, docs_dir / name)
 

@@ -7,16 +7,11 @@ datasets/*/transform/dbt_packages/
 datasets/*/transform/logs/
 datasets/*/transform/.user.yml
 
-# DuckLake
-datasets/*/**/ducklake.duckdb
-datasets/*/**/ducklake.duckdb.files/
-datasets/*/**/ducklake.duckdb.wal
-datasets/*/**/*.ducklake
-datasets/*/**/*.ducklake.files/
-datasets/*/**/*.ducklake.wal
-
-# Generated files
-datasets/*/metadata.json
+# DuckLake (transform/ 内の一時ファイル)
+*.ducklake
+*.ducklake.files/
+*.ducklake.wal
+ducklake.duckdb.wal
 
 # Python
 __pycache__/

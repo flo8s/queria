@@ -13,11 +13,11 @@ zipcode:
         - name: zipfs
           repo: community
       attach:
-        - path: "ducklake:ducklake.duckdb"
+        - path: "ducklake:../dist/ducklake.duckdb"
           alias: zipcode
           is_ducklake: true
           options:
-            DATA_PATH: "ducklake.duckdb.files/"
+            DATA_PATH: "../dist/ducklake.duckdb.files/"
             OVERRIDE_DATA_PATH: true
     prd:
       type: duckdb
@@ -37,7 +37,7 @@ zipcode:
         s3_endpoint: "{{ env_var('S3_ENDPOINT') }}"
         s3_region: auto
       attach:
-        - path: "ducklake:ducklake.duckdb"
+        - path: "ducklake:../dist/ducklake.duckdb"
           alias: zipcode
           is_ducklake: true
           options:

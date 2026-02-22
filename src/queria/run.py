@@ -2,6 +2,7 @@
 
 import json
 import os
+import shutil
 from collections import defaultdict
 from contextlib import contextmanager
 from pathlib import Path
@@ -13,7 +14,7 @@ from dbt.artifacts.schemas.catalog import CatalogArtifact
 from dbt.artifacts.schemas.manifest import WritableManifest
 from dbt.cli.main import dbtRunner
 
-from queria import DATASET_YML, DUCKLAKE_FILE, METADATA_JSON, TRANSFORM_DIR
+from queria import DATASET_YML, DIST_DIR, DUCKLAKE_FILE, METADATA_JSON, TRANSFORM_DIR
 from queria.config_schema import DatasetConfig
 from queria.metadata_schema import (
     ColumnInfo,
@@ -55,8 +56,8 @@ def load_dataset_config(dataset_dir: Path) -> DatasetConfig:
 
 def init_ducklake(dataset_dir: Path) -> None:
     """Initialize DuckLake only if the file does not exist yet."""
-    transform_dir = dataset_dir / TRANSFORM_DIR
-    ducklake_file = transform_dir / DUCKLAKE_FILE
+    dist_dir = dataset_dir / DIST_DIR
+    ducklake_file = dist_dir / DUCKLAKE_FILE
     if ducklake_file.exists():
         return
 
@@ -64,6 +65,8 @@ def init_ducklake(dataset_dir: Path) -> None:
     datasource = config.name
     data_path = f"{config.ducklake_url}.files/"
     print(f"Creating DuckLake: {datasource} (DATA_PATH: {data_path})")
+
+    dist_dir.mkdir(parents=True, exist_ok=True)
 
     conn = duckdb.connect(":memory:")
     conn.execute("INSTALL ducklake; LOAD ducklake;")
@@ -245,13 +248,26 @@ def generate_metadata(dataset_dir: Path) -> None:
 
     output = build_metadata(dataset_config, manifest, catalog, datasource)
 
-    output_path = dataset_dir / METADATA_JSON
+    dist_dir = dataset_dir / DIST_DIR
+    dist_dir.mkdir(parents=True, exist_ok=True)
+    output_path = dist_dir / METADATA_JSON
     with open(output_path, "w") as f:
         json.dump(output.model_dump(exclude_none=True), f, ensure_ascii=False, indent=2)
 
     total_tables = sum(len(s.tables) for s in output.schemas.values())
     print(f"Generated metadata: {output_path}")
     print(f"  Datasource: {datasource} / Public tables: {total_tables}")
+
+
+def _copy_docs_to_dist(dataset_dir: Path) -> None:
+    """Copy dbt docs files from transform/target/ to dist/docs/."""
+    target_dir = dataset_dir / TRANSFORM_DIR / "target"
+    docs_dir = dataset_dir / DIST_DIR / "docs"
+    docs_dir.mkdir(parents=True, exist_ok=True)
+    for name in ("index.html", "manifest.json", "catalog.json"):
+        src = target_dir / name
+        if src.exists():
+            shutil.copy2(src, docs_dir / name)
 
 
 def build_datasource(dataset_dir: Path, target: str, *, dbt_vars: str | None = None) -> None:
@@ -272,6 +288,9 @@ def build_datasource(dataset_dir: Path, target: str, *, dbt_vars: str | None = N
 
     print(f"--- dbt docs generate ({datasource}) ---")
     run_dbt(transform_dir, ["docs", "generate", "--target", target, *extra_args])
+
+    print(f"--- Copying docs to dist/ ({datasource}) ---")
+    _copy_docs_to_dist(dataset_dir)
 
     print(f"--- Generating metadata ({datasource}) ---")
     generate_metadata(dataset_dir)
