@@ -2,7 +2,7 @@
 
 select *
 from read_json(
-    '{{ var("articles_metadata_url", "https://queria.dev/api/articles-metadata") }}',
+    '{{ var("articles_metadata_url", "https://queria.io/api/articles-metadata") }}',
     format='array',
     columns={
         slug: 'VARCHAR',

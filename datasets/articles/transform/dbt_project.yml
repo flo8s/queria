@@ -24,3 +24,6 @@ models:
       +materialized: table
     mart:
       +materialized: view
+      +persist_docs:
+        relation: true
+        columns: false
