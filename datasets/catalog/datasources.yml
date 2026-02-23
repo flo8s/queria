@@ -7,5 +7,3 @@ datasources:
     description: つくば市データセット
   - name: zipcode
     description: 郵便番号データセット
-  - name: catalog
-    description: Queriaカタログ
