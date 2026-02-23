@@ -1,22 +1,15 @@
-"""Fetch: download ducklake.duckdb from S3."""
+"""Fetch: download ducklake.duckdb and metadata.json from S3."""
 
 from pathlib import Path
 
 from botocore.exceptions import ClientError
 
-from queria import DIST_DIR, DUCKLAKE_FILE
+from queria import DIST_DIR, DUCKLAKE_FILE, METADATA_JSON
 from queria.freeze import create_s3_client
 from queria.run import load_dataset_config
 
 
-def fetch_from_s3(client, bucket: str, dataset_dir: Path, datasource: str) -> None:
-    """Download ducklake.duckdb from S3."""
-    dist_dir = dataset_dir / DIST_DIR
-    dist_dir.mkdir(parents=True, exist_ok=True)
-
-    key = f"{datasource}/ducklake.duckdb"
-    dest = dist_dir / DUCKLAKE_FILE
-
+def _download_file(client, bucket: str, key: str, dest: Path) -> None:
     try:
         print(f"  {key}")
         client.download_file(bucket, key, str(dest))
@@ -25,6 +18,15 @@ def fetch_from_s3(client, bucket: str, dataset_dir: Path, datasource: str) -> No
             print(f"  {key} not found in S3, skipping")
             return
         raise
+
+
+def fetch_from_s3(client, bucket: str, dataset_dir: Path, datasource: str) -> None:
+    """Download ducklake.duckdb and metadata.json from S3."""
+    dist_dir = dataset_dir / DIST_DIR
+    dist_dir.mkdir(parents=True, exist_ok=True)
+
+    _download_file(client, bucket, f"{datasource}/ducklake.duckdb", dist_dir / DUCKLAKE_FILE)
+    _download_file(client, bucket, f"{datasource}/metadata.json", dist_dir / METADATA_JSON)
 
 
 def fetch_datasource(dataset_dir: Path, *, bucket: str) -> None:
