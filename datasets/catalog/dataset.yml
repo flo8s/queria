@@ -1,6 +1,6 @@
 title: "Queriaカタログ"
 description: "Queriaで公開している全データセット・テーブルのメタデータ"
-tags: ["カタログ"]
+tags: ["カタログ", "Queria"]
 ducklake_url: "https://data.queria.io/catalog/ducklake.duckdb"
 schemas:
   main:
