@@ -15,7 +15,7 @@ clean-targets:
   - "dbt_packages"
 
 vars:
-  storage_base_url: "https://pub-0292714ad4094bd0aaf8d36835b0972a.r2.dev"
+  storage_base_url: "https://data.queria.io"
 
 models:
   catalog:

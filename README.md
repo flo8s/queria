@@ -25,14 +25,14 @@ DuckDB WASM / CLI (query)
 From DuckDB CLI:
 
 ```sql
-ATTACH 'ducklake:https://pub-0292714ad4094bd0aaf8d36835b0972a.r2.dev/tsukuba/ducklake.duckdb' AS tsukuba;
+ATTACH 'ducklake:https://data.queria.io/tsukuba/ducklake.duckdb' AS tsukuba;
 SELECT * FROM tsukuba.main.mart_tsukuba_population LIMIT 10;
 ```
 
 Or:
 
 ```bash
-duckdb "ducklake:https://pub-0292714ad4094bd0aaf8d36835b0972a.r2.dev/tsukuba/ducklake.duckdb" \
+duckdb "ducklake:https://data.queria.io/tsukuba/ducklake.duckdb" \
     -c "SELECT COUNT(*) FROM mart_tsukuba_population"
 ```
 
@@ -120,7 +120,7 @@ The `freeze` command and prd target require the following environment variables:
 | S3_ENDPOINT | S3-compatible endpoint | `<account_id>.r2.cloudflarestorage.com` |
 | S3_ACCESS_KEY_ID | Access key | |
 | S3_SECRET_ACCESS_KEY | Secret key | |
-| S3_BUCKET | Bucket name | queria-dev |
+| S3_BUCKET | Bucket name | dev: `queria-dev` / prd: `queria` |
 
 ### R2 CORS Configuration
 
