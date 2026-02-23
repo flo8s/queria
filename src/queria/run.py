@@ -215,6 +215,7 @@ def build_metadata(
     return DatasetMetadata(
         title=dataset_config.title,
         description=dataset_config.description,
+        cover=dataset_config.cover,
         tags=dataset_config.tags,
         ducklake_url=dataset_config.ducklake_url,
         schemas=schemas,

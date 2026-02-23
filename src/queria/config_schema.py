@@ -17,6 +17,7 @@ class DatasetConfig(BaseModel):
     title: str = ""
     description: str = ""
     tags: list[str] = []
+    cover: str = ""
     ducklake_url: str
     schemas: dict[str, DatasetSchemaConfig] = {}
     dependencies: list[DependencyInfo] | None = None

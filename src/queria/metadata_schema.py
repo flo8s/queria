@@ -52,6 +52,7 @@ class LineageInfo(BaseModel):
 class DatasetMetadata(BaseModel):
     title: str
     description: str
+    cover: str = ""
     tags: list[str]
     ducklake_url: str
     schemas: dict[str, SchemaInfo]

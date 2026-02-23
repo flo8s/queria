@@ -6,6 +6,7 @@ FROM read_json(
     columns={
         title: 'VARCHAR',
         description: 'VARCHAR',
+        cover: 'VARCHAR',
         tags: 'JSON',
         ducklake_url: 'VARCHAR',
         schemas: 'JSON',

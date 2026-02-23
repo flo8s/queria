@@ -21,6 +21,9 @@ models:
       - name: description
         description: データセットの説明
         data_type: VARCHAR
+      - name: cover
+        description: カバー画像URLまたは絵文字
+        data_type: VARCHAR
       - name: ducklake_url
         description: DuckLake の公開 URL
         data_type: VARCHAR
