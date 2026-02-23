@@ -1,0 +1,8 @@
+title: "記事メタデータ"
+description: "ショーケース記事のメタデータ（タイトル、サマリー、タグ等）"
+tags: ["記事"]
+ducklake_url: "https://pub-0292714ad4094bd0aaf8d36835b0972a.r2.dev/articles/ducklake.duckdb"
+
+schemas:
+  main:
+    title: "メイン"

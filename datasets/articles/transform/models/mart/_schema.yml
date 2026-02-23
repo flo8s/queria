@@ -1,0 +1,24 @@
+version: 2
+
+models:
+  - name: mart_articles
+    description: "記事メタデータ"
+    access: public
+    meta:
+      public: true
+      title: "記事メタデータ"
+    columns:
+      - name: slug
+        description: 記事のスラグ（一意識別子）
+      - name: title
+        description: 記事タイトル
+      - name: summary
+        description: 記事の概要
+      - name: date
+        description: 公開日
+      - name: datasources
+        description: 使用データソース
+      - name: tags
+        description: タグ
+      - name: search_text
+        description: 検索用テキスト（タイトル + サマリー + タグの結合）
