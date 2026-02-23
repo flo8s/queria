@@ -1,5 +1,6 @@
 title: "E-Stat 統計データ"
 description: "e-Stat API から取得した統計データ"
+cover: "📊"
 tags: ["e-stat", "統計"]
 ducklake_url: "https://data.queria.io/e_stat/ducklake.duckdb"
 dependencies:

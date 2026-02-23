@@ -1,5 +1,6 @@
 title: "記事メタデータ"
 description: "ショーケース記事のメタデータ（タイトル、サマリー、タグ等）"
+cover: "📝"
 tags: ["記事"]
 ducklake_url: "https://data.queria.io/articles/ducklake.duckdb"
 

@@ -1,5 +1,6 @@
 title: "郵便番号データ"
 description: "日本郵便が公開している全国の郵便番号データ"
+cover: "📮"
 tags: ["郵便番号", "住所", "日本郵便"]
 ducklake_url: "https://data.queria.io/zipcode/ducklake.duckdb"
 
