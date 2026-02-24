@@ -45,5 +45,6 @@ SELECT
     col->>'$.name' AS column_name,
     column_index,
     col->>'$.description' AS description,
-    col->>'$.data_type' AS data_type
+    col->>'$.data_type' AS data_type,
+    CAST(COALESCE(col->>'$.nullable', 'true') AS BOOLEAN) AS nullable
 FROM columns_expanded

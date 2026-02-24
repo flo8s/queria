@@ -5,5 +5,6 @@ SELECT
     column_name,
     column_index,
     description,
-    data_type
+    data_type,
+    nullable
 FROM {{ ref('stg_columns') }}

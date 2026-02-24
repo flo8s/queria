@@ -104,3 +104,5 @@ models:
         description: カラムの説明
       - name: data_type
         description: データ型
+      - name: nullable
+        description: NULL許容フラグ

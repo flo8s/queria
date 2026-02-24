@@ -138,6 +138,9 @@ models:
       - name: data_type
         description: データ型
         data_type: VARCHAR
+      - name: nullable
+        description: NULL許容フラグ
+        data_type: BOOLEAN
 
   - name: mart_search_entries
     description: 全文検索用エントリ
