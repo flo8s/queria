@@ -13,6 +13,7 @@ class ColumnInfo(BaseModel):
     name: str
     description: str
     data_type: str
+    nullable: bool = True
 
 
 class ModelInfo(BaseModel):

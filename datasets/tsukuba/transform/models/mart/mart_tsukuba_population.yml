@@ -18,24 +18,40 @@ models:
       - name: lg_code
         description: 全国地方公共団体コード
         data_type: VARCHAR
+        constraints:
+          - type: not_null
       - name: area_code
         description: 地域を識別するコード
         data_type: VARCHAR
+        constraints:
+          - type: not_null
       - name: lg_name
         description: 地方公共団体の名称
         data_type: VARCHAR
+        constraints:
+          - type: not_null
       - name: reference_date
         description: データの調査年月日
         data_type: DATE
+        constraints:
+          - type: not_null
       - name: area_name
         description: 地域の名称
         data_type: VARCHAR
+        constraints:
+          - type: not_null
       - name: sex
         description: 性別（male/female）
         data_type: VARCHAR
+        constraints:
+          - type: not_null
       - name: age_group
         description: 年齢層（0-4, 5-9, ..., 85+）
         data_type: VARCHAR
+        constraints:
+          - type: not_null
       - name: population
         description: 該当性別・年齢層の人口
         data_type: BIGINT
+        constraints:
+          - type: not_null
