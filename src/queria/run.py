@@ -87,12 +87,12 @@ def run_dbt(transform_dir: Path, args: list[str]) -> None:
             raise RuntimeError(f"dbt {' '.join(args)} failed")
 
 
-def _is_public_model(node, datasource: str) -> bool:
+def _is_datasource_model(node, datasource: str) -> bool:
     if not isinstance(node, Model):
         return False
     if not node.fqn or node.fqn[0] != datasource:
         return False
-    return node.meta.get("public", False)
+    return True
 
 
 def _resolve_column_type(
@@ -132,6 +132,7 @@ def _build_model_info(node: Model, catalog_columns: dict) -> ModelInfo:
         license=meta.get("license", ""),
         license_url=meta.get("license_url", ""),
         source_url=meta.get("source_url", ""),
+        public=meta.get("public", False),
         columns=_build_columns(node, catalog_columns),
         materialized=node.config.materialized,
         sql=(node.compiled_code or "").strip() or None,
@@ -141,10 +142,10 @@ def _build_model_info(node: Model, catalog_columns: dict) -> ModelInfo:
 def extract_models(
     manifest: WritableManifest, catalog: CatalogArtifact | None, datasource: str
 ) -> dict[str, list[ModelInfo]]:
-    """Extract public models for the given datasource from manifest.json and group by schema."""
+    """Extract models for the given datasource from manifest.json and group by schema."""
     tables_by_schema: dict[str, list[ModelInfo]] = defaultdict(list)
     for node_id, node in manifest.nodes.items():
-        if not _is_public_model(node, datasource):
+        if not _is_datasource_model(node, datasource):
             continue
         catalog_node = catalog.nodes.get(node_id) if catalog else None
         catalog_columns = catalog_node.columns if catalog_node else {}

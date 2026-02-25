@@ -35,7 +35,7 @@ SELECT
     tbl->>'$.license' AS license,
     tbl->>'$.license_url' AS license_url,
     tbl->>'$.source_url' AS source_url,
-    true AS is_public,
+    COALESCE(CAST(tbl->>'$.public' AS BOOLEAN), false) AS is_public,
     tbl->'$.tags' AS tags_json,
     tbl->>'$.sql' AS sql,
     tbl->'$.columns' AS columns_json

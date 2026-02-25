@@ -24,6 +24,7 @@ class ModelInfo(BaseModel):
     license: str
     license_url: str
     source_url: str
+    public: bool = False
     materialized: Materialization
     columns: list[ColumnInfo]
     sql: str | None = None
