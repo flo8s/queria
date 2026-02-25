@@ -225,7 +225,7 @@ models:
       license: "CC BY 4.0"
       license_url: "https://creativecommons.org/licenses/by/4.0/"
       source_url: "https://example.com/"
-      public: true
+      published: true
     columns:
       - name: lg_code
         description: 全国地方公共団体コード
@@ -253,10 +253,10 @@ models:
 | license | No | ライセンス名（例: "CC BY 4.0"） |
 | license_url | No | ライセンスの URL |
 | source_url | No | データの出典 URL |
-| public | Yes | `true` にすると metadata.json に含まれ、フロントエンドに表示される |
+| published | No | `true` にするとフロントエンドのデータセット一覧に表示される（UI表示制御） |
 
 `access: public` は dbt のモデルアクセス制御で、他の dbt プロジェクトから `ref()` できるようにする設定。
-`meta.public: true` は queria 独自のフラグで、フロントエンドに公開するかどうかを制御する。
+`meta.published: true` は queria 独自のフラグで、フロントエンドのデータセット一覧に表示するかどうかを制御する。metadata.json にはすべてのモデル（raw/stg/mart）が含まれる。
 
 `config.contract.enforced: true` を設定すると、カラムの `data_type` と `constraints` がビルド時に検証される。mart 層では設定を推奨する。
 
