@@ -113,6 +113,7 @@ def _build_columns(node: Model, catalog_columns: dict) -> list[ColumnInfo]:
     return [
         ColumnInfo(
             name=col_name,
+            title=col_info.meta.get("title", ""),
             description=col_info.description,
             data_type=_resolve_column_type(col_name, col_info.data_type, catalog_columns),
             nullable=not any(c.type.value == "not_null" for c in col_info.constraints),

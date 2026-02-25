@@ -11,6 +11,7 @@ Materialization = Literal["table", "view", "incremental"]
 
 class ColumnInfo(BaseModel):
     name: str
+    title: str = ""
     description: str
     data_type: str
     nullable: bool = True
