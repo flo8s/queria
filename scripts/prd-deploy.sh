@@ -24,7 +24,7 @@ for ds in "$REPO_DIR"/datasets/*/; do
   # TODO: e_stat は dwh 依存先の Cloudflare 問題が解決するまでスキップ (CI のみ)
   if [ "${GITHUB_ACTIONS:-}" = "true" ]; then
     # CI では、catalog と e_stat は R2 にアップロードされたメタデータを参照するためスキップ
-    [ "$name" = "e_stat" ] && continue
+    # [ "$name" = "e_stat" ] && continue
   fi
   datasets+=("$ds")
 done
