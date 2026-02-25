@@ -5,7 +5,7 @@ models:
     description: "記事メタデータ"
     access: public
     meta:
-      public: true
+      published: true
       title: "記事メタデータ"
     columns:
       - name: slug

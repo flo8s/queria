@@ -10,7 +10,7 @@ SELECT
     license,
     license_url,
     source_url,
-    is_public,
+    is_published,
     tags_json,
     sql
 FROM {{ ref('stg_models') }}

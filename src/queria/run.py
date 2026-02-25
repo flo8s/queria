@@ -132,7 +132,7 @@ def _build_model_info(node: Model, catalog_columns: dict) -> ModelInfo:
         license=meta.get("license", ""),
         license_url=meta.get("license_url", ""),
         source_url=meta.get("source_url", ""),
-        public=meta.get("public", False),
+        published=meta.get("published", False),
         columns=_build_columns(node, catalog_columns),
         materialized=node.config.materialized,
         sql=(node.compiled_code or "").strip() or None,

@@ -78,7 +78,7 @@ models:
         description: ライセンス URL
       - name: source_url
         description: データソース URL
-      - name: is_public
+      - name: is_published
         description: 公開フラグ
       - name: tags_json
         description: タグ（JSON 配列）

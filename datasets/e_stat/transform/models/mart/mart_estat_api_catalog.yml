@@ -10,7 +10,7 @@ models:
       license: "CC BY 4.0"
       license_url: "https://creativecommons.org/licenses/by/4.0/"
       source_url: "https://www.e-stat.go.jp/"
-      public: true
+      published: true
     columns:
       - name: aid
         description: 統計表ID

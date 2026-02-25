@@ -13,7 +13,7 @@ models:
       license: "CC BY 4.0"
       license_url: "https://creativecommons.org/licenses/by/4.0/"
       source_url: "https://www.city.tsukuba.lg.jp/"
-      public: true
+      published: true
     columns:
       - name: lg_code
         description: 全国地方公共団体コード

@@ -13,7 +13,7 @@ models:
       license: "自由利用"
       license_url: "https://www.post.japanpost.jp/zipcode/dl/utf-readme.html"
       source_url: "https://www.post.japanpost.jp/zipcode/dl/utf-zip.html"
-      public: true
+      published: true
     columns:
       - name: lg_code
         description: 全国地方公共団体コード（JIS X0401, X0402）

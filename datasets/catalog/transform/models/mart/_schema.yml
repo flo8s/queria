@@ -10,7 +10,7 @@ models:
     meta:
       title: "データセット一覧"
       tags: ["カタログ"]
-      public: true
+      published: true
     columns:
       - name: datasource
         description: データセット識別子
@@ -40,7 +40,7 @@ models:
     meta:
       title: "スキーマ一覧"
       tags: ["カタログ"]
-      public: true
+      published: true
     columns:
       - name: datasource
         description: データセット識別子
@@ -61,7 +61,7 @@ models:
     meta:
       title: "テーブル一覧"
       tags: ["カタログ"]
-      public: true
+      published: true
     columns:
       - name: datasource
         description: データセット識別子
@@ -96,7 +96,7 @@ models:
       - name: source_url
         description: データソース URL
         data_type: VARCHAR
-      - name: is_public
+      - name: is_published
         description: 公開フラグ
         data_type: BOOLEAN
       - name: tags_json
@@ -115,7 +115,7 @@ models:
     meta:
       title: "カラム一覧"
       tags: ["カタログ"]
-      public: true
+      published: true
     columns:
       - name: datasource
         description: データセット識別子
@@ -148,7 +148,7 @@ models:
     meta:
       title: "検索エントリ"
       tags: ["カタログ"]
-      public: true
+      published: true
     columns:
       - name: entry_type
         description: エントリ種別（table/column）
@@ -178,7 +178,7 @@ models:
     meta:
       title: "データセット依存関係"
       tags: ["カタログ"]
-      public: true
+      published: true
     columns:
       - name: datasource
         description: データセット識別子
