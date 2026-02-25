@@ -100,6 +100,8 @@ models:
         description: カラム名
       - name: column_index
         description: カラムの定義順序
+      - name: title
+        description: カラムの論理名
       - name: description
         description: カラムの説明
       - name: data_type

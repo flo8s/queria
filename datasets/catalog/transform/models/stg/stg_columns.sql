@@ -44,6 +44,7 @@ SELECT
     table_name,
     col->>'$.name' AS column_name,
     column_index,
+    COALESCE(col->>'$.title', '') AS title,
     col->>'$.description' AS description,
     col->>'$.data_type' AS data_type,
     CAST(COALESCE(col->>'$.nullable', 'true') AS BOOLEAN) AS nullable

@@ -41,6 +41,7 @@ columns AS (
         c.column_name,
         c.description,
         COALESCE(REPLACE(c.column_name, '_', ' '), '') || ' ' ||
+            COALESCE(c.title, '') || ' ' ||
             COALESCE(c.description, '') || ' ' ||
             COALESCE(REPLACE(c.table_name, '_', ' '), '') AS search_text,
         '/datasets/' || c.datasource || '/' || t.schema_name || '/' || c.table_name AS href

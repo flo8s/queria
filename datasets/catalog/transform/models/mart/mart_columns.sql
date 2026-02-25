@@ -4,6 +4,7 @@ SELECT
     table_name,
     column_name,
     column_index,
+    title,
     description,
     data_type,
     nullable
