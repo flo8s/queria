@@ -13,24 +13,40 @@ models:
       published: false
     columns:
       - name: tab
-        description: 表章項目コード
+        meta:
+          title: 表章項目コード
       - name: cat01
-        description: 分類事項コード
+        meta:
+          title: 分類事項コード
       - name: area
-        description: 地域コード
+        meta:
+          title: 地域コード
       - name: time
-        description: 時間軸コード
+        meta:
+          title: 時間軸コード
       - name: unit
-        description: 単位
+        meta:
+          title: 単位
       - name: value
-        description: 統計値
+        meta:
+          title: 統計値
       - name: tab_metadata
-        description: 表章項目メタデータ (JSON)
+        meta:
+          title: 表章項目メタデータ
+          description: JSON
       - name: cat01_metadata
-        description: 分類事項メタデータ (JSON)
+        meta:
+          title: 分類事項メタデータ
+          description: JSON
       - name: area_metadata
-        description: 地域メタデータ (JSON)
+        meta:
+          title: 地域メタデータ
+          description: JSON
       - name: time_metadata
-        description: 時間軸メタデータ (JSON)
+        meta:
+          title: 時間軸メタデータ
+          description: JSON
       - name: stat_inf
-        description: 統計表情報 (JSON)
+        meta:
+          title: 統計表情報
+          description: JSON

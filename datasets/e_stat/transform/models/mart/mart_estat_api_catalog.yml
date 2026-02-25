@@ -13,80 +13,119 @@ models:
       published: true
     columns:
       - name: aid
-        description: 統計表ID
+        meta:
+          title: 統計表ID
       - name: stat_name__acode
-        description: 政府統計コード
+        meta:
+          title: 政府統計コード
       - name: stat_name__x
-        description: 政府統計名
+        meta:
+          title: 政府統計名
       - name: gov_org__acode
-        description: 作成機関コード
+        meta:
+          title: 作成機関コード
       - name: gov_org__x
-        description: 作成機関名
+        meta:
+          title: 作成機関名
       - name: statistics_name
-        description: 提供統計名及び提供分類名
+        meta:
+          title: 提供統計名及び提供分類名
       - name: title
-        description: 統計表題名及び表番号
+        meta:
+          title: 統計表題名及び表番号
       - name: cycle
-        description: 提供周期
+        meta:
+          title: 提供周期
       - name: survey_date
-        description: 調査日付
+        meta:
+          title: 調査日付
       - name: open_date
-        description: 公開日
+        meta:
+          title: 公開日
       - name: small_area
-        description: 小地域属性フラグ
+        meta:
+          title: 小地域属性フラグ
       - name: collect_area
-        description: 集計地域区分
+        meta:
+          title: 集計地域区分
       - name: main_category__acode
-        description: 統計大分類コード
+        meta:
+          title: 統計大分類コード
       - name: main_category__x
-        description: 統計大分類名
+        meta:
+          title: 統計大分類名
       - name: sub_category__acode
-        description: 統計小分類コード
+        meta:
+          title: 統計小分類コード
       - name: sub_category__x
-        description: 統計小分類名
+        meta:
+          title: 統計小分類名
       - name: overall_total_number
-        description: 総件数
+        meta:
+          title: 総件数
       - name: updated_date
-        description: 最終更新日
+        meta:
+          title: 最終更新日
       - name: statistics_name_spec__tabulation_category
-        description: 集計分類
+        meta:
+          title: 集計分類
       - name: description
-        description: 統計表の説明
+        meta:
+          title: 統計表の説明
       - name: title_spec__table_name
-        description: 表名
+        meta:
+          title: 表名
       - name: _dlt_load_id
-        description: dltロードID
+        meta:
+          title: dltロードID
       - name: _dlt_id
-        description: dltレコードID
+        meta:
+          title: dltレコードID
       - name: title_spec__table_explanation
-        description: 表の説明
+        meta:
+          title: 表の説明
       - name: statistics_name_spec__tabulation_sub_category1
-        description: 集計小分類1
+        meta:
+          title: 集計小分類1
       - name: survey_date__v_text
-        description: 調査日付テキスト
+        meta:
+          title: 調査日付テキスト
       - name: title__ano
-        description: 統計表番号
+        meta:
+          title: 統計表番号
       - name: title__x
-        description: 統計表題名
+        meta:
+          title: 統計表題名
       - name: statistics_name_spec__tabulation_sub_category2
-        description: 集計小分類2
+        meta:
+          title: 集計小分類2
       - name: title_spec__table_category
-        description: 表分類
+        meta:
+          title: 表分類
       - name: statistics_name_spec__tabulation_sub_category3
-        description: 集計小分類3
+        meta:
+          title: 集計小分類3
       - name: title_spec__table_sub_category1
-        description: 表小分類1
+        meta:
+          title: 表小分類1
       - name: description__tabulation_category_explanation
-        description: 集計分類の説明
+        meta:
+          title: 集計分類の説明
       - name: description__tabulation_sub_category_explanation1
-        description: 集計小分類の説明1
+        meta:
+          title: 集計小分類の説明1
       - name: title_spec__table_sub_category2
-        description: 表小分類2
+        meta:
+          title: 表小分類2
       - name: description__tabulation_sub_category_explanation2
-        description: 集計小分類の説明2
+        meta:
+          title: 集計小分類の説明2
       - name: title_spec__table_sub_category3
-        description: 表小分類3
+        meta:
+          title: 表小分類3
       - name: statistics_name_spec__tabulation_sub_category4
-        description: 集計小分類4
+        meta:
+          title: 集計小分類4
       - name: statistics_name_spec__tabulation_sub_category5
-        description: 集計小分類5
+        meta:
+          title: 集計小分類5

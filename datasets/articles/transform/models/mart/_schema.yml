@@ -9,16 +9,25 @@ models:
       title: "記事メタデータ"
     columns:
       - name: slug
-        description: 記事のスラグ（一意識別子）
+        meta:
+          title: 記事のスラグ
+          description: 一意識別子
       - name: title
-        description: 記事タイトル
+        meta:
+          title: 記事タイトル
       - name: summary
-        description: 記事の概要
+        meta:
+          title: 記事の概要
       - name: date
-        description: 公開日
+        meta:
+          title: 公開日
       - name: datasources
-        description: 使用データソース
+        meta:
+          title: 使用データソース
       - name: tags
-        description: タグ
+        meta:
+          title: タグ
       - name: search_text
-        description: 検索用テキスト（タイトル + サマリー + タグの結合）
+        meta:
+          title: 検索用テキスト
+          description: タイトル + サマリー + タグの結合

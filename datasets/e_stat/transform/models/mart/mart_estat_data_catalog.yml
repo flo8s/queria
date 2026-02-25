@@ -13,28 +13,45 @@ models:
       published: true
     columns:
       - name: aid
-        description: 統計表ID
+        meta:
+          title: 統計表ID
       - name: dataset__stat_name
-        description: 政府統計名 (STRUCT)
+        meta:
+          title: 政府統計名
+          description: STRUCT
       - name: dataset__organization
-        description: 作成機関 (STRUCT)
+        meta:
+          title: 作成機関
+          description: STRUCT
       - name: dataset__title
-        description: データセットタイトル (STRUCT)
+        meta:
+          title: データセットタイトル
+          description: STRUCT
       - name: dataset__description
-        description: データセットの説明
+        meta:
+          title: データセットの説明
       - name: dataset__publisher
-        description: 公開者
+        meta:
+          title: 公開者
       - name: dataset__contact_point
-        description: 連絡先
+        meta:
+          title: 連絡先
       - name: dataset__creator
-        description: 作成者
+        meta:
+          title: 作成者
       - name: dataset__release_date
-        description: 公開日
+        meta:
+          title: 公開日
       - name: dataset__last_modified_date
-        description: 最終更新日
+        meta:
+          title: 最終更新日
       - name: dataset__frequency_of_update
-        description: 更新頻度
+        meta:
+          title: 更新頻度
       - name: dataset__landing_page
-        description: ランディングページURL
+        meta:
+          title: ランディングページURL
       - name: resources__resource
-        description: リソース情報 (STRUCT配列)
+        meta:
+          title: リソース情報
+          description: STRUCT配列

@@ -2,21 +2,29 @@ version: 2
 
 _columns: &columns
   - name: cat01
-    description: 分類事項コード
+    meta:
+      title: 分類事項コード
   - name: item_name
-    description: 分類事項名
+    meta:
+      title: 分類事項名
   - name: area
-    description: 地域コード
+    meta:
+      title: 地域コード
   - name: area_name
-    description: 地域名
+    meta:
+      title: 地域名
   - name: time
-    description: 時間軸コード
+    meta:
+      title: 時間軸コード
   - name: time_name
-    description: 時間軸名
+    meta:
+      title: 時間軸名
   - name: unit
-    description: 単位
+    meta:
+      title: 単位
   - name: value
-    description: 統計値
+    meta:
+      title: 統計値
 
 _meta: &meta
   license: "CC BY 4.0"
