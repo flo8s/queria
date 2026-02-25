@@ -2,11 +2,11 @@ version: 2
 
 models:
   - name: mart_articles
-    description: "記事メタデータ"
+    description: "Queriaショーケース記事のメタデータ"
     access: public
     meta:
       published: true
-      title: "記事メタデータ"
+      title: "Queriaショーケース記事"
     columns:
       - name: slug
         meta:

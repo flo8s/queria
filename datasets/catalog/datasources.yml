@@ -1,6 +1,6 @@
 datasources:
   - name: articles
-    description: 記事メタデータ
+    description: Queriaショーケース記事
   - name: e_stat
     description: E-Stat データセット
   - name: tsukuba
