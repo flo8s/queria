@@ -21,6 +21,9 @@ __pycache__/
 # Local dev server
 .dev-serve/
 
+# MkDocs
+site/
+
 # Node.js
 node_modules/
 dist/

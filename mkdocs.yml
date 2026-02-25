@@ -1,0 +1,13 @@
+site_name: Queria
+site_description: dbt + DuckLake + Cloudflare R2 によるオープンデータ公開パイプライン
+repo_url: https://github.com/flo8s/queria
+
+theme:
+  name: material
+  language: ja
+
+nav:
+  - Home: index.md
+  - はじめに: getting-started.md
+  - データセット追加ガイド: adding-dataset.md
+  - CLI リファレンス: cli.md
