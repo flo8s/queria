@@ -6,9 +6,33 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy:
+  discover:
+    runs-on: ubuntu-latest
+    outputs:
+      datasets: ${{ steps.find.outputs.datasets }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: datasets
+
+      - name: List datasets (excluding catalog)
+        id: find
+        run: |
+          datasets=$(ls -d datasets/*/dataset.yml \
+            | xargs -I{} dirname {} \
+            | xargs -I{} basename {} \
+            | grep -v catalog \
+            | jq -Rsc 'split("\n") | map(select(length > 0))')
+          echo "datasets=$datasets" >> "$GITHUB_OUTPUT"
+
+  deploy-dataset:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    needs: discover
+    strategy:
+      fail-fast: true
+      matrix:
+        dataset: ${{ fromJson(needs.discover.outputs.datasets) }}
     env:
       S3_ENDPOINT: ${{ secrets.S3_ENDPOINT }}
       S3_ACCESS_KEY_ID: ${{ secrets.S3_ACCESS_KEY_ID }}
@@ -24,11 +48,44 @@ jobs:
 
       - run: uv sync
 
-      - name: Build and deploy
-        run: bash scripts/prd-deploy.sh
+      - name: Build and deploy ${{ matrix.dataset }}
+        run: |
+          uv run queria fetch "datasets/${{ matrix.dataset }}"
+          uv run queria run "datasets/${{ matrix.dataset }}" --target prd
+          uv run queria freeze "datasets/${{ matrix.dataset }}"
 
+  deploy-catalog:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: deploy-dataset
+    env:
+      S3_ENDPOINT: ${{ secrets.S3_ENDPOINT }}
+      S3_ACCESS_KEY_ID: ${{ secrets.S3_ACCESS_KEY_ID }}
+      S3_SECRET_ACCESS_KEY: ${{ secrets.S3_SECRET_ACCESS_KEY }}
+      S3_BUCKET: ${{ vars.S3_BUCKET }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - run: uv python install 3.13
+
+      - run: uv sync
+
+      - name: Build and deploy catalog
+        run: |
+          uv run python datasets/catalog/generate_sources.py
+          uv run queria fetch datasets/catalog
+          uv run queria run datasets/catalog --target prd
+          uv run queria freeze datasets/catalog
+
+  notify-failure:
+    runs-on: ubuntu-latest
+    needs: [deploy-dataset, deploy-catalog]
+    if: failure()
+    steps:
       - name: Notify Discord on failure
-        if: failure()
         run: |
           curl -s -H "Content-Type: application/json" \
             -d "{\"embeds\": [{\"title\": \"Deploy Failed\", \"url\": \"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\", \"color\": 15158332, \"fields\": [{\"name\": \"Repository\", \"value\": \"${{ github.repository }}\"}, {\"name\": \"Branch\", \"value\": \"${{ github.ref_name }}\"}, {\"name\": \"Commit\", \"value\": \"${{ github.sha }}\"}]}]}" \
