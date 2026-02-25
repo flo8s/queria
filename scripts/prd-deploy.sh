@@ -25,6 +25,7 @@ for ds in "$REPO_DIR"/datasets/*/; do
   if [ "${GITHUB_ACTIONS:-}" = "true" ]; then
     # CI では、catalog と e_stat は R2 にアップロードされたメタデータを参照するためスキップ
     # [ "$name" = "e_stat" ] && continue
+    :
   fi
   datasets+=("$ds")
 done
