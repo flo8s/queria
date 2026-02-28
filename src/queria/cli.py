@@ -36,15 +36,54 @@ def fetch(
 
 
 @app.command()
+def ingest(
+    path: Path = typer.Argument(..., help="Path to the dataset directory"),
+) -> None:
+    """Run dataset-specific ingestion script"""
+    script = path.resolve() / "ingestion" / "__main__.py"
+    if not script.exists():
+        return
+    import subprocess
+    import sys
+
+    subprocess.run(
+        [sys.executable, str(script.parent)],
+        check=True,
+    )
+
+
+@app.command()
+def transform(
+    path: Path = typer.Argument(..., help="Path to the dataset directory"),
+    target: str = typer.Option("dev", help="dbt target (defined in profiles.yml)"),
+    vars: Optional[str] = typer.Option(None, help="dbt vars (JSON string)"),
+) -> None:
+    """Transform a dataset"""
+    script = path.resolve() / "transform" / "__main__.py"
+    if script.exists():
+        import subprocess
+        import sys
+
+        subprocess.run(
+            [sys.executable, str(script.parent)],
+            check=True,
+        )
+        return
+
+    from queria.run import build_datasource
+
+    build_datasource(path.resolve(), target, dbt_vars=vars)
+
+
+@app.command()
 def run(
     path: Path = typer.Argument(..., help="Path to the dataset directory"),
     target: str = typer.Option("dev", help="dbt target (defined in profiles.yml)"),
     vars: Optional[str] = typer.Option(None, help="dbt vars (JSON string)"),
 ) -> None:
-    """Build a dataset"""
-    from queria.run import build_datasource
-
-    build_datasource(path.resolve(), target, dbt_vars=vars)
+    """Build a dataset (ingest + transform)"""
+    ingest(path)
+    transform(path, target, vars)
 
 
 @app.command()
