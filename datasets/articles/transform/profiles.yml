@@ -10,6 +10,7 @@ articles:
       extensions:
         - httpfs
         - ducklake
+        - sqlite
       attach:
         - path: "ducklake:../dist/ducklake.duckdb"
           alias: articles
@@ -26,6 +27,7 @@ articles:
       extensions:
         - httpfs
         - ducklake
+        - sqlite
       settings:
         s3_url_style: path
         s3_access_key_id: "{{ env_var('S3_ACCESS_KEY_ID') }}"

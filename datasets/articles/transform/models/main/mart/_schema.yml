@@ -15,7 +15,7 @@ models:
       - name: title
         meta:
           title: 記事タイトル
-      - name: summary
+      - name: description
         meta:
           title: 記事の概要
       - name: date
@@ -30,4 +30,4 @@ models:
       - name: search_text
         meta:
           title: 検索用テキスト
-          description: タイトル + サマリー + タグの結合
+          description: タイトル + 概要 + タグの結合
