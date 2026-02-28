@@ -17,20 +17,10 @@ clean-targets:
 models:
   k_oxon:
     +database: k_oxon
-    +persist_docs:
-      relation: true
-      columns: true
     japan_map_for_bi:
       raw:
         +materialized: table
       stg:
         +materialized: view
-        +persist_docs:
-          relation: true
-          columns: false
       mart:
         +materialized: view
-        +schema: japan_map_for_bi
-        +persist_docs:
-          relation: true
-          columns: false
