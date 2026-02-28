@@ -1,0 +1,24 @@
+version: 2
+
+models:
+  - name: estat_items
+    description: 分類事項カタログ
+    access: public
+    meta:
+      title: "分類事項カタログ"
+      tags: ["e-stat", "カタログ"]
+      license: "CC BY 4.0"
+      license_url: "https://creativecommons.org/licenses/by/4.0/"
+      source_url: "https://www.e-stat.go.jp/"
+      published: true
+    columns:
+      - name: category_prefix
+        meta:
+          title: カテゴリプレフィックス
+          description: A-K
+      - name: cat01
+        meta:
+          title: 分類事項コード
+      - name: item_name
+        meta:
+          title: 分類事項名

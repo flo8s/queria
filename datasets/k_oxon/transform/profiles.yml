@@ -18,6 +18,8 @@ k_oxon:
           options:
             DATA_PATH: "../dist/ducklake.duckdb.files/"
             OVERRIDE_DATA_PATH: true
+        - path: "ducklake:{{ env_var('DWH_DUCKLAKE_PATH', 'https://data.oxon-data.work/fdl_experiment/dwh.ducklake') }}"
+          alias: dwh
     prd:
       type: duckdb
       path: ":memory:"
@@ -41,3 +43,5 @@ k_oxon:
           options:
             DATA_PATH: "s3://{{ env_var('S3_BUCKET') }}/k_oxon/ducklake.duckdb.files/"
             OVERRIDE_DATA_PATH: true
+        - path: "ducklake:{{ env_var('DWH_DUCKLAKE_PATH', 'https://data.oxon-data.work/fdl_experiment/dwh.ducklake') }}"
+          alias: dwh

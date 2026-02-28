@@ -24,3 +24,8 @@ models:
         +materialized: view
       mart:
         +materialized: view
+    e_stat:
+      raw:
+        +materialized: view
+      mart:
+        +materialized: table

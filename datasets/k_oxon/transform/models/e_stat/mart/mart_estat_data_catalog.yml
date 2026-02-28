@@ -1,0 +1,57 @@
+version: 2
+
+models:
+  - name: mart_estat_data_catalog
+    description: E-Stat データカタログ（データセット・リソース情報）
+    access: public
+    meta:
+      title: "E-Stat データカタログ"
+      tags: ["e-stat", "カタログ"]
+      license: "CC BY 4.0"
+      license_url: "https://creativecommons.org/licenses/by/4.0/"
+      source_url: "https://www.e-stat.go.jp/"
+      published: true
+    columns:
+      - name: aid
+        meta:
+          title: 統計表ID
+      - name: dataset__stat_name
+        meta:
+          title: 政府統計名
+          description: STRUCT
+      - name: dataset__organization
+        meta:
+          title: 作成機関
+          description: STRUCT
+      - name: dataset__title
+        meta:
+          title: データセットタイトル
+          description: STRUCT
+      - name: dataset__description
+        meta:
+          title: データセットの説明
+      - name: dataset__publisher
+        meta:
+          title: 公開者
+      - name: dataset__contact_point
+        meta:
+          title: 連絡先
+      - name: dataset__creator
+        meta:
+          title: 作成者
+      - name: dataset__release_date
+        meta:
+          title: 公開日
+      - name: dataset__last_modified_date
+        meta:
+          title: 最終更新日
+      - name: dataset__frequency_of_update
+        meta:
+          title: 更新頻度
+      - name: dataset__landing_page
+        meta:
+          title: ランディングページURL
+      - name: resources__resource
+        meta:
+          title: リソース情報
+          description: STRUCT配列
