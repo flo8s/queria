@@ -1,8 +1,8 @@
 datasources:
   - name: articles
     description: Queriaショーケース記事
-  - name: e_stat
-    description: E-Stat データセット
+  - name: k_oxon
+    description: K-Oxon データ
   - name: tsukuba
     description: つくば市データセット
   - name: zipcode

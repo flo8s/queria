@@ -3,7 +3,7 @@
 
 SELECT * FROM {{ ref('raw_articles') }}
 UNION ALL
-SELECT * FROM {{ ref('raw_e_stat') }}
+SELECT * FROM {{ ref('raw_k_oxon') }}
 UNION ALL
 SELECT * FROM {{ ref('raw_tsukuba') }}
 UNION ALL
