@@ -34,7 +34,7 @@ queria/
 │   │       │   └── mart/  #       公開用ビュー
 │   │       └── profiles.yml
 │   ├── zipcode/
-│   ├── e_stat/
+│   ├── k_oxon/            #   K-Oxon データ (GIS + e-Stat)
 │   └── catalog/           #   全データセットの統合カタログ
 ├── packages/
 │   └── queria_common/     # 共有 dbt マクロ
@@ -82,8 +82,8 @@ catalog データセットは他データセットの metadata.json を参照す
 # 1. 各データセットをビルド・デプロイ
 uv run queria run datasets/tsukuba --target prd
 uv run queria freeze datasets/tsukuba
-uv run queria run datasets/e_stat --target prd
-uv run queria freeze datasets/e_stat
+uv run queria run datasets/k_oxon --target prd
+uv run queria freeze datasets/k_oxon
 
 # 2. 最後に catalog をビルド・デプロイ
 uv run queria run datasets/catalog --target prd

@@ -21,10 +21,7 @@ for ds in "$REPO_DIR"/datasets/*/; do
   name="$(basename "$ds")"
   # dataset.yml を持たないディレクトリはデータセットではないのでスキップ
   [ ! -f "$ds/dataset.yml" ] && continue
-  # TODO: e_stat は dwh 依存先の Cloudflare 問題が解決するまでスキップ (CI のみ)
   if [ "${GITHUB_ACTIONS:-}" = "true" ]; then
-    # CI では、catalog と e_stat は R2 にアップロードされたメタデータを参照するためスキップ
-    # [ "$name" = "e_stat" ] && continue
     :
   fi
   datasets+=("$ds")

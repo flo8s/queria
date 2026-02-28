@@ -41,6 +41,6 @@ DuckDB WASM でも同じ URL でアクセスできる。
 |---|---|
 | tsukuba | つくば市オープンデータ（人口統計） |
 | zipcode | 日本郵便 郵便番号データ |
-| e_stat | e-Stat（政府統計） |
+| k_oxon | K-Oxon データ（GIS境界 + e-Stat統計） |
 | articles | 記事メタデータ |
 | catalog | 全データセットの統合カタログ |

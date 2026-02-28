@@ -1,7 +1,7 @@
 # queria 開発ガイド
 
 dbt + DuckLake + Cloudflare R2 によるオープンデータ公開パイプライン。
-マルチデータソース対応 (tsukuba, e_stat, catalog, articles, zipcode)。
+マルチデータソース対応 (tsukuba, k_oxon, catalog, articles, zipcode)。
 
 ## セットアップ
 

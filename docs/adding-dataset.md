@@ -55,27 +55,25 @@ schemas:
     title: "メイン"
 ```
 
-### 依存関係がある例（e_stat）
+### 依存関係がある例（k_oxon）
 
 他のデータセットを参照する場合は `dependencies` を指定する:
 
 ```yaml
-title: "E-Stat 統計データ"
-description: "e-Stat API から取得した統計データ"
-cover: "📊"
-tags: ["e-stat", "統計"]
-ducklake_url: "https://data.queria.io/e_stat/ducklake.duckdb"
+title: "K-Oxon データ"
+description: "K-Oxon が公開するオープンデータ"
+cover: "🗾"
+tags: ["GIS", "行政区域", "境界", "地図"]
+ducklake_url: "https://data.queria.io/k_oxon/ducklake.duckdb"
 dependencies:
   - alias: "dwh"
     ducklake_url: "https://data.oxon-data.work/fdl_experiment/dwh.ducklake"
 
 schemas:
-  main:
-    title: "メイン"
-  main_municipal:
-    title: "市区町村統計"
-  main_pref:
-    title: "都道府県統計"
+  japan_map_for_bi:
+    title: "Japan map for BI"
+  e_stat:
+    title: "E-Stat 統計データ"
 ```
 
 ### フィールド一覧

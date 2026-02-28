@@ -65,7 +65,7 @@ queria/
 │   │       │   ├── stg/       # Data transformation
 │   │       │   └── mart/      # Public views
 │   │       └── profiles.yml   # dbt profiles (dev/prd)
-│   └── e_stat/                # e-Stat datasource
+│   └── k_oxon/                # K-Oxon datasource (GIS + e-Stat)
 │       ├── dataset.yml
 │       └── transform/
 ├── src/
@@ -106,9 +106,9 @@ The catalog dataset reads metadata from other datasources on R2, so run it last:
 
 ```bash
 uv run queria run datasets/tsukuba --target prd
-uv run queria run datasets/e_stat --target prd
+uv run queria run datasets/k_oxon --target prd
 uv run queria freeze datasets/tsukuba
-uv run queria freeze datasets/e_stat
+uv run queria freeze datasets/k_oxon
 uv run queria run datasets/catalog --target prd
 uv run queria freeze datasets/catalog
 ```
@@ -139,7 +139,7 @@ When accessing from DuckDB WASM, the R2 bucket requires CORS configuration:
 ## Datasources
 
 - tsukuba: Tsukuba city open data (population by area)
-- e_stat: e-Stat (Japanese government statistics)
+- k_oxon: K-Oxon data (GIS boundaries + e-Stat statistics)
 
 ## License
 
