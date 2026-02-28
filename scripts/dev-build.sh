@@ -4,16 +4,29 @@ set -euo pipefail
 REPO_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 OUTPUT_DIR="$REPO_DIR/.dev-serve"
 
+if [ -f "$REPO_DIR/.env" ]; then
+  set -a
+  source "$REPO_DIR/.env"
+  set +a
+fi
+
 echo "=== Building datasets ==="
 
+failed=()
 for ds in "$REPO_DIR"/datasets/*/; do
   [ ! -f "$ds/dataset.yml" ] && continue
   [ "$(basename "$ds")" = "catalog" ] && continue
 
+  name="$(basename "$ds")"
   echo ""
-  echo "--- $(basename "$ds") ---"
-  uv run queria run "$ds" --target dev
-  uv run queria freeze "$ds" --output-dir "$OUTPUT_DIR"
+  echo "--- $name ---"
+  if uv run queria run "$ds" --target dev && \
+     uv run queria freeze "$ds" --output-dir "$OUTPUT_DIR"; then
+    :
+  else
+    echo "WARNING: $name failed, skipping"
+    failed+=("$name")
+  fi
 done
 
 echo ""
@@ -23,6 +36,11 @@ uv run queria run "$REPO_DIR/datasets/catalog" --target dev \
   --vars "{\"storage_base_url\": \"$OUTPUT_DIR\"}"
 uv run queria freeze "$REPO_DIR/datasets/catalog" --output-dir "$OUTPUT_DIR"
 
+if [ ${#failed[@]} -gt 0 ]; then
+  echo ""
+  echo "WARNING: ${#failed[@]} dataset(s) failed: ${failed[*]}"
+fi
+
 echo ""
 echo "Done. Serve with:"
-echo "  npx serve $OUTPUT_DIR --cors -l 4000"
+echo "  ./scripts/dev-serve.sh"
