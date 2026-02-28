@@ -17,19 +17,10 @@ clean-targets:
 models:
   e_stat:
     +database: e_stat
-    +persist_docs:
-      relation: true
-      columns: true
     raw:
       +materialized: view
-      +persist_docs:
-        relation: true
-        columns: false
     mart:
       +materialized: view
-      +persist_docs:
-        relation: true
-        columns: false
       municipal:
         +schema: municipal
       pref:

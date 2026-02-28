@@ -17,13 +17,7 @@ clean-targets:
 models:
   articles:
     +database: articles
-    +persist_docs:
-      relation: true
-      columns: true
     raw:
       +materialized: table
     mart:
       +materialized: view
-      +persist_docs:
-        relation: true
-        columns: false

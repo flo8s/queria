@@ -17,18 +17,9 @@ clean-targets:
 models:
   zipcode:
     +database: zipcode
-    +persist_docs:
-      relation: true
-      columns: true
     raw:
       +materialized: table
     stg:
       +materialized: view
-      +persist_docs:
-        relation: true
-        columns: false
     mart:
       +materialized: view
-      +persist_docs:
-        relation: true
-        columns: false

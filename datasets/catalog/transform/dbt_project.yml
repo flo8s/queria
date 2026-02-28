@@ -20,18 +20,9 @@ vars:
 models:
   catalog:
     +database: catalog
-    +persist_docs:
-      relation: true
-      columns: true
     raw:
       +materialized: table
     stg:
       +materialized: view
-      +persist_docs:
-        relation: true
-        columns: false
     mart:
       +materialized: table
-      +persist_docs:
-        relation: true
-        columns: false
