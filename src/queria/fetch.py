@@ -5,8 +5,8 @@ from pathlib import Path
 from botocore.exceptions import ClientError
 
 from queria import DIST_DIR, DUCKLAKE_FILE, METADATA_JSON
-from queria.freeze import create_s3_client
-from queria.run import load_dataset_config
+from queria.s3 import create_s3_client
+from queria.config_schema import load_dataset_config
 
 
 def _download_file(client, bucket: str, key: str, dest: Path) -> None:
@@ -31,7 +31,8 @@ def fetch_from_s3(client, bucket: str, dataset_dir: Path, datasource: str) -> No
 
 def fetch_datasource(dataset_dir: Path, *, bucket: str) -> None:
     """Fetch ducklake.duckdb from S3."""
-    datasource = load_dataset_config(dataset_dir).name
+    config = load_dataset_config(dataset_dir)
+    datasource = config.name
 
     print(f"--- fetch: {datasource} ---")
 

@@ -10,7 +10,7 @@ import yaml
 from dbt.cli.main import dbtRunner
 
 from queria import DATASET_YML, DUCKLAKE_FILE, TRANSFORM_DIR
-from queria.run import working_directory
+from queria.dbt import working_directory
 
 _VALID_NAME_RE = re.compile(r"^[a-zA-Z_]\w*$")
 

@@ -7,8 +7,8 @@ from pathlib import Path
 import duckdb
 
 from queria import DIST_DIR, DUCKLAKE_FILE
-from queria.freeze import create_s3_client
-from queria.run import load_dataset_config
+from queria.s3 import create_s3_client
+from queria.config_schema import load_dataset_config
 
 
 def _format_size(size_bytes: int) -> str:

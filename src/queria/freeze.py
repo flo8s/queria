@@ -1,24 +1,11 @@
 """Freeze: S3 upload / local copy."""
 
-import os
 import shutil
 from pathlib import Path
 
 from queria import DIST_DIR, DUCKLAKE_FILE, METADATA_JSON
-from queria.run import load_dataset_config
-
-
-def create_s3_client():
-    """Create a boto3 S3 client from environment variables."""
-    import boto3
-
-    return boto3.client(
-        "s3",
-        endpoint_url=f"https://{os.environ['S3_ENDPOINT']}",
-        aws_access_key_id=os.environ["S3_ACCESS_KEY_ID"],
-        aws_secret_access_key=os.environ["S3_SECRET_ACCESS_KEY"],
-        region_name="auto",
-    )
+from queria.config_schema import load_dataset_config
+from queria.s3 import create_s3_client
 
 
 def _upload(
