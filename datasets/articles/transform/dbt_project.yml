@@ -17,7 +17,8 @@ clean-targets:
 models:
   articles:
     +database: articles
-    raw:
-      +materialized: table
-    mart:
-      +materialized: view
+    main:
+      raw:
+        +materialized: table
+      mart:
+        +materialized: view

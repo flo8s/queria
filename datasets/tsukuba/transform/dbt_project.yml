@@ -17,9 +17,10 @@ clean-targets:
 models:
   tsukuba:
     +database: tsukuba
-    raw:
-      +materialized: table
-    stg:
-      +materialized: view
-    mart:
-      +materialized: view
+    main:
+      raw:
+        +materialized: table
+      stg:
+        +materialized: view
+      mart:
+        +materialized: view

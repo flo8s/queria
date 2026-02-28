@@ -17,11 +17,12 @@ clean-targets:
 models:
   e_stat:
     +database: e_stat
-    raw:
-      +materialized: view
-    mart:
-      +materialized: view
-      municipal:
-        +schema: municipal
-      pref:
-        +schema: pref
+    main:
+      raw:
+        +materialized: view
+      mart:
+        +materialized: view
+        municipal:
+          +schema: municipal
+        pref:
+          +schema: pref

@@ -20,9 +20,10 @@ vars:
 models:
   catalog:
     +database: catalog
-    raw:
-      +materialized: table
-    stg:
-      +materialized: view
-    mart:
-      +materialized: table
+    main:
+      raw:
+        +materialized: table
+      stg:
+        +materialized: view
+      mart:
+        +materialized: table
