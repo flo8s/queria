@@ -65,6 +65,23 @@ def freeze(
     freeze_datasource(path.resolve(), bucket=bucket, output_dir=output_dir)
 
 
+@app.command()
+def gc(
+    path: Path = typer.Argument(..., help="Path to the dataset directory"),
+    bucket: str = typer.Option(..., envvar="S3_BUCKET", help="S3 bucket name"),
+    force: bool = typer.Option(False, help="Skip confirmation prompt"),
+    older_than_days: Optional[int] = typer.Option(
+        None, help="Only delete files older than N days"
+    ),
+) -> None:
+    """Clean up orphaned Parquet files on R2"""
+    from queria.gc import gc_datasource
+
+    gc_datasource(
+        path.resolve(), bucket=bucket, force=force, older_than_days=older_than_days
+    )
+
+
 main: Typer = app
 
 if __name__ == "__main__":
