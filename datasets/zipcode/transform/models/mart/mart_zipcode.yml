@@ -19,7 +19,7 @@ models:
         data_type: VARCHAR
         meta:
           title: 全国地方公共団体コード
-          description: JIS X0401, X0402
+          description: JIS X0401, X0402 (6桁、チェックディジット付き)
       - name: old_zipcode
         data_type: VARCHAR
         meta:
