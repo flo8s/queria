@@ -1,0 +1,56 @@
+version: 2
+
+models:
+  - name: prefecture
+    description: 都道府県の行政区域境界ポリゴン
+    access: public
+    meta:
+      title: "都道府県境界"
+      tags: ["GIS", "都道府県", "境界"]
+      license: "CC BY 4.0"
+      license_url: "https://creativecommons.org/licenses/by/4.0/"
+      source_url: "https://github.com/K-Oxon/Japan-map-for-BI"
+      published: true
+    columns:
+      - name: prefecture_code
+        meta:
+          title: 都道府県コード
+          description: 2桁
+      - name: prefecture_name
+        meta:
+          title: 都道府県名
+      - name: geometry
+        meta:
+          title: 境界ポリゴン
+
+  - name: municipality
+    description: 市区町村の行政区域境界ポリゴン
+    access: public
+    meta:
+      title: "市区町村境界"
+      tags: ["GIS", "市区町村", "境界"]
+      license: "CC BY 4.0"
+      license_url: "https://creativecommons.org/licenses/by/4.0/"
+      source_url: "https://github.com/K-Oxon/Japan-map-for-BI"
+      published: true
+    columns:
+      - name: lg_code
+        meta:
+          title: 地方公共団体コード
+          description: 6桁
+      - name: prefecture_code
+        meta:
+          title: 都道府県コード
+          description: 2桁
+      - name: prefecture_name
+        meta:
+          title: 都道府県名
+      - name: county_name
+        meta:
+          title: 郡名
+      - name: city_name
+        meta:
+          title: 市区町村名
+      - name: geometry
+        meta:
+          title: 境界ポリゴン

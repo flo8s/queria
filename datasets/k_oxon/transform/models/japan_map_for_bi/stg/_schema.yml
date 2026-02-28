@@ -1,0 +1,28 @@
+version: 2
+
+models:
+  - name: stg_boundary_prefecture
+    description: 都道府県境界 (カラム正規化済み)
+    columns:
+      - name: prefecture_code
+        description: 都道府県コード (2桁)
+      - name: prefecture_name
+        description: 都道府県名
+      - name: geometry
+        description: 境界ポリゴン
+
+  - name: stg_boundary_municipality
+    description: 市区町村境界 (カラム正規化済み)
+    columns:
+      - name: lg_code
+        description: 地方公共団体コード (6桁)
+      - name: prefecture_code
+        description: 都道府県コード (2桁)
+      - name: prefecture_name
+        description: 都道府県名
+      - name: county_name
+        description: 郡名
+      - name: city_name
+        description: 市区町村名
+      - name: geometry
+        description: 境界ポリゴン

@@ -1,0 +1,36 @@
+version: 2
+
+models:
+  - name: raw_boundary_prefecture
+    description: K-Oxon/Japan-map-for-BI の都道府県境界データ (TopoJSON)
+    columns:
+      - name: id
+        description: 都道府県コード (2桁)
+      - name: prefecture_code
+        description: 都道府県コード (2桁)
+      - name: prefecture_name
+        description: 都道府県名
+      - name: geom
+        description: 境界ポリゴン (GEOMETRY)
+
+  - name: raw_boundary_municipality
+    description: K-Oxon/Japan-map-for-BI の市区町村境界データ (TopoJSON)
+    columns:
+      - name: id
+        description: 地方公共団体コード (6桁)
+      - name: lg_code
+        description: 地方公共団体コード (6桁)
+      - name: lg_code_5
+        description: 行政区域コード (5桁)
+      - name: prefecture_code
+        description: 都道府県コード (2桁)
+      - name: prefecture_name
+        description: 都道府県名
+      - name: county_name
+        description: 郡名
+      - name: city_name
+        description: 市区町村名
+      - name: is_hoppo_city
+        description: 北方領土フラグ
+      - name: geom
+        description: 境界ポリゴン (GEOMETRY)
