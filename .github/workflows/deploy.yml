@@ -30,7 +30,7 @@ jobs:
     timeout-minutes: 15
     needs: discover
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         dataset: ${{ fromJson(needs.discover.outputs.datasets) }}
     env:
