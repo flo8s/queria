@@ -319,3 +319,105 @@ uv run queria freeze datasets/catalog
 ```
 
 GitHub Actions で main ブランチに push すると、`scripts/prd-deploy.sh` が自動実行される。
+
+## パターン: API 直接取得 + DuckLake 直接書き込み
+
+外部 API からデータを取得して DuckLake に直接書き込むパターン。dbt は全てビューとして構成し、データの再コピーを避ける。
+
+### アーキテクチャ
+
+```
+[外部 API]
+    ↓  ingestion スクリプト (Arrow Tables を生成)
+[dist/ducklake.duckdb]  ← DuckLake に直接 INSERT (OVERRIDE_DATA_PATH)
+    ↓  dbt (ビューのみ)
+[dist/ducklake.duckdb]  ← ビュー追加 + metadata.json 生成
+    ↓  queria freeze
+[R2]
+```
+
+### ディレクトリ構成
+
+```
+datasets/my_api/
+├── dataset.yml
+├── ingestion/
+│   ├── __main__.py      # API 取得 + DuckLake 書き込み
+│   └── tables.yml       # テーブル定義（API パラメータ、merge_keys）
+└── transform/
+    ├── dbt_project.yml
+    ├── profiles.yml
+    └── models/
+        ├── raw/         # SELECT * FROM source (view)
+        └── mart/        # フィルタ・加工ビュー (view)
+```
+
+### ingestion スクリプト
+
+`ingestion/__main__.py` で API からデータを取得し、DuckLake テーブルに直接書き込む:
+
+```python
+import duckdb
+
+conn = duckdb.connect(":memory:")
+conn.execute("INSTALL ducklake; LOAD ducklake;")
+conn.execute("""
+    ATTACH 'ducklake:../dist/ducklake.duckdb' AS mydb (
+        DATA_PATH '../dist/ducklake.duckdb.files/',
+        OVERRIDE_DATA_PATH true
+    )
+""")
+conn.execute("CREATE SCHEMA IF NOT EXISTS mydb._source")
+
+# Arrow Table を DuckLake に書き込み
+conn.register("_new_data", arrow_table)
+conn.execute("CREATE TABLE mydb._source.my_table AS SELECT * FROM _new_data")
+```
+
+### 増分更新（merge）
+
+データ量が大きい場合、merge_keys を指定して増分更新する:
+
+```python
+# DELETE matching keys → INSERT
+keys_condition = " AND ".join(f"t.{k} = n.{k}" for k in merge_keys)
+conn.execute(f"DELETE FROM {fqn} t WHERE EXISTS (SELECT 1 FROM _new_data n WHERE {keys_condition})")
+conn.execute(f"INSERT INTO {fqn} SELECT * FROM _new_data")
+```
+
+DuckLake が Parquet ファイルのバージョン管理を行い、`queria gc` で古いファイルをクリーンアップする。
+
+### dbt モデル
+
+ingestion が `_source` スキーマにテーブルを作成し、dbt が `e_stat` 等のスキーマにビューを作成する。全て `materialized: view` にすることで、データの再コピーが発生せず増分更新と相性が良い。
+
+```yaml
+# dbt_project.yml
+models:
+  my_project:
+    +database: mydb
+    my_schema:
+      raw:
+        +materialized: view
+      mart:
+        +materialized: view
+```
+
+```yaml
+# models/raw/_sources.yml
+sources:
+  - name: my_source
+    database: mydb
+    schema: _source
+    tables:
+      - name: my_table
+```
+
+### prd 環境への切り替え
+
+環境変数で OVERRIDE_DATA_PATH を制御する:
+
+- dev: ローカルパス（デフォルト）
+- prd: `s3://{bucket}/{dataset}/ducklake.duckdb.files/`
+
+実装例は `datasets/estat/` を参照。

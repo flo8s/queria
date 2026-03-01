@@ -1,0 +1,9 @@
+version: 2
+
+sources:
+  - name: estat_source
+    database: estat
+    schema: _source
+    tables:
+      - name: social_demographic_pref_basic
+      - name: social_demographic_municipal_basic
