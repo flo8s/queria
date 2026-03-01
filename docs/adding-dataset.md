@@ -320,19 +320,22 @@ uv run queria freeze datasets/catalog
 
 GitHub Actions で main ブランチに push すると、`scripts/prd-deploy.sh` が自動実行される。
 
-## パターン: API 直接取得 + DuckLake 直接書き込み
+## パターン: dlt + DuckLake による API データ取得
 
-外部 API からデータを取得して DuckLake に直接書き込むパターン。dbt は全てビューとして構成し、データの再コピーを避ける。
+外部 API からデータを取得し、dlt パイプライン経由で DuckLake に直接書き込むパターン。
+dlt の state 管理により、2回目以降のロードで既取得データをスキップできる。
 
 ### アーキテクチャ
 
 ```
 [外部 API]
-    ↓  ingestion スクリプト (Arrow Tables を生成)
-[dist/ducklake.duckdb]  ← DuckLake に直接 INSERT (OVERRIDE_DATA_PATH)
+    ↓  dlt resource (ページネーション + パース)
+[dlt pipeline (DuckLake destination)]
+    ↓  write_disposition="merge" で upsert
+    ↓  _dlt_pipeline_state に state 保存
+[dist/ducklake.duckdb]
     ↓  dbt (ビューのみ)
-[dist/ducklake.duckdb]  ← ビュー追加 + metadata.json 生成
-    ↓  queria freeze
+    ↓  metadata.json 生成
 [R2]
 ```
 
@@ -342,82 +345,76 @@ GitHub Actions で main ブランチに push すると、`scripts/prd-deploy.sh`
 datasets/my_api/
 ├── dataset.yml
 ├── ingestion/
-│   ├── __main__.py      # API 取得 + DuckLake 書き込み
+│   ├── __main__.py      # dlt pipeline + DuckLake destination
 │   └── tables.yml       # テーブル定義（API パラメータ、merge_keys）
 └── transform/
     ├── dbt_project.yml
     ├── profiles.yml
     └── models/
-        ├── raw/         # SELECT * FROM source (view)
+        ├── raw/         # SELECT columns FROM source (view)
         └── mart/        # フィルタ・加工ビュー (view)
 ```
 
 ### ingestion スクリプト
 
-`ingestion/__main__.py` で API からデータを取得し、DuckLake テーブルに直接書き込む:
+`ingestion/__main__.py` で dlt パイプラインを構築し、DuckLake destination に書き込む:
 
 ```python
-import duckdb
+import dlt
+from dlt.destinations.impl.ducklake.configuration import DuckLakeCredentials
 
-conn = duckdb.connect(":memory:")
-conn.execute("INSTALL ducklake; LOAD ducklake;")
-conn.execute("""
-    ATTACH 'ducklake:../dist/ducklake.duckdb' AS mydb (
-        DATA_PATH '../dist/ducklake.duckdb.files/',
-        OVERRIDE_DATA_PATH true
-    )
-""")
-conn.execute("CREATE SCHEMA IF NOT EXISTS mydb._source")
+credentials = DuckLakeCredentials(
+    ducklake_name="mydb",
+    catalog=f"duckdb:///{ducklake_file}",
+    storage=data_path,  # dev: ローカル, prd: S3
+)
 
-# Arrow Table を DuckLake に書き込み
-conn.register("_new_data", arrow_table)
-conn.execute("CREATE TABLE mydb._source.my_table AS SELECT * FROM _new_data")
+destination = dlt.destinations.ducklake(credentials=credentials)
+
+pipeline = dlt.pipeline(
+    pipeline_name="my_pipeline",
+    destination=destination,
+    dataset_name="_source",
+)
+
+# dlt resource からデータを取得して DuckLake に書き込み
+load_info = pipeline.run(my_resource, write_disposition="merge")
 ```
 
-### 増分更新（merge）
+### state 管理による増分スキップ
 
-データ量が大きい場合、merge_keys を指定して増分更新する:
+dlt は `_dlt_pipeline_state` テーブルにロード状態を保存する。
+`dlt.current.resource_state()` を使って、既に取得済みのデータをスキップできる:
 
 ```python
-# DELETE matching keys → INSERT
-keys_condition = " AND ".join(f"t.{k} = n.{k}" for k in merge_keys)
-conn.execute(f"DELETE FROM {fqn} t WHERE EXISTS (SELECT 1 FROM _new_data n WHERE {keys_condition})")
-conn.execute(f"INSERT INTO {fqn} SELECT * FROM _new_data")
+@dlt.resource(write_disposition="merge", primary_key=["id"])
+def my_resource():
+    state = dlt.current.resource_state()
+    if state.get("loaded"):
+        return  # 取得済み → API 呼び出しをスキップ
+    yield fetch_data()
+    state["loaded"] = True
 ```
-
-DuckLake が Parquet ファイルのバージョン管理を行い、`queria gc` で古いファイルをクリーンアップする。
 
 ### dbt モデル
 
-ingestion が `_source` スキーマにテーブルを作成し、dbt が `e_stat` 等のスキーマにビューを作成する。全て `materialized: view` にすることで、データの再コピーが発生せず増分更新と相性が良い。
+ingestion が `_source` スキーマにテーブルを作成し、dbt がビューを作成する。
+dlt が追加する `_dlt_load_id`, `_dlt_id` カラムは raw ビューで除外する:
 
-```yaml
-# dbt_project.yml
-models:
-  my_project:
-    +database: mydb
-    my_schema:
-      raw:
-        +materialized: view
-      mart:
-        +materialized: view
+```sql
+-- models/raw/raw_my_table.sql
+SELECT col1, col2, col3
+FROM {{ source('my_source', 'my_table') }}
 ```
 
-```yaml
-# models/raw/_sources.yml
-sources:
-  - name: my_source
-    database: mydb
-    schema: _source
-    tables:
-      - name: my_table
-```
+全て `materialized: view` にすることで、データの再コピーが発生せず増分更新と相性が良い。
 
 ### prd 環境への切り替え
 
-環境変数で OVERRIDE_DATA_PATH を制御する:
+DuckLakeCredentials の `storage` パラメータで切り替える:
 
 - dev: ローカルパス（デフォルト）
-- prd: `s3://{bucket}/{dataset}/ducklake.duckdb.files/`
+- prd: `s3://{bucket}/{dataset}/ducklake.duckdb.files/`（環境変数で制御）
 
+S3 認証は `FilesystemConfiguration` + `AwsCredentials` で設定する。
 実装例は `datasets/estat/` を参照。

@@ -1,14 +1,18 @@
-"""e-Stat API からデータを取得し DuckLake に直接書き込む。"""
+"""e-Stat API からデータを取得し dlt 経由で DuckLake に書き込む。"""
 
-import json
 import os
-import urllib.request
 from pathlib import Path
 
-import duckdb
-import pyarrow as pa
+import dlt
 import yaml
-from estat_api_dlt_helper import parse_response
+from dlt.destinations.impl.ducklake.configuration import DuckLakeCredentials
+from estat_api_dlt_helper import (
+    DestinationConfig,
+    EstatDltConfig,
+    SourceConfig,
+    create_estat_pipeline,
+    create_estat_resource,
+)
 
 INGESTION_DIR = Path(__file__).parent
 DIST_DIR = INGESTION_DIR.parent / "dist"
@@ -17,74 +21,31 @@ DEFAULT_DATA_PATH = str(DIST_DIR / "ducklake.duckdb.files") + "/"
 SOURCE_SCHEMA = "_source"
 
 
-def fetch_pages(
-    app_id: str, stats_data_id: str, limit: int = 100000
-) -> list[pa.Table]:
-    """e-Stat API からページネーションしながら Arrow Tables を取得する。"""
-    pages: list[pa.Table] = []
-    offset = 1
-    while True:
-        url = (
-            f"https://api.e-stat.go.jp/rest/3.0/app/json/getStatsData"
-            f"?appId={app_id}&statsDataId={stats_data_id}"
-            f"&limit={limit}&startPosition={offset}"
+def _build_destination(data_path: str):
+    """DuckLake destination を構築（dev: ローカル, prd: S3）。"""
+    if data_path.startswith("s3://"):
+        from dlt.common.configuration.specs.aws_credentials import AwsCredentials
+        from dlt.common.storages.configuration import FilesystemConfiguration
+
+        storage = FilesystemConfiguration(
+            bucket_url=data_path,
+            credentials=AwsCredentials(
+                aws_access_key_id=os.environ["S3_ACCESS_KEY_ID"],
+                aws_secret_access_key=os.environ["S3_SECRET_ACCESS_KEY"],
+                endpoint_url=os.environ.get("S3_ENDPOINT"),
+                region_name="auto",
+            ),
         )
-        with urllib.request.urlopen(url) as resp:
-            data = json.loads(resp.read())
-        table = parse_response(data)
-        if table is None or len(table) == 0:
-            break
-        pages.append(table)
-        offset += len(table)
-        if len(table) < limit:
-            break
-    return pages
-
-
-def load_table(
-    conn: duckdb.DuckDBPyConnection,
-    name: str,
-    stats_data_id: str,
-    merge_keys: list[str],
-    app_id: str,
-) -> int:
-    """1テーブル分のデータを取得し DuckLake に書き込む。"""
-    fqn = f"estat.{SOURCE_SCHEMA}.{name}"
-
-    pages = fetch_pages(app_id, stats_data_id)
-    if not pages:
-        print(f"    No data returned")
-        return 0
-    combined = pa.concat_tables(pages)
-    total_rows = len(combined)
-
-    exists = conn.execute(
-        f"SELECT count(*) FROM information_schema.tables "
-        f"WHERE table_catalog='estat' AND table_schema='{SOURCE_SCHEMA}' "
-        f"AND table_name='{name}'"
-    ).fetchone()[0]
-
-    if not exists:
-        conn.register("_new_data", combined)
-        conn.execute(f"CREATE TABLE {fqn} AS SELECT * FROM _new_data")
-        conn.unregister("_new_data")
     else:
-        conn.register("_new_data", combined)
-        if merge_keys:
-            keys_condition = " AND ".join(
-                f"{fqn}.{k} = _new_data.{k}" for k in merge_keys
-            )
-            conn.execute(
-                f"DELETE FROM {fqn} WHERE EXISTS "
-                f"(SELECT 1 FROM _new_data WHERE {keys_condition})"
-            )
-            conn.execute(f"INSERT INTO {fqn} SELECT * FROM _new_data")
-        else:
-            conn.execute(f"DELETE FROM {fqn}")
-            conn.execute(f"INSERT INTO {fqn} SELECT * FROM _new_data")
-        conn.unregister("_new_data")
+        storage = data_path
 
-    return total_rows
+    return dlt.destinations.ducklake(
+        credentials=DuckLakeCredentials(
+            ducklake_name="estat",
+            catalog=f"duckdb:///{DUCKLAKE_FILE}",
+            storage=storage,
+        )
+    )
 
 
 def main() -> None:
@@ -92,38 +53,36 @@ def main() -> None:
     data_path = os.environ.get("ESTAT_DATA_PATH", DEFAULT_DATA_PATH)
 
     with open(INGESTION_DIR / "tables.yml") as f:
-        config = yaml.safe_load(f)
+        tables_config = yaml.safe_load(f)
 
-    conn = duckdb.connect(":memory:")
-    conn.execute("INSTALL ducklake; LOAD ducklake;")
+    destination = _build_destination(data_path)
 
-    if os.environ.get("S3_ENDPOINT"):
-        conn.execute("INSTALL httpfs; LOAD httpfs;")
-        conn.execute(f"""
-            SET s3_url_style = 'path';
-            SET s3_access_key_id = '{os.environ["S3_ACCESS_KEY_ID"]}';
-            SET s3_secret_access_key = '{os.environ["S3_SECRET_ACCESS_KEY"]}';
-            SET s3_endpoint = '{os.environ["S3_ENDPOINT"]}';
-            SET s3_region = 'auto';
-        """)
-
-    conn.execute(f"""
-        ATTACH 'ducklake:{DUCKLAKE_FILE}' AS estat (
-            DATA_PATH '{data_path}',
-            OVERRIDE_DATA_PATH true
-        )
-    """)
-    conn.execute(f"CREATE SCHEMA IF NOT EXISTS estat.{SOURCE_SCHEMA}")
-
-    for table_def in config["tables"]:
+    for table_def in tables_config["tables"]:
         name = table_def["name"]
         stats_id = table_def["statsDataId"]
         merge_keys = table_def.get("merge_keys", [])
-        print(f"  Loading {name} (statsDataId: {stats_id})")
-        rows = load_table(conn, name, stats_id, merge_keys, app_id)
-        print(f"    -> {rows} rows")
 
-    conn.close()
+        print(f"  Loading {name} (statsDataId: {stats_id})")
+
+        estat_config = EstatDltConfig(
+            source=SourceConfig(
+                app_id=app_id,
+                statsDataId=stats_id,
+            ),
+            destination=DestinationConfig(
+                destination=destination,
+                dataset_name=SOURCE_SCHEMA,
+                table_name=name,
+                write_disposition="merge" if merge_keys else "replace",
+                primary_key=merge_keys or None,
+                pipeline_name=f"estat_{name}",
+            ),
+        )
+
+        resource = create_estat_resource(estat_config)
+        pipeline = create_estat_pipeline(estat_config)
+        info = pipeline.run(resource)
+        print(f"    -> {info}")
 
 
 main()
