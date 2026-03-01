@@ -67,6 +67,9 @@ jobs:
       S3_ACCESS_KEY_ID: ${{ secrets.S3_ACCESS_KEY_ID }}
       S3_SECRET_ACCESS_KEY: ${{ secrets.S3_SECRET_ACCESS_KEY }}
       S3_BUCKET: ${{ vars.S3_BUCKET }}
+      CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+      CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+      CF_D1_DATABASE_ID: ${{ secrets.CF_D1_DATABASE_ID }}
     steps:
       - uses: actions/checkout@v4
 
@@ -83,6 +86,9 @@ jobs:
           uv run queria fetch datasets/catalog
           uv run queria run datasets/catalog --target prd
           uv run queria freeze datasets/catalog
+
+      - name: Sync catalog to D1
+        run: uv run --with cloudflare python scripts/sync_catalog_d1.py
 
   notify-failure:
     runs-on: ubuntu-latest
