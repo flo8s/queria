@@ -56,7 +56,7 @@ def bool_val(v: object) -> str:
 def build_insert(table: str, row: dict[str, str]) -> str:
     cols = ", ".join(row.keys())
     vals = ", ".join(row.values())
-    return f"INSERT INTO {table} ({cols}) VALUES ({vals});"
+    return f"INSERT OR REPLACE INTO {table} ({cols}) VALUES ({vals});"
 
 
 # --- SQL generation ---
