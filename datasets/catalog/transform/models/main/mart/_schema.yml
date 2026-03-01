@@ -7,10 +7,10 @@ models:
     config:
       contract:
         enforced: true
-    meta:
-      title: "データセット一覧"
-      tags: ["カタログ"]
-      published: true
+      meta:
+        title: "データセット一覧"
+        tags: ["カタログ"]
+        published: true
     columns:
       - name: datasource
         description: データセット識別子
@@ -37,10 +37,10 @@ models:
     config:
       contract:
         enforced: true
-    meta:
-      title: "スキーマ一覧"
-      tags: ["カタログ"]
-      published: true
+      meta:
+        title: "スキーマ一覧"
+        tags: ["カタログ"]
+        published: true
     columns:
       - name: datasource
         description: データセット識別子
@@ -58,10 +58,10 @@ models:
     config:
       contract:
         enforced: true
-    meta:
-      title: "テーブル一覧"
-      tags: ["カタログ"]
-      published: true
+      meta:
+        title: "テーブル一覧"
+        tags: ["カタログ"]
+        published: true
     columns:
       - name: datasource
         description: データセット識別子
@@ -112,10 +112,10 @@ models:
     config:
       contract:
         enforced: true
-    meta:
-      title: "カラム一覧"
-      tags: ["カタログ"]
-      published: true
+      meta:
+        title: "カラム一覧"
+        tags: ["カタログ"]
+        published: true
     columns:
       - name: datasource
         description: データセット識別子
@@ -148,10 +148,11 @@ models:
   - name: mart_search_entries
     description: 全文検索用エントリ
     access: public
-    meta:
-      title: "検索エントリ"
-      tags: ["カタログ"]
-      published: true
+    config:
+      meta:
+        title: "検索エントリ"
+        tags: ["カタログ"]
+        published: true
     columns:
       - name: entry_type
         description: エントリ種別（table/column）
@@ -178,10 +179,10 @@ models:
     config:
       contract:
         enforced: true
-    meta:
-      title: "データセット依存関係"
-      tags: ["カタログ"]
-      published: true
+      meta:
+        title: "データセット依存関係"
+        tags: ["カタログ"]
+        published: true
     columns:
       - name: datasource
         description: データセット識別子

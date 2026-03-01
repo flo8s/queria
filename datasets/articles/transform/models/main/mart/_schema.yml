@@ -4,9 +4,10 @@ models:
   - name: mart_articles
     description: "Queriaショーケース記事のメタデータ"
     access: public
-    meta:
-      published: true
-      title: "Queriaショーケース記事"
+    config:
+      meta:
+        published: true
+        title: "Queriaショーケース記事"
     columns:
       - name: slug
         meta:
