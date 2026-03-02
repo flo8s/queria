@@ -1,4 +1,4 @@
-{% macro estat_category_view(source_ref, prefix) %}
+{% macro e_stat_category_view(source_ref, prefix) %}
 SELECT
     cat01,
     cat01_metadata->>'$.name' AS item_name,
