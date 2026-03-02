@@ -25,6 +25,9 @@ build-backend = "hatchling.build"
 packages = ["src/queria"]
 
 [dependency-groups]
+dev = [
+    "pytest>=9.0.2",
+]
 docs = ["mkdocs-material>=9"]
 
 [project.scripts]
