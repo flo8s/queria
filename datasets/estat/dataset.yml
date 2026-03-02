@@ -1,9 +1,0 @@
-title: "e-Stat 統計データ"
-description: "e-Stat API から直接取得した日本の公的統計データ"
-cover: "📊"
-tags: ["統計", "e-Stat", "人口", "社会"]
-ducklake_url: "https://data.queria.io/estat/ducklake.duckdb"
-
-schemas:
-  e_stat:
-    title: "e-Stat 統計データ"
