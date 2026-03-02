@@ -27,8 +27,7 @@ def init_ducklake(dataset_dir: Path) -> None:
     conn.execute(f"""
         ATTACH '{ducklake_file}' AS {datasource} (
             TYPE ducklake,
-            DATA_PATH '{data_path}',
-            META_TYPE 'sqlite'
+            DATA_PATH '{data_path}'
         )
     """)
     conn.close()
