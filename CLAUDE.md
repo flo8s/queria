@@ -1,14 +1,15 @@
 # queria 開発ガイド
 
 dbt + DuckLake + Cloudflare R2 によるオープンデータ公開パイプライン。
-マルチデータソース対応 (tsukuba, k_oxon, catalog, articles, zipcode)。
+マルチデータソース対応 (tsukuba, k_oxon, catalog, articles, zipcode, e_stat)。
+uv workspace で依存関係をデータセット単位に分離。
 
-## セットアップ
+## セットアップh
 
 ```bash
 # 前提: Python 3.13, uv
-uv sync
-cp .env.example .env  # S3 認証情報を設定
+uv sync --all-packages   # 全 workspace メンバーの依存をインストール
+cp .env.example .env      # S3 認証情報を設定
 ```
 
 ## CLI コマンド
@@ -33,6 +34,8 @@ scripts/prd-deploy.sh   # 全データセットをビルド + S3 アップロー
 datasets/
   {datasource}/
     dataset.yml              # メタデータ定義 (title, description, ducklake_url, schemas)
+    pyproject.toml           # (オプション) Python 依存がある場合のみ
+    ingestion/               # (オプション) データ取得スクリプト
     transform/               # dbt プロジェクト
       dbt_project.yml
       profiles.yml           # dev (ローカル) / prd (S3) ターゲット
