@@ -27,7 +27,7 @@ jobs:
 
   deploy-dataset:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 45
     needs: discover
     strategy:
       fail-fast: false
