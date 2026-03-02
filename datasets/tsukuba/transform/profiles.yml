@@ -17,7 +17,6 @@ tsukuba:
           options:
             DATA_PATH: "../dist/ducklake.duckdb.files/"
             OVERRIDE_DATA_PATH: true
-            META_TYPE: "'sqlite'"
     prd:
       type: duckdb
       path: ":memory:"
@@ -40,4 +39,3 @@ tsukuba:
           options:
             DATA_PATH: "s3://{{ env_var('S3_BUCKET') }}/tsukuba/ducklake.duckdb.files/"
             OVERRIDE_DATA_PATH: true
-            META_TYPE: "'sqlite'"
