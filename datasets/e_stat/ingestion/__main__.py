@@ -2,11 +2,15 @@
 
 import argparse
 import gc
+import logging
 import os
 from pathlib import Path
 
 import duckdb
 import yaml
+
+# dlt の ArrowExtractor が merge 時に出す column hints 差異の WARNING を抑制
+logging.getLogger("dlt.extract.extractors").setLevel(logging.ERROR)
 
 INGESTION_DIR = Path(__file__).parent
 DATASET_DIR = INGESTION_DIR.parent
@@ -251,7 +255,9 @@ def _table_exists(table_name: str) -> bool:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--refresh", action="store_true", help="全データを再取得（洗い替え）")
+    parser.add_argument(
+        "--refresh", action="store_true", help="全データを再取得（洗い替え）"
+    )
     args = parser.parse_args()
 
     app_id = os.environ["ESTAT_API_KEY"]
