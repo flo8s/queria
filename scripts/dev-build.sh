@@ -22,7 +22,7 @@ for ds in "$REPO_DIR"/datasets/*/; do
   echo ""
   echo "--- $name ---"
   if uv run queria run "$ds" --target dev && \
-     uv run queria freeze "$ds" --output-dir "$OUTPUT_DIR"; then
+     uv run queria push "$ds" --output-dir "$OUTPUT_DIR"; then
     :
   else
     echo "WARNING: $name failed, skipping"
@@ -35,7 +35,7 @@ echo "=== Building catalog ==="
 uv run python "$REPO_DIR/datasets/catalog/generate_sources.py"
 uv run queria run "$REPO_DIR/datasets/catalog" --target dev \
   --vars "{\"storage_base_url\": \"$OUTPUT_DIR\"}"
-uv run queria freeze "$REPO_DIR/datasets/catalog" --output-dir "$OUTPUT_DIR"
+uv run queria push "$REPO_DIR/datasets/catalog" --output-dir "$OUTPUT_DIR"
 
 if [ ${#failed[@]} -gt 0 ]; then
   echo ""

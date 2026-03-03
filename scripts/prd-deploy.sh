@@ -27,27 +27,27 @@ for ds in "$REPO_DIR"/datasets/*/; do
   datasets+=("$ds")
 done
 
-# Fetch
-echo "=== Fetching datasets ==="
+# Pull
+echo "=== Pulling datasets ==="
 for ds in "${datasets[@]}"; do
   echo "--- $(basename "$ds") ---"
-  uv run queria fetch "$ds"
+  uv run queria pull "$ds"
 done
 
-# Build and freeze non-catalog datasets
+# Build and push non-catalog datasets
 echo "=== Building datasets ==="
 for ds in "${datasets[@]}"; do
 
   echo "--- $(basename "$ds") ---"
   uv run queria run "$ds" --target prd
-  uv run queria freeze "$ds"
+  uv run queria push "$ds"
 done
 
-# Build and freeze catalog (depends on other datasets' metadata on R2)
+# Build and push catalog (depends on other datasets' metadata on R2)
 echo "=== Building catalog ==="
 uv run python "$REPO_DIR/datasets/catalog/generate_sources.py"
-uv run queria fetch "$REPO_DIR/datasets/catalog"
+uv run queria pull "$REPO_DIR/datasets/catalog"
 uv run queria run "$REPO_DIR/datasets/catalog" --target prd
-uv run queria freeze "$REPO_DIR/datasets/catalog"
+uv run queria push "$REPO_DIR/datasets/catalog"
 
 echo "Done."

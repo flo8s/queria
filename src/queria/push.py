@@ -1,4 +1,4 @@
-"""Freeze: S3 upload / local copy."""
+"""Push: S3 upload / local copy."""
 
 import shutil
 from pathlib import Path
@@ -27,7 +27,7 @@ def _upload(
     client.upload_file(str(file_path), bucket, key, ExtraArgs=extra_args or None)
 
 
-def freeze_to_s3(client, bucket: str, dataset_dir: Path, datasource: str) -> None:
+def push_to_s3(client, bucket: str, dataset_dir: Path, datasource: str) -> None:
     """Upload artifacts to S3."""
     dist_dir = dataset_dir / DIST_DIR
 
@@ -66,7 +66,7 @@ def freeze_to_s3(client, bucket: str, dataset_dir: Path, datasource: str) -> Non
     )
 
 
-def freeze_to_local(output_dir: Path, dataset_dir: Path, datasource: str) -> None:
+def push_to_local(output_dir: Path, dataset_dir: Path, datasource: str) -> None:
     """Copy artifacts to a local directory."""
     dist_dir = dataset_dir / DIST_DIR
     dest = output_dir / datasource
@@ -94,20 +94,20 @@ def freeze_to_local(output_dir: Path, dataset_dir: Path, datasource: str) -> Non
             shutil.copy2(src, docs_dir / name)
 
 
-def freeze_datasource(
+def push_datasource(
     dataset_dir: Path,
     *,
     bucket: str | None = None,
     output_dir: Path | None = None,
 ) -> None:
-    """Freeze datasource artifacts."""
+    """Push datasource artifacts."""
     datasource = load_dataset_config(dataset_dir).name
 
-    print(f"--- freeze: {datasource} ---")
+    print(f"--- push: {datasource} ---")
 
     if bucket:
         client = create_s3_client()
-        freeze_to_s3(client, bucket, dataset_dir, datasource)
+        push_to_s3(client, bucket, dataset_dir, datasource)
 
     if output_dir:
-        freeze_to_local(output_dir, dataset_dir, datasource)
+        push_to_local(output_dir, dataset_dir, datasource)

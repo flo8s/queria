@@ -54,9 +54,9 @@ jobs:
 
       - name: Build and deploy ${{ matrix.dataset }}
         run: |
-          uv run queria fetch "datasets/${{ matrix.dataset }}"
+          uv run queria pull "datasets/${{ matrix.dataset }}"
           uv run queria run "datasets/${{ matrix.dataset }}" --target prd
-          uv run queria freeze "datasets/${{ matrix.dataset }}"
+          uv run queria push "datasets/${{ matrix.dataset }}"
 
   deploy-catalog:
     runs-on: ubuntu-latest
@@ -84,9 +84,9 @@ jobs:
       - name: Build and deploy catalog
         run: |
           uv run python datasets/catalog/generate_sources.py
-          uv run queria fetch datasets/catalog
+          uv run queria pull datasets/catalog
           uv run queria run datasets/catalog --target prd
-          uv run queria freeze datasets/catalog
+          uv run queria push datasets/catalog
 
       - name: Sync catalog to D1
         run: uv run --with cloudflare python scripts/sync_catalog_d1.py

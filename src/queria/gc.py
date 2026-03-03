@@ -105,7 +105,7 @@ def gc_datasource(
     ducklake_file = dataset_dir / DIST_DIR / DUCKLAKE_FILE
     if not ducklake_file.exists():
         raise FileNotFoundError(
-            f"{ducklake_file} not found. Run 'queria fetch' first."
+            f"{ducklake_file} not found. Run 'queria pull' first."
         )
 
     # Step 1: Handle files scheduled for deletion by DuckLake

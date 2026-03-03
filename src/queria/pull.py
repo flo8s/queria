@@ -1,4 +1,4 @@
-"""Fetch: download ducklake.duckdb and metadata.json from S3."""
+"""Pull: download ducklake.duckdb and metadata.json from S3."""
 
 from pathlib import Path
 
@@ -20,7 +20,7 @@ def _download_file(client, bucket: str, key: str, dest: Path) -> None:
         raise
 
 
-def fetch_from_s3(client, bucket: str, dataset_dir: Path, datasource: str) -> None:
+def pull_from_s3(client, bucket: str, dataset_dir: Path, datasource: str) -> None:
     """Download ducklake.duckdb and metadata.json from S3."""
     dist_dir = dataset_dir / DIST_DIR
     dist_dir.mkdir(parents=True, exist_ok=True)
@@ -29,12 +29,12 @@ def fetch_from_s3(client, bucket: str, dataset_dir: Path, datasource: str) -> No
     _download_file(client, bucket, f"{datasource}/metadata.json", dist_dir / METADATA_JSON)
 
 
-def fetch_datasource(dataset_dir: Path, *, bucket: str) -> None:
-    """Fetch ducklake.duckdb from S3."""
+def pull_datasource(dataset_dir: Path, *, bucket: str) -> None:
+    """Pull ducklake.duckdb from S3."""
     config = load_dataset_config(dataset_dir)
     datasource = config.name
 
-    print(f"--- fetch: {datasource} ---")
+    print(f"--- pull: {datasource} ---")
 
     client = create_s3_client()
-    fetch_from_s3(client, bucket, dataset_dir, datasource)
+    pull_from_s3(client, bucket, dataset_dir, datasource)

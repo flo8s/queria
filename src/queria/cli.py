@@ -25,14 +25,14 @@ def init(
 
 
 @app.command()
-def fetch(
+def pull(
     path: Path = typer.Argument(..., help="Path to the dataset directory"),
     bucket: str = typer.Option(..., envvar="S3_BUCKET", help="S3 bucket name"),
 ) -> None:
-    """Fetch ducklake.duckdb from S3"""
-    from queria.fetch import fetch_datasource
+    """Pull ducklake.duckdb from S3"""
+    from queria.pull import pull_datasource
 
-    fetch_datasource(path.resolve(), bucket=bucket)
+    pull_datasource(path.resolve(), bucket=bucket)
 
 
 @app.command()
@@ -90,21 +90,21 @@ def run(
 
 
 @app.command()
-def freeze(
+def push(
     path: Path = typer.Argument(..., help="Path to the dataset directory"),
     bucket: Optional[str] = typer.Option(
         None, envvar="S3_BUCKET", help="S3 bucket name"
     ),
     output_dir: Optional[Path] = typer.Option(None, help="Local output directory"),
 ) -> None:
-    """Deploy build artifacts"""
-    from queria.freeze import freeze_datasource
+    """Push build artifacts to S3 or local directory"""
+    from queria.push import push_datasource
 
     if not bucket and not output_dir:
         typer.echo("Error: specify --bucket or --output-dir", err=True)
         raise typer.Exit(1)
 
-    freeze_datasource(path.resolve(), bucket=bucket, output_dir=output_dir)
+    push_datasource(path.resolve(), bucket=bucket, output_dir=output_dir)
 
 
 @app.command()
