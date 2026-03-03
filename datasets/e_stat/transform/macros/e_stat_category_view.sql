@@ -1,4 +1,4 @@
-{% macro estat_category_view(source_ref, prefix) %}
+{% macro e_stat_category_view(source_ref) %}
 SELECT
     cat01,
     cat01_metadata->>'$.name' AS item_name,
@@ -9,5 +9,4 @@ SELECT
     unit,
     value
 FROM {{ source_ref }}
-WHERE cat01 LIKE '{{ prefix }}%'
 {% endmacro %}

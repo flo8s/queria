@@ -1,0 +1,235 @@
+# e-Stat 小地域（町丁・字等）統計表一覧
+#
+# getStatsList API (searchKind=2) から取得した小地域統計表の設定ファイル。
+# 各テーブルは都道府県ごとに分割されており（47テーブル/パターン/年）、
+# statsDataId は特定の都道府県の1件を示すサンプルID。
+# 全都道府県分を取得するには getStatsList API で該当調査のテーブル一覧を再取得する。
+# id_range は参考値（ID が連続しない場合あり）。
+#
+# 調査日: 2026-03-02
+# 総テーブル数: 2,632件（小地域のみ、地域メッシュ 4,903件を除く）
+
+# ==============================================================================
+# 国勢調査（00200521）
+# 最新: 2020年（令和2年）、過去: 2000, 2005, 2010, 2015
+# 全テーブル: 2,209件
+# ==============================================================================
+tables:
+  # --- 人口 ---
+  - name: small_area_population
+    description: 小地域 男女別人口総数及び世帯総数
+    source_survey: 国勢調査
+    survey_year: 2020
+    statsDataId: "8003006726"  # 北海道
+    id_range: "8003006700-8003006746"
+    merge_keys: [cat01, cat02, area]
+    notes: |
+      cat01: 人口総数/男/女/世帯総数（4 classes）
+      cat02: 秘匿地域・合算地域フラグ（3 classes）
+
+  - name: small_area_age
+    description: 小地域 年齢（5歳階級、4区分）別、男女別人口
+    source_survey: 国勢調査
+    survey_year: 2020
+    statsDataId: "8003006768"  # 福岡県
+    id_range: "8003006747-8003006793"
+    merge_keys: [cat01, cat02, area]
+    notes: |
+      cat01: 年齢5歳階級×男女（60 classes）
+      cat02: 秘匿地域・合算地域フラグ（3 classes）
+
+  # --- 世帯 ---
+  - name: small_area_household_size
+    description: 小地域 世帯人員別一般世帯数
+    source_survey: 国勢調査
+    survey_year: 2020
+    statsDataId: "8003006811"  # 神奈川県
+    id_range: "8003006794-8003006840"
+    merge_keys: [cat01, cat02, area]
+    notes: |
+      cat01: 1人〜7人以上 + 1世帯当たり人員（8 classes）
+      cat02: 秘匿地域・合算地域フラグ（3 classes）
+
+  - name: small_area_household_type
+    description: 小地域 世帯の家族類型別一般世帯数
+    source_survey: 国勢調査
+    survey_year: 2020
+    statsDataId: "8003006841"  # 熊本県
+    id_range: "8003006841-8003006887"
+    merge_keys: [cat01, cat02, area]
+    notes: |
+      cat01: 親族世帯/核家族/単独世帯 等（9 classes）
+      cat02: 秘匿地域・合算地域フラグ（3 classes）
+
+  - name: small_area_household_economic
+    description: 小地域 世帯の経済構成別一般世帯数
+    source_survey: 国勢調査
+    survey_year: 2020
+    statsDataId: "8003007736"  # 北海道
+    id_range: "8003007734-8003007780"
+    merge_keys: [cat01, cat02, area]
+    notes: |
+      cat01: 住宅の種類・所有の関係（3 classes）
+      cat02: 秘匿地域・合算地域フラグ（3 classes）
+      ※ 2020年から「世帯の経済構成別」に変更
+
+  # --- 住宅 ---
+  - name: small_area_housing_tenure
+    description: 小地域 住宅の所有の関係別一般世帯数
+    source_survey: 国勢調査
+    survey_year: 2020
+    statsDataId: "8003006905"  # 北海道
+    id_range: "8003006888-8003006934"
+    merge_keys: [cat01, cat02, area]
+    notes: |
+      cat01: 住宅の種類・所有の関係（3 classes）
+      cat02: 秘匿地域・合算地域フラグ（3 classes）
+
+  - name: small_area_housing_structure
+    description: 小地域 住宅の建て方別世帯数
+    source_survey: 国勢調査
+    survey_year: 2020
+    statsDataId: "8003006949"  # 大阪府
+    id_range: "8003006935-8003006981"
+    merge_keys: [cat01, cat02, area]
+    notes: |
+      cat01: 一戸建/長屋建/共同住宅 階数別 等（9 classes）
+      cat02: 秘匿地域・合算地域フラグ（3 classes）
+
+  # --- 就業 ---
+  - name: small_area_industry
+    description: 小地域 産業（大分類）別及び従業上の地位別就業者数
+    source_survey: 国勢調査
+    survey_year: 2020
+    statsDataId: "8003007640"  # 宮崎県
+    id_range: "8003007640-8003007686"
+    merge_keys: [cat01, cat02, area]
+    notes: |
+      cat01: 産業大分類A-S × 従業上の地位（26 classes）
+      cat02: 秘匿地域・合算地域フラグ（3 classes）
+
+  - name: small_area_occupation
+    description: 小地域 職業（大分類）別就業者数
+    source_survey: 国勢調査
+    survey_year: 2020
+    statsDataId: "8003007687"  # 東京都
+    id_range: "8003007687-8003007733"
+    merge_keys: [cat01, cat02, area]
+    notes: |
+      cat01: 職業大分類A-K（13 classes）
+      cat02: 秘匿地域・合算地域フラグ（3 classes）
+
+# ==============================================================================
+# 経済センサス-基礎調査（00200552）
+# 最新: 2014年（平成26年）、過去: 2009
+# 全テーブル: 188件
+# ==============================================================================
+
+  - name: small_area_establishment_industry_basic
+    description: 小地域 産業（大分類）別・従業者規模別全事業所数及び男女別従業者数（基礎調査）
+    source_survey: 経済センサス‐基礎調査
+    survey_year: 2014
+    statsDataId: "8003005208"  # 北海道
+    id_range: "8003005024-8003005210"
+    merge_keys: [cat01, area]
+    notes: |
+      cat01: 産業大分類別 × 事業所数・従業者数（59 classes）
+
+  - name: small_area_establishment_org_basic
+    description: 小地域 経営組織別民営事業所数及び従業者数（基礎調査）
+    source_survey: 経済センサス‐基礎調査
+    survey_year: 2014
+    statsDataId: "8003005247"  # 北海道
+    id_range: "8003005211-8003005257"
+    merge_keys: [cat01, area]
+    notes: |
+      cat01: 個人/法人/会社 等 × 事業所数・従業者数（10 classes）
+
+# ==============================================================================
+# 経済センサス-活動調査（00200553）
+# 最新: 2012年（平成24年）
+# 全テーブル: 141件
+# ==============================================================================
+
+  - name: small_area_establishment_industry_activity
+    description: 小地域 産業（大分類）別民営事業所数及び男女別従業者数（活動調査）
+    source_survey: 経済センサス‐活動調査
+    survey_year: 2012
+    statsDataId: "8003005940"  # 北海道
+    id_range: "8003005792-8003005978"
+    merge_keys: [cat01, area]
+    notes: |
+      cat01: 産業大分類A-R × 事業所数・従業者数（38 classes）
+
+  - name: small_area_establishment_org_activity
+    description: 小地域 経営組織（4区分）別民営事業所数及び従業者数（活動調査）
+    source_survey: 経済センサス‐活動調査
+    survey_year: 2012
+    statsDataId: "8003006003"  # 北海道
+    id_range: "8003005979-8003006025"
+    merge_keys: [cat01, area]
+    notes: |
+      cat01: 経営組織4区分 × 事業所数・従業者数（10 classes）
+
+  - name: small_area_establishment_size_activity
+    description: 小地域 従業者規模（6区分）別民営事業所数及び従業者数（活動調査）
+    source_survey: 経済センサス‐活動調査
+    survey_year: 2012
+    statsDataId: "8003006055"  # 北海道
+    id_range: "8003006026-8003006072"
+    merge_keys: [cat01, area]
+    notes: |
+      cat01: 従業者規模6区分 × 事業所数・従業者数（13 classes）
+
+# ==============================================================================
+# 事業所・企業統計調査（00200551）※廃止調査
+# 最新: 2001年（平成13年）
+# 全テーブル: 94件
+# 注: 2009年の経済センサス-基礎調査に統合されたため廃止
+# ==============================================================================
+
+  - name: small_area_establishment_industry_legacy
+    description: 小地域 産業別（大分類）・従業者規模別全事業所数及び男女別従業者数（事業所統計）
+    source_survey: 事業所・企業統計調査
+    survey_year: 2001
+    statsDataId: "8003002269"
+    id_range: "8003002263-8003002309"
+    merge_keys: [cat01, area]
+    notes: |
+      cat01: 産業大分類別 × 事業所数・従業者数
+      ※ 廃止調査。後継は経済センサス-基礎調査
+
+  - name: small_area_establishment_org_legacy
+    description: 小地域 経営組織別・事業所の形態別民営事業所数及び従業者数（事業所統計）
+    source_survey: 事業所・企業統計調査
+    survey_year: 2001
+    statsDataId: "8003002243"
+    id_range: "8003001796-8003002262"
+    merge_keys: [cat01, area]
+    notes: |
+      cat01: 経営組織別 × 事業所数・従業者数（22 classes）
+      ※ 廃止調査。後継は経済センサス-基礎調査
+
+# ==============================================================================
+# 国勢調査 過去年度のみの統計表（参考）
+# ==============================================================================
+
+  - name: small_area_school_enrollment
+    description: 小地域 在学学校・未就学の種類別在学者数・未就学者数
+    source_survey: 国勢調査
+    survey_year: 2000
+    statsDataId: "8003003827"
+    id_range: "8003003814-8003003860"
+    merge_keys: [cat01, area]
+    notes: |
+      ※ 2000年のみ。2005年以降は小地域データに含まれない
+
+  - name: small_area_elderly_household
+    description: 小地域 65歳以上親族のみの一般世帯数
+    source_survey: 国勢調査
+    survey_year: 2000
+    statsDataId: "8003003708"
+    id_range: "8003003673-8003003719"
+    merge_keys: [cat01, area]
+    notes: |
+      ※ 2000年のみ。2005年以降は小地域データに含まれない

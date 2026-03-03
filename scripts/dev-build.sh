@@ -9,6 +9,7 @@ if [ -f "$REPO_DIR/.env" ]; then
   source "$REPO_DIR/.env"
   set +a
 fi
+unset S3_BUCKET  # dev ビルドはローカルストレージを使用
 
 echo "=== Building datasets ==="
 

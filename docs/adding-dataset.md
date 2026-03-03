@@ -319,3 +319,102 @@ uv run queria freeze datasets/catalog
 ```
 
 GitHub Actions で main ブランチに push すると、`scripts/prd-deploy.sh` が自動実行される。
+
+## パターン: dlt + DuckLake による API データ取得
+
+外部 API からデータを取得し、dlt パイプライン経由で DuckLake に直接書き込むパターン。
+dlt の state 管理により、2回目以降のロードで既取得データをスキップできる。
+
+### アーキテクチャ
+
+```
+[外部 API]
+    ↓  dlt resource (ページネーション + パース)
+[dlt pipeline (DuckLake destination)]
+    ↓  write_disposition="merge" で upsert
+    ↓  _dlt_pipeline_state に state 保存
+[dist/ducklake.duckdb]
+    ↓  dbt (ビューのみ)
+    ↓  metadata.json 生成
+[R2]
+```
+
+### ディレクトリ構成
+
+```
+datasets/my_api/
+├── dataset.yml
+├── ingestion/
+│   ├── __main__.py      # dlt pipeline + DuckLake destination
+│   └── tables.yml       # テーブル定義（API パラメータ、merge_keys）
+└── transform/
+    ├── dbt_project.yml
+    ├── profiles.yml
+    └── models/
+        ├── raw/         # SELECT columns FROM source (view)
+        └── mart/        # フィルタ・加工ビュー (view)
+```
+
+### ingestion スクリプト
+
+`ingestion/__main__.py` で dlt パイプラインを構築し、DuckLake destination に書き込む:
+
+```python
+import dlt
+from dlt.destinations.impl.ducklake.configuration import DuckLakeCredentials
+
+credentials = DuckLakeCredentials(
+    ducklake_name="mydb",
+    catalog=f"duckdb:///{ducklake_file}",
+    storage=data_path,  # dev: ローカル, prd: S3
+)
+
+destination = dlt.destinations.ducklake(credentials=credentials)
+
+pipeline = dlt.pipeline(
+    pipeline_name="my_pipeline",
+    destination=destination,
+    dataset_name="_source",
+)
+
+# dlt resource からデータを取得して DuckLake に書き込み
+load_info = pipeline.run(my_resource, write_disposition="merge")
+```
+
+### state 管理による増分スキップ
+
+dlt は `_dlt_pipeline_state` テーブルにロード状態を保存する。
+`dlt.current.resource_state()` を使って、既に取得済みのデータをスキップできる:
+
+```python
+@dlt.resource(write_disposition="merge", primary_key=["id"])
+def my_resource():
+    state = dlt.current.resource_state()
+    if state.get("loaded"):
+        return  # 取得済み → API 呼び出しをスキップ
+    yield fetch_data()
+    state["loaded"] = True
+```
+
+### dbt モデル
+
+ingestion が `_source` スキーマにテーブルを作成し、dbt がビューを作成する。
+dlt が追加する `_dlt_load_id`, `_dlt_id` カラムは raw ビューで除外する:
+
+```sql
+-- models/raw/raw_my_table.sql
+SELECT col1, col2, col3
+FROM {{ source('my_source', 'my_table') }}
+```
+
+全て `materialized: view` にすることで、データの再コピーが発生せず増分更新と相性が良い。
+
+### prd 環境への切り替え
+
+DuckLakeCredentials の `storage` パラメータで切り替える:
+
+- dev: ローカルパス（デフォルト）
+- prd: `s3://{bucket}/{dataset}/ducklake.duckdb.files/`（環境変数で制御）
+
+S3 認証は `FilesystemConfiguration` + `AwsCredentials` で設定する。
+実装例は `datasets/estat/` を参照。

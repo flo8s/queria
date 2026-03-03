@@ -82,6 +82,9 @@ def run(
     vars: Optional[str] = typer.Option(None, help="dbt vars (JSON string)"),
 ) -> None:
     """Build a dataset (ingest + transform)"""
+    from queria.ducklake import init_ducklake
+
+    init_ducklake(path.resolve())
     ingest(path)
     transform(path, target, vars)
 
