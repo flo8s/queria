@@ -24,13 +24,13 @@ uv run queria init <path>
 - `transform/packages.yml` - dbt パッケージ依存（queria_common）
 - `transform/models/raw/`, `stg/`, `mart/` - モデルディレクトリ
 
-## queria fetch
+## queria pull
 
 S3/R2 から ducklake.duckdb と metadata.json をダウンロードする。
 CI 環境で既存データを取得する場合に使う。
 
 ```bash
-uv run queria fetch <path>
+uv run queria pull <path>
 ```
 
 | 引数/オプション | 説明 |
@@ -79,16 +79,16 @@ uv run queria run <path> [--target <target>] [--vars <json>]
 - dev: ローカルファイルシステムに Parquet を書き込む
 - prd: S3/R2 パスに Parquet を書き込む（環境変数が必要）
 
-## queria freeze
+## queria push
 
 ビルド成果物を S3/R2 にアップロード、またはローカルディレクトリにコピーする。
 
 ```bash
 # S3 にアップロード
-uv run queria freeze <path> --bucket <bucket>
+uv run queria push <path> --bucket <bucket>
 
 # ローカルにコピー
-uv run queria freeze <path> --output-dir <dir>
+uv run queria push <path> --output-dir <dir>
 ```
 
 | 引数/オプション | 説明 |

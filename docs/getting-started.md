@@ -11,7 +11,7 @@
 uv sync
 ```
 
-本番デプロイや `fetch` コマンドを使う場合は、`.env.example` を参考に環境変数を設定する:
+本番デプロイや `pull` コマンドを使う場合は、`.env.example` を参考に環境変数を設定する:
 
 | 変数 | 説明 | 例 |
 |---|---|---|
@@ -73,7 +73,7 @@ npx serve .dev-serve --cors -l 4000
 
 ```bash
 uv run queria run datasets/tsukuba --target prd
-uv run queria freeze datasets/tsukuba --bucket queria
+uv run queria push datasets/tsukuba --bucket queria
 ```
 
 catalog データセットは他データセットの metadata.json を参照するため、最後にビルドする:
@@ -81,13 +81,13 @@ catalog データセットは他データセットの metadata.json を参照す
 ```bash
 # 1. 各データセットをビルド・デプロイ
 uv run queria run datasets/tsukuba --target prd
-uv run queria freeze datasets/tsukuba
+uv run queria push datasets/tsukuba
 uv run queria run datasets/k_oxon --target prd
-uv run queria freeze datasets/k_oxon
+uv run queria push datasets/k_oxon
 
 # 2. 最後に catalog をビルド・デプロイ
 uv run queria run datasets/catalog --target prd
-uv run queria freeze datasets/catalog
+uv run queria push datasets/catalog
 ```
 
 ### GitHub Actions

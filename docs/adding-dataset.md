@@ -3,14 +3,14 @@
 ## 全体の流れ
 
 ```
-queria init → モデル実装 → queria run (dev) → 動作確認 → queria run (prd) → queria freeze
+queria init → モデル実装 → queria run (dev) → 動作確認 → queria run (prd) → queria push
 ```
 
 1. `queria init` でスカフォルディング
 2. `dataset.yml` にメタデータを定義
 3. dbt モデルを実装（raw → stg → mart）
 4. `queria run` でローカルビルド・確認
-5. `queria run --target prd` + `queria freeze` で本番デプロイ
+5. `queria run --target prd` + `queria push` で本番デプロイ
 
 ## 1. データセットを作成する
 
@@ -308,14 +308,14 @@ cd /path/to/queria-web && pnpm dev
 
 ```bash
 uv run queria run datasets/my_city --target prd
-uv run queria freeze datasets/my_city
+uv run queria push datasets/my_city
 ```
 
 新しいデータセットを追加した場合、catalog の再ビルドも必要:
 
 ```bash
 uv run queria run datasets/catalog --target prd
-uv run queria freeze datasets/catalog
+uv run queria push datasets/catalog
 ```
 
 GitHub Actions で main ブランチに push すると、`scripts/prd-deploy.sh` が自動実行される。

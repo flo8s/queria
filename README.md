@@ -72,7 +72,7 @@ queria/
 │   └── queria/                # Build & deploy CLI tool
 │       ├── cli.py             # CLI entry point
 │       ├── run.py             # DuckLake init + dbt execution + metadata generation
-│       ├── freeze.py          # R2 upload / local copy
+│       ├── push.py            # R2 upload / local copy
 │       └── models.py          # Pydantic model definitions for catalog output
 └── pyproject.toml
 ```
@@ -92,28 +92,28 @@ uv run queria run datasets/tsukuba
 
 # Production build + deploy
 uv run queria run datasets/tsukuba --target prd
-uv run queria freeze datasets/tsukuba --bucket queria-dev
+uv run queria push datasets/tsukuba --bucket queria-dev
 
 # Freeze to local directory
-uv run queria freeze datasets/tsukuba --output-dir ./out
+uv run queria push datasets/tsukuba --output-dir ./out
 ```
 
-The pipeline is split into two commands: `run` and `freeze`:
+The pipeline is split into two commands: `run` and `push`:
 - `queria run <path>`: DuckLake init -> dbt deps/run/docs -> metadata generation. Does not touch R2
-- `queria freeze <path>`: Uploads to R2 or copies locally
+- `queria push <path>`: Uploads to R2 or copies locally
 
 The catalog dataset reads metadata from other datasources on R2, so run it last:
 
 ```bash
 uv run queria run datasets/tsukuba --target prd
 uv run queria run datasets/k_oxon --target prd
-uv run queria freeze datasets/tsukuba
-uv run queria freeze datasets/k_oxon
+uv run queria push datasets/tsukuba
+uv run queria push datasets/k_oxon
 uv run queria run datasets/catalog --target prd
-uv run queria freeze datasets/catalog
+uv run queria push datasets/catalog
 ```
 
-The `freeze` command and prd target require the following environment variables:
+The `push` command and prd target require the following environment variables:
 
 | Variable | Description | Example |
 | --- | --- | --- |

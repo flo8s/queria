@@ -16,9 +16,9 @@ cp .env.example .env      # S3 認証情報を設定
 
 ```bash
 uv run queria init <path>     # 新規データセットのスキャフォールド
-uv run queria fetch <path>    # S3 から ducklake.duckdb + metadata.json をダウンロード
+uv run queria pull <path>     # S3 から ducklake.duckdb + metadata.json をダウンロード
 uv run queria run <path>      # ビルド (DuckLake 初期化 → dbt run → メタデータ生成)
-uv run queria freeze <path>   # S3 またはローカルへデプロイ
+uv run queria push <path>     # S3 またはローカルへデプロイ
 ```
 
 ビルドスクリプト:
@@ -52,8 +52,8 @@ datasets/
 src/queria/
   cli.py              # Typer CLI エントリポイント
   run.py              # ビルドパイプライン (init_ducklake, run_dbt, generate_metadata)
-  freeze.py            # S3 アップロード / ローカルコピー
-  fetch.py             # S3 ダウンロード
+  push.py              # S3 アップロード / ローカルコピー
+  pull.py              # S3 ダウンロード
   init.py              # データセットスキャフォールド
   config_schema.py     # Pydantic DatasetConfig モデル
   metadata_schema.py   # Pydantic メタデータモデル
