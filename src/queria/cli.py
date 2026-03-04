@@ -16,6 +16,16 @@ def callback() -> None:
 
 @app.command()
 def init(
+    path: Path = typer.Argument(..., help="Path to the dataset directory"),
+) -> None:
+    """Initialize DuckLake catalog"""
+    from queria.ducklake import init_ducklake
+
+    init_ducklake(path.resolve())
+
+
+@app.command()
+def new(
     path: Path = typer.Argument(..., help="Path to the dataset directory to create"),
 ) -> None:
     """Scaffold a new dataset"""
@@ -38,18 +48,35 @@ def pull(
 @app.command()
 def ingest(
     path: Path = typer.Argument(..., help="Path to the dataset directory"),
+    bucket: Optional[str] = typer.Option(None, envvar="S3_BUCKET", help="S3 bucket for state persistence"),
 ) -> None:
     """Run dataset-specific ingestion script"""
-    script = path.resolve() / "ingestion" / "__main__.py"
+    dataset_dir = path.resolve()
+    script = dataset_dir / "ingestion" / "__main__.py"
     if not script.exists():
         return
     import subprocess
-    import sys
+
+    from queria.ingestion import (
+        convert_to_duckdb,
+        fetch_sqlite,
+        freeze_sqlite,
+        init_sqlite,
+    )
+
+    if bucket:
+        fetch_sqlite(dataset_dir, bucket)
+    init_sqlite(dataset_dir)
 
     subprocess.run(
-        [sys.executable, str(script.parent)],
+        ["uv", "run", "python", "-m", "ingestion"],
+        cwd=dataset_dir,
         check=True,
     )
+
+    if bucket:
+        freeze_sqlite(dataset_dir, bucket)
+    convert_to_duckdb(dataset_dir)
 
 
 @app.command()
@@ -80,12 +107,17 @@ def run(
     path: Path = typer.Argument(..., help="Path to the dataset directory"),
     target: str = typer.Option("dev", help="dbt target (defined in profiles.yml)"),
     vars: Optional[str] = typer.Option(None, help="dbt vars (JSON string)"),
+    bucket: Optional[str] = typer.Option(None, envvar="S3_BUCKET", help="S3 bucket for state persistence"),
 ) -> None:
     """Build a dataset (ingest + transform)"""
-    from queria.ducklake import init_ducklake
+    dataset_dir = path.resolve()
+    has_ingestion = (dataset_dir / "ingestion" / "__main__.py").exists()
 
-    init_ducklake(path.resolve())
-    ingest(path)
+    if has_ingestion:
+        ingest(path, bucket)
+    else:
+        init(path)
+
     transform(path, target, vars)
 
 
