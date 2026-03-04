@@ -1,0 +1,16 @@
+name: "bodik"
+version: "1.0.0"
+
+profile: "bodik"
+
+model-paths: ["models"]
+clean-targets: ["target", "dbt_packages"]
+
+models:
+  bodik:
+    +database: bodik
+    bodik:
+      raw:
+        +materialized: view
+      mart:
+        +materialized: view

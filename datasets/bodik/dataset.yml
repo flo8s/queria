@@ -1,0 +1,9 @@
+title: "BODIK ODCS 自治体オープンデータ"
+description: "BODIK ODCS（CKAN）から取得した自治体の人口・世帯データ"
+cover: "🏛️"
+tags: ["人口", "世帯", "自治体", "オープンデータ"]
+ducklake_url: "https://data.queria.io/bodik/ducklake.duckdb"
+
+schemas:
+  main:
+    title: "BODIK ODCS"

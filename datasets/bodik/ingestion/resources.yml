@@ -1,0 +1,12 @@
+base_url: "https://data.bodik.jp"
+
+resources:
+  - name: nago_population
+    description: 名護市 人口データ（地区別・年齢別・男女別）
+    resource_id: "513c0375-a3bb-4f75-a5af-9dd72fb45405"
+    organization: 名護市
+
+  - name: kushima_population
+    description: 串間市 現住推計人口の推移
+    resource_id: "db93ab00-cd5b-43e8-ac83-873b2c52c9bc"
+    organization: 串間市

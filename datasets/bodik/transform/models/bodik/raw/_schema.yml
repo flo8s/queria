@@ -1,0 +1,16 @@
+version: 2
+
+_meta: &meta
+  license: "CC BY 4.0"
+  license_url: "https://creativecommons.org/licenses/by/4.0/"
+  source_url: "https://odcs.bodik.jp/"
+  published: true
+  tags: ["bodik", "人口"]
+
+models:
+  - name: raw_nago_population
+    description: 名護市 人口データ（地区別・年齢別・男女別）
+    meta: *meta
+  - name: raw_kushima_population
+    description: 串間市 現住推計人口の推移
+    meta: *meta

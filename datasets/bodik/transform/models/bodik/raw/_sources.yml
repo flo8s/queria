@@ -1,0 +1,9 @@
+version: 2
+
+sources:
+  - name: bodik_source
+    database: bodik
+    schema: _source
+    tables:
+      - name: nago_population
+      - name: kushima_population
