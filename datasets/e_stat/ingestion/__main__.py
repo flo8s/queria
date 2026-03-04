@@ -174,8 +174,12 @@ def _load_single_table(
     data_path: str,
 ) -> None:
     """1 テーブル分のデータを取得して DuckLake に書き込む。"""
+    import sys
+
+    # リポジトリ root の ducklake_patch.py を import するためパスを追加
+    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+
     import dlt
-    import ducklake_patch
     from dlt.destinations.impl.ducklake.configuration import DuckLakeCredentials
     from estat_api_dlt_helper import (
         DestinationConfig,
@@ -184,6 +188,8 @@ def _load_single_table(
         create_estat_pipeline,
         create_estat_resource,
     )
+
+    import ducklake_patch
 
     ducklake_patch.apply()
 
