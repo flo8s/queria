@@ -7,8 +7,6 @@ dependencies = [
     "dlt[ducklake]>=1.17.0",
     "estat-api-dlt-helper",
     "pyyaml>=6.0",
-    "geopandas>=1.0",
-    "pyogrio>=0.10",
 ]
 
 [build-system]

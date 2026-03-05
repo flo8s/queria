@@ -1,9 +1,10 @@
 """e-Stat 国勢調査2020 小地域（町丁・字等）境界データのダウンロード・変換スクリプト.
 
-47都道府県分の Shapefile を e-Stat からダウンロードし、GeoParquet に変換して保存する。
+47都道府県分の Shapefile を e-Stat からダウンロードし、
+DuckDB spatial 拡張で GeoParquet に変換して保存する。
 
 Usage:
-    python -m ingestion.boundary [--refresh] [--output-dir OUTPUT_DIR]
+    python -m ingestion.boundary [--refresh] [--pref 08 13]
 """
 
 from __future__ import annotations
@@ -16,7 +17,7 @@ import time
 import zipfile
 from pathlib import Path
 
-import geopandas as gpd
+import duckdb
 import requests
 
 BASE_URL = (
@@ -38,15 +39,15 @@ MAX_RETRIES = 3
 RETRY_BACKOFF_BASE = 2  # seconds
 
 
-def download_shapefile(pref_code: str, *, session: requests.Session) -> gpd.GeoDataFrame:
-    """e-Stat から指定都道府県の Shapefile ZIP をダウンロードし GeoDataFrame として返す."""
+def download_zip(pref_code: str, *, session: requests.Session) -> bytes:
+    """e-Stat から指定都道府県の Shapefile ZIP をダウンロードする."""
     url = BASE_URL.format(code=pref_code)
 
     for attempt in range(MAX_RETRIES):
         try:
             resp = session.get(url, timeout=60)
             resp.raise_for_status()
-            break
+            return resp.content
         except requests.RequestException as e:
             if attempt < MAX_RETRIES - 1:
                 wait = RETRY_BACKOFF_BASE ** (attempt + 1)
@@ -54,9 +55,35 @@ def download_shapefile(pref_code: str, *, session: requests.Session) -> gpd.GeoD
                 time.sleep(wait)
             else:
                 raise
+    raise RuntimeError("unreachable")
+
+
+def convert_shapefile_to_parquet(shp_path: Path, output_path: Path) -> int:
+    """DuckDB spatial で Shapefile を GeoParquet に変換する."""
+    conn = duckdb.connect(":memory:")
+    conn.install_extension("spatial")
+    conn.load_extension("spatial")
+
+    count = conn.execute(
+        f"""
+        COPY (
+            SELECT * FROM ST_Read('{shp_path}', open_options=['ENCODING=CP932'])
+        ) TO '{output_path}' (FORMAT PARQUET)
+        """
+    ).fetchone()[0]
+
+    conn.close()
+    return count
+
+
+def process_prefecture(
+    pref_code: str, output_path: Path, *, session: requests.Session
+) -> int:
+    """1都道府県分のダウンロード→変換を実行し、ポリゴン数を返す."""
+    zip_content = download_zip(pref_code, session=session)
 
     with tempfile.TemporaryDirectory() as tmpdir:
-        with zipfile.ZipFile(io.BytesIO(resp.content)) as zf:
+        with zipfile.ZipFile(io.BytesIO(zip_content)) as zf:
             zf.extractall(tmpdir)
 
         shp_files = list(Path(tmpdir).rglob("*.shp"))
@@ -64,9 +91,7 @@ def download_shapefile(pref_code: str, *, session: requests.Session) -> gpd.GeoD
             msg = f"都道府県 {pref_code}: ZIP 内に .shp ファイルが見つかりません"
             raise FileNotFoundError(msg)
 
-        gdf = gpd.read_file(shp_files[0], encoding="cp932")
-
-    return gdf
+        return convert_shapefile_to_parquet(shp_files[0], output_path)
 
 
 def main() -> None:
@@ -112,9 +137,8 @@ def main() -> None:
 
         print(f"[{pref_code}] ダウンロード中...")
         try:
-            gdf = download_shapefile(pref_code, session=session)
-            gdf.to_parquet(output_path)
-            print(f"[{pref_code}] 保存完了: {output_path} ({len(gdf)} ポリゴン)")
+            count = process_prefecture(pref_code, output_path, session=session)
+            print(f"[{pref_code}] 保存完了: {output_path} ({count} ポリゴン)")
             success_count += 1
         except Exception as e:
             print(f"[{pref_code}] エラー: {e}", file=sys.stderr)
