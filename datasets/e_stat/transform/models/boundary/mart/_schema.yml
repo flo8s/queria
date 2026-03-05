@@ -1,0 +1,49 @@
+version: 2
+
+models:
+  - name: boundary_small_area
+    description: 国勢調査2020 小地域（町丁・字等）境界データ
+    access: public
+    config:
+      meta:
+        title: "小地域（町丁・字等）境界"
+        tags: ["GIS", "境界", "小地域", "国勢調査"]
+        license: "利用規約に基づく"
+        license_url: "https://www.e-stat.go.jp/terms-of-use"
+        source_url: "https://www.e-stat.go.jp/gis/statmap-search?type=2"
+        published: true
+    columns:
+      - name: key_code
+        meta:
+          title: 町丁字等コード
+      - name: pref_code
+        meta:
+          title: 都道府県コード
+          description: 2桁
+      - name: pref_name
+        meta:
+          title: 都道府県名
+      - name: city_code
+        meta:
+          title: 市区町村コード
+      - name: city_name
+        meta:
+          title: 市区町村名
+      - name: area_name
+        meta:
+          title: 町丁字等名
+      - name: area_sqm
+        meta:
+          title: 面積（㎡）
+      - name: perimeter_m
+        meta:
+          title: 周囲長（m）
+      - name: population
+        meta:
+          title: 人口
+      - name: households
+        meta:
+          title: 世帯数
+      - name: geometry
+        meta:
+          title: 境界ポリゴン

@@ -1,0 +1,32 @@
+version: 2
+
+models:
+  - name: raw_boundary_small_area
+    description: e-Stat 国勢調査2020 小地域（町丁・字等）境界データ（全国）
+    columns:
+      - name: KEY_CODE
+        description: 町丁字等コード
+      - name: PREF
+        description: 都道府県コード
+      - name: PREF_NAME
+        description: 都道府県名
+      - name: CITY
+        description: 市区町村コード
+      - name: CITY_NAME
+        description: 市区町村名
+      - name: S_NAME
+        description: 町丁字等名
+      - name: KIHON1
+        description: 基本単位区1
+      - name: DUMMY1
+        description: ダミー1
+      - name: AREA
+        description: 面積（㎡）
+      - name: PERIMETER
+        description: 周囲長（m）
+      - name: JINKO
+        description: 人口
+      - name: SETAI
+        description: 世帯数
+      - name: geom
+        description: 境界ポリゴン (GEOMETRY)

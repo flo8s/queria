@@ -11,6 +11,9 @@ datasets/*/transform/.user.yml
 datasets/*/dist/.dlt_pipelines/
 datasets/*/ingestion/.dlt/
 
+# Ingestion output (downloaded/converted data)
+datasets/*/ingestion/output/
+
 # DuckLake (transform/ 内の一時ファイル)
 *.ducklake
 *.ducklake.files/

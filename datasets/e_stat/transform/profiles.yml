@@ -10,6 +10,7 @@ e_stat:
       extensions:
         - httpfs
         - ducklake
+        - spatial
       attach:
         - path: "ducklake:../dist/ducklake.duckdb"
           alias: e_stat
@@ -26,6 +27,7 @@ e_stat:
       extensions:
         - httpfs
         - ducklake
+        - spatial
       settings:
         s3_url_style: path
         s3_access_key_id: "{{ env_var('S3_ACCESS_KEY_ID') }}"
