@@ -2,24 +2,30 @@
 
 dbt + DuckLake + Cloudflare R2 によるオープンデータ公開パイプライン。
 マルチデータソース対応 (tsukuba, k_oxon, catalog, articles, zipcode, e_stat)。
-uv workspace で依存関係をデータセット単位に分離。
+各データセットが queria をフレームワークとして依存し、データセットディレクトリ内から CLI を実行する。
 
-## セットアップh
+## セットアップ
 
 ```bash
 # 前提: Python 3.13, uv
-uv sync --all-packages   # 全 workspace メンバーの依存をインストール
-cp .env.example .env      # S3 認証情報を設定
+cd datasets/tsukuba   # 任意のデータセットディレクトリに移動
+uv sync               # そのデータセットの依存をインストール
+cp ../../.env.example ../../.env  # S3 認証情報を設定
 ```
 
 ## CLI コマンド
 
+データセットディレクトリ内（または配下）で実行する。カレントディレクトリから上方向に `dataset.yml` を探索して自動検出する。
+
 ```bash
-uv run queria init <path>     # 新規データセットのスキャフォールド
-uv run queria pull <path>     # S3 から ducklake.duckdb + metadata.json をダウンロード
-uv run queria run <path>      # ビルド (DuckLake 初期化 → dbt run → メタデータ生成)
-uv run queria push <path>     # S3 またはローカルへデプロイ
+cd datasets/tsukuba
+uv run queria init          # DuckLake カタログ初期化
+uv run queria pull          # S3 から ducklake.duckdb + metadata.json をダウンロード
+uv run queria run           # ビルド (DuckLake 初期化 → dbt run → メタデータ生成)
+uv run queria push          # S3 またはローカルへデプロイ
 ```
+
+`queria new <path>` のみ path 引数を取る（新規スキャフォールド用）。
 
 ビルドスクリプト:
 
@@ -34,8 +40,9 @@ scripts/prd-deploy.sh   # 全データセットをビルド + S3 アップロー
 datasets/
   {datasource}/
     dataset.yml              # メタデータ定義 (title, description, ducklake_url, schemas)
-    pyproject.toml           # (オプション) Python 依存がある場合のみ
+    pyproject.toml           # queria を dependency として指定
     ingestion/               # (オプション) データ取得スクリプト
+      pipeline.py            # main() を実装
     transform/               # dbt プロジェクト
       dbt_project.yml
       profiles.yml           # dev (ローカル) / prd (S3) ターゲット
@@ -51,13 +58,27 @@ datasets/
 
 src/queria/
   cli.py              # Typer CLI エントリポイント
-  run.py              # ビルドパイプライン (init_ducklake, run_dbt, generate_metadata)
+  ingestion.py         # パイプラインスクリプト実行 + SQLite→DuckDB 自動変換
+  dlt.py              # dlt + DuckLake destination ヘルパー (create_destination)
+  ducklake.py          # DuckLake DuckDB カタログ初期化
+  ducklake_patch.py    # dlt の DuckLake destination モンキーパッチ
+  transform.py         # ビルドパイプライン (init_ducklake, dbt run, メタデータ生成)
   push.py              # S3 アップロード / ローカルコピー
   pull.py              # S3 ダウンロード
   init.py              # データセットスキャフォールド
   config_schema.py     # Pydantic DatasetConfig モデル
   metadata_schema.py   # Pydantic メタデータモデル
 ```
+
+## ingestion 規約
+
+データセット側の `ingestion/pipeline.py` は引数なしの `main()` 関数を実装する。
+フレームワークがコンテキスト（dataset_dir 等）を管理するため、パイプライン作者はフレームワーク内部を意識する必要がない。
+
+ingestion パターン:
+
+1. dlt パイプライン: `queria.dlt.create_destination()` で DuckLake destination を取得し dlt 経由で書き込み。SQLite→DuckDB 変換はフレームワークが自動実行
+2. ファイル取得: ローカルにファイル/DB を用意するだけ。dbt raw 層が参照
 
 ## dbt モデル構造
 

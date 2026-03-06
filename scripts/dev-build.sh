@@ -21,9 +21,12 @@ for ds in "$REPO_DIR"/datasets/*/; do
   name="$(basename "$ds")"
   echo ""
   echo "--- $name ---"
-  if uv run queria run "$ds" --target dev && \
-     uv run queria push "$ds" --output-dir "$OUTPUT_DIR"; then
-    :
+  if (
+    cd "$ds" && uv sync --quiet && \
+    uv run queria run --target dev && \
+    uv run queria push --output-dir "$OUTPUT_DIR"
+  ); then
+  :
   else
     echo "WARNING: $name failed, skipping"
     failed+=("$name")
@@ -33,9 +36,12 @@ done
 echo ""
 echo "=== Building catalog ==="
 uv run python "$REPO_DIR/datasets/catalog/generate_sources.py"
-uv run queria run "$REPO_DIR/datasets/catalog" --target dev \
-  --vars "{\"storage_base_url\": \"$OUTPUT_DIR\"}"
-uv run queria push "$REPO_DIR/datasets/catalog" --output-dir "$OUTPUT_DIR"
+(
+  cd "$REPO_DIR/datasets/catalog" &&
+  uv sync --quiet && \
+  uv run queria run --target dev --vars "{\"storage_base_url\": \"$OUTPUT_DIR\"}" && \
+  uv run queria push --output-dir "$OUTPUT_DIR"
+)
 
 if [ ${#failed[@]} -gt 0 ]; then
   echo ""
