@@ -6,8 +6,6 @@ import sqlite3
 import urllib.request
 from pathlib import Path
 
-INGESTION_DIR = Path(__file__).parent
-
 
 def main() -> None:
     account_id = os.environ["CF_ACCOUNT_ID"]
@@ -31,7 +29,7 @@ def main() -> None:
 
     rows = body["result"][0]["results"]
 
-    db_path = INGESTION_DIR / "d1.db"
+    db_path = Path(__file__).parent / "d1.db"
     conn = sqlite3.connect(db_path)
     conn.execute("DROP TABLE IF EXISTS articles")
     conn.execute("""
@@ -47,6 +45,3 @@ def main() -> None:
     conn.commit()
     conn.close()
     print(f"  D1 → {db_path} ({len(rows)} rows)")
-
-
-main()
