@@ -36,5 +36,5 @@ def load_dataset_config(dataset_dir: Path) -> DatasetConfig:
     with open(path) as f:
         config = DatasetConfig.model_validate(yaml.safe_load(f))
     if not config.name:
-        config.name = dataset_dir.name
+        config.name = dataset_dir.resolve().name
     return config
