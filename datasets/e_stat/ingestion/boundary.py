@@ -4,12 +4,11 @@
 DuckDB spatial 拡張で GeoParquet に変換して保存する。
 
 Usage:
-    python -m ingestion.boundary [--refresh] [--pref 08 13]
+    python -m ingestion.boundary
 """
 
 from __future__ import annotations
 
-import argparse
 import io
 import sys
 import tempfile
@@ -28,7 +27,7 @@ BASE_URL = (
 
 PREF_CODES = [f"{i:02d}" for i in range(1, 48)]
 
-DEFAULT_OUTPUT_DIR = Path(__file__).parent / "output"
+OUTPUT_DIR = Path(__file__).parent / "output"
 
 USER_AGENT = (
     "Mozilla/5.0 (compatible; queria-boundary-downloader/1.0; "
@@ -95,45 +94,16 @@ def process_prefecture(
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="e-Stat 小地域境界データのダウンロード")
-    parser.add_argument(
-        "--refresh",
-        action="store_true",
-        help="既存のファイルを上書きして再ダウンロード",
-    )
-    parser.add_argument(
-        "--output-dir",
-        type=Path,
-        default=DEFAULT_OUTPUT_DIR,
-        help=f"出力ディレクトリ (default: {DEFAULT_OUTPUT_DIR})",
-    )
-    parser.add_argument(
-        "--pref",
-        type=str,
-        nargs="*",
-        help="特定の都道府県コードのみ処理 (例: 08 13)",
-    )
-    args = parser.parse_args()
-
-    output_dir: Path = args.output_dir
-    output_dir.mkdir(parents=True, exist_ok=True)
-
-    pref_codes = args.pref if args.pref else PREF_CODES
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
     session = requests.Session()
     session.headers.update({"User-Agent": USER_AGENT})
 
     success_count = 0
-    skip_count = 0
     error_count = 0
 
-    for pref_code in pref_codes:
-        output_path = output_dir / f"boundary_{pref_code}.parquet"
-
-        if output_path.exists() and not args.refresh:
-            print(f"[{pref_code}] スキップ (既に存在): {output_path}")
-            skip_count += 1
-            continue
+    for pref_code in PREF_CODES:
+        output_path = OUTPUT_DIR / f"boundary_{pref_code}.parquet"
 
         print(f"[{pref_code}] ダウンロード中...")
         try:
@@ -144,7 +114,7 @@ def main() -> None:
             print(f"[{pref_code}] エラー: {e}", file=sys.stderr)
             error_count += 1
 
-    print(f"\n完了: 成功={success_count}, スキップ={skip_count}, エラー={error_count}")
+    print(f"\n完了: 成功={success_count}, エラー={error_count}")
 
     if error_count > 0:
         sys.exit(1)
