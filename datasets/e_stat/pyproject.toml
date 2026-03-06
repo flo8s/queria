@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "e-Stat dataset for queria"
 requires-python = ">=3.13"
 dependencies = [
+    "queria",
     "dlt[ducklake]>=1.17.0",
     "estat-api-dlt-helper",
     "pyyaml>=6.0",
@@ -18,3 +19,6 @@ packages = ["ingestion"]
 
 [dependency-groups]
 dev = ["pytest>=9.0.2"]
+
+[tool.uv.sources]
+queria = { path = "../../", editable = true }

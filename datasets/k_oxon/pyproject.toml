@@ -1,0 +1,8 @@
+[project]
+name = "dataset-k-oxon"
+version = "0.1.0"
+requires-python = ">=3.13"
+dependencies = ["queria"]
+
+[tool.uv.sources]
+queria = { path = "../../", editable = true }
