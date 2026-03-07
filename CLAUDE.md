@@ -61,7 +61,6 @@ src/queria/
   ingestion.py         # パイプラインスクリプト実行 + SQLite→DuckDB 自動変換
   dlt.py              # dlt + DuckLake destination ヘルパー (create_destination)
   ducklake.py          # DuckLake DuckDB カタログ初期化
-  ducklake_patch.py    # dlt の DuckLake destination モンキーパッチ
   transform.py         # ビルドパイプライン (init_ducklake, dbt run, メタデータ生成)
   push.py              # S3 アップロード / ローカルコピー
   pull.py              # S3 ダウンロード
