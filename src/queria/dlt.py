@@ -27,14 +27,9 @@ def _create_ducklake_destination(dist_dir: Path, config: DatasetConfig):
     """dlt 用の DuckLake destination を作成する。
 
     S3_BUCKET 環境変数の有無でローカル/S3 ストレージを自動判定。
-    ducklake_patch も自動適用する。
     """
     import dlt
     from dlt.destinations.impl.ducklake.configuration import DuckLakeCredentials
-
-    from queria import ducklake_patch
-
-    ducklake_patch.apply(override_data_path=True)
 
     datasource = config.name
     sqlite_file = (dist_dir / DUCKLAKE_SQLITE).resolve()
@@ -63,7 +58,8 @@ def _create_ducklake_destination(dist_dir: Path, config: DatasetConfig):
             ducklake_name=datasource,
             catalog=f"duckdb:///{sqlite_file}",
             storage=storage,
-        )
+        ),
+        override_data_path=True,
     )
 
 
