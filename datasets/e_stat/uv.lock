@@ -329,7 +329,7 @@ wheels = [
 
 [[package]]
 name = "dlt"
-version = "1.22.2"
+version = "1.23.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "click" },
@@ -358,9 +358,9 @@ dependencies = [
     { name = "typing-extensions" },
     { name = "tzdata" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/c1/03/78a79269f004241f6644d56c2666fd105fd311a120ff8c747d5d106a6c37/dlt-1.22.2.tar.gz", hash = "sha256:55be2318c0e5ca024200000a02bd51dfd3078f5bbf0b233b3ee64329f9987031", size = 940374, upload-time = "2026-03-01T18:34:40.048Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/a4/dc/b71d5ff2d5dfc8d5b15369079ed7af889277ea6367e23913848f59d72da9/dlt-1.23.0.tar.gz", hash = "sha256:e61b5cdc90fc80b1f080dd4cf4bb47f32f0bf8991f0a3926dc7a697bedc6530a", size = 960825, upload-time = "2026-03-06T14:08:00.538Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/81/a3/ca205dd3daaa8896f0550c2090983125494246c849c63b8aadb3f7f12708/dlt-1.22.2-py3-none-any.whl", hash = "sha256:ee0741fb80e16bcff444e9670d7008a1325d5db0c8650f4e1d53722181adc186", size = 1191198, upload-time = "2026-03-01T18:34:36.93Z" },
+    { url = "https://files.pythonhosted.org/packages/2c/47/ff900919bc7d3b0832e537b41ba3f56ccbb7c0bccfb30f0f321ff65c8aa6/dlt-1.23.0-py3-none-any.whl", hash = "sha256:99e072c1bf963f98af1f9b70ab68aa5ca2d12ef2200ff7d492b5f8eae1f6da20", size = 1212399, upload-time = "2026-03-06T14:07:58.085Z" },
 ]
 
 [package.optional-dependencies]
@@ -393,16 +393,16 @@ wheels = [
 
 [[package]]
 name = "estat-api-dlt-helper"
-version = "0.1.5"
+version = "0.3.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "dlt" },
     { name = "pyarrow" },
     { name = "pydantic" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/42/5e/7e2d59a3cd3e651de6d7de0ec47e1dd821b72b0b0983a0f0da5a0a748837/estat_api_dlt_helper-0.1.5.tar.gz", hash = "sha256:5e8d5fd82156b82cc73dee648ee9a28bf8a2c7ec45329dcbe254432b4bf9362f", size = 500477, upload-time = "2026-02-11T13:33:01.414Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/c9/4c/1bf8e7d197b5cb9d4b3c6d53c3170c97fbf570e286e7f28b1b96ff8150f0/estat_api_dlt_helper-0.3.0.tar.gz", hash = "sha256:408b21e1216126ab6ba0d496dbf0e2c88276bd0781b35bbe04ae9009f39ca808", size = 514072, upload-time = "2026-03-09T13:41:05.184Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/6d/76/a7f851235596530c3b603501e159cdf63344d5b27550dd5048ecafda694e/estat_api_dlt_helper-0.1.5-py3-none-any.whl", hash = "sha256:a5c4b569e3d39d02474f06e74f86f88736d4fc218f9d11eb64848cddc65a9237", size = 31028, upload-time = "2026-02-11T13:33:00.247Z" },
+    { url = "https://files.pythonhosted.org/packages/d5/d9/8dd5c015e1ac62ae682d8ca8f0f8bb7d1df761dea24a5dde034110918d34/estat_api_dlt_helper-0.3.0-py3-none-any.whl", hash = "sha256:a8e3a95da190fe0f3f2e726ffe80d9d147fa698d0915ab3ad7264e128f639308", size = 37932, upload-time = "2026-03-09T13:41:02.76Z" },
 ]
 
 [[package]]
@@ -1097,7 +1097,7 @@ requires-dist = [
     { name = "boto3", specifier = ">=1.35" },
     { name = "dbt-core", specifier = ">=1.11.2" },
     { name = "dbt-duckdb", specifier = ">=1.10.0" },
-    { name = "dlt", extras = ["ducklake"], specifier = ">=1.17.0" },
+    { name = "dlt", extras = ["ducklake"], specifier = ">=1.23.0" },
     { name = "duckdb", specifier = ">=1.3.0" },
     { name = "pyarrow", specifier = ">=15.0" },
     { name = "pydantic", specifier = ">=2.0" },
@@ -1128,7 +1128,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "dlt", extras = ["ducklake"], specifier = ">=1.17.0" },
-    { name = "estat-api-dlt-helper" },
+    { name = "estat-api-dlt-helper", specifier = ">=0.3.0" },
     { name = "pyyaml", specifier = ">=6.0" },
     { name = "queria", editable = "../../" },
 ]

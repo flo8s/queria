@@ -1,17 +1,11 @@
 """e-Stat API からデータを取得し dlt 経由で DuckLake に書き込む。"""
 
 import logging
-import os
 from pathlib import Path
 
 import dlt
 import yaml
-from estat_api_dlt_helper import (
-    DestinationConfig,
-    EstatDltConfig,
-    SourceConfig,
-    create_estat_resource,
-)
+from estat_api_dlt_helper import estat_source, estat_table
 
 from queria.dlt import create_destination
 
@@ -22,8 +16,6 @@ SOURCE_SCHEMA = "_source"
 
 
 def main() -> None:
-    app_id = os.environ["ESTAT_API_KEY"]
-
     with open(Path(__file__).parent / "tables.yml") as f:
         tables_config = yaml.safe_load(f)
 
@@ -33,25 +25,16 @@ def main() -> None:
         destination=destination,
         dataset_name=SOURCE_SCHEMA,
     )
-    info = pipeline.run(
-        [
-            create_estat_resource(
-                EstatDltConfig(
-                    source=SourceConfig(
-                        app_id=app_id, statsDataId=table_def["statsDataId"]
-                    ),
-                    destination=DestinationConfig(
-                        destination=destination,
-                        dataset_name=SOURCE_SCHEMA,
-                        table_name=table_def["name"],
-                        write_disposition="merge"
-                        if table_def.get("merge_keys")
-                        else "replace",
-                        primary_key=table_def.get("merge_keys") or None,
-                    ),
-                )
+    source = estat_source(
+        tables=[
+            estat_table(
+                stats_data_id=t["statsDataId"],
+                table_name=t["name"],
+                write_disposition="merge" if t.get("merge_keys") else "replace",
+                primary_key=t.get("merge_keys"),
             )
-            for table_def in tables_config["tables"]
-        ]
+            for t in tables_config["tables"]
+        ],
     )
+    info = pipeline.run(source)
     print(info)

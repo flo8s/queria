@@ -6,7 +6,7 @@ requires-python = ">=3.13"
 dependencies = [
     "queria",
     "dlt[ducklake]>=1.17.0",
-    "estat-api-dlt-helper",
+    "estat-api-dlt-helper>=0.3.0",
     "pyyaml>=6.0",
 ]
 
