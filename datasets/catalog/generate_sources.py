@@ -15,9 +15,10 @@ from pathlib import Path
 
 import yaml
 
+from queria.config_schema import load_dataset_config
+
 CATALOG_DIR = Path(__file__).resolve().parent
 DATASOURCES_YML = CATALOG_DIR / "datasources.yml"
-DATASET_YML = CATALOG_DIR / "dataset.yml"
 DIST_DIR = CATALOG_DIR / "dist"
 RAW_DIR = CATALOG_DIR / "transform" / "models" / "main" / "raw"
 STG_DIR = CATALOG_DIR / "transform" / "models" / "main" / "stg"
@@ -63,21 +64,20 @@ def ensure_metadata_stub() -> None:
     if metadata_path.exists():
         return
 
-    with open(DATASET_YML) as f:
-        config = yaml.safe_load(f)
+    config = load_dataset_config(CATALOG_DIR)
 
     schemas = {}
-    for schema_name, schema_config in config.get("schemas", {}).items():
+    for schema_name, schema_config in config.schemas.items():
         schemas[schema_name] = {
-            "title": schema_config.get("title", ""),
+            "title": schema_config.title,
             "tables": [],
         }
 
     stub = {
-        "title": config["title"],
-        "description": config["description"],
-        "tags": config.get("tags", []),
-        "ducklake_url": config["ducklake_url"],
+        "title": config.title,
+        "description": config.description,
+        "tags": config.tags,
+        "ducklake_url": config.ducklake_url,
         "schemas": schemas,
         "lineage": {"parent_map": {}, "nodes": {}},
     }

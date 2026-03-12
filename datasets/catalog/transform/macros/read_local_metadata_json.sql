@@ -2,7 +2,7 @@
 
 SELECT '{{ datasource }}' AS datasource, *
 FROM read_json(
-    '../dist/metadata.json',
+    'dist/metadata.json',
     columns={
         title: 'VARCHAR',
         description: 'VARCHAR',
