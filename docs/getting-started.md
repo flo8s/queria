@@ -27,6 +27,7 @@ queria/
 ├── datasets/              # 各データセットの定義
 │   ├── tsukuba/           #   つくば市オープンデータ
 │   │   ├── dataset.yml    #     メタデータ定義
+│   │   ├── pipeline.py    #     ビルドエントリポイント
 │   │   └── transform/     #     dbt プロジェクト
 │   │       ├── models/
 │   │       │   ├── raw/   #       外部データ取り込み
@@ -39,7 +40,7 @@ queria/
 ├── packages/
 │   └── queria_common/     # 共有 dbt マクロ
 ├── src/
-│   └── queria/            # CLI ツール
+│   └── queria/            # DuckLake カタログ管理 CLI
 ├── scripts/               # ビルド・デプロイスクリプト
 └── pyproject.toml
 ```
@@ -51,20 +52,30 @@ queria/
 ### 単一データセットのビルド
 
 ```bash
-uv run queria run datasets/tsukuba
+cd datasets/tsukuba
+uv run python pipeline.py
+uv run queria metadata
 ```
 
 ### 全データセットの一括ビルド
 
 ```bash
-./scripts/dev-build.sh
+./scripts/build.sh dev
 ```
 
 このスクリプトは全データセットをビルドし、`.dev-serve/` にまとめる。
 ローカルサーバーで確認する:
 
 ```bash
-npx serve .dev-serve --cors -l 4000
+./scripts/dev-serve.sh
+```
+
+### stg 環境へのデプロイ
+
+R2 の `queria-dev` バケットにデプロイして動作確認する:
+
+```bash
+./scripts/build.sh stg
 ```
 
 ### 本番デプロイ
@@ -72,25 +83,27 @@ npx serve .dev-serve --cors -l 4000
 手動デプロイ:
 
 ```bash
-uv run queria run datasets/tsukuba --target prd
-uv run queria push datasets/tsukuba --bucket queria
+cd datasets/tsukuba
+uv run queria pull
+uv run python pipeline.py
+uv run queria metadata
+uv run queria push
 ```
 
 catalog データセットは他データセットの metadata.json を参照するため、最後にビルドする:
 
 ```bash
 # 1. 各データセットをビルド・デプロイ
-uv run queria run datasets/tsukuba --target prd
-uv run queria push datasets/tsukuba
-uv run queria run datasets/k_oxon --target prd
-uv run queria push datasets/k_oxon
+cd datasets/tsukuba
+uv run queria pull && uv run python pipeline.py && uv run queria metadata && uv run queria push
+cd ../k_oxon
+uv run queria pull && uv run python pipeline.py && uv run queria metadata && uv run queria push
 
 # 2. 最後に catalog をビルド・デプロイ
-uv run queria run datasets/catalog --target prd
-uv run queria push datasets/catalog
+cd ../catalog
+uv run queria pull && uv run python pipeline.py && uv run queria metadata && uv run queria push
 ```
 
 ### GitHub Actions
 
 main ブランチへの push で自動デプロイが実行される（`.github/workflows/deploy.yml`）。
-`scripts/prd-deploy.sh` が全データセットのビルドとデプロイを行う。

@@ -59,6 +59,7 @@ queria/
 ├── datasets/
 │   ├── tsukuba/               # Tsukuba city datasource
 │   │   ├── dataset.yml        # Dataset metadata definition
+│   │   ├── pipeline.py        # Build entry point (dbt execution)
 │   │   └── transform/         # dbt project
 │   │       ├── models/
 │   │       │   ├── raw/       # External CSV ingestion
@@ -67,13 +68,16 @@ queria/
 │   │       └── profiles.yml   # dbt profiles (dev/prd)
 │   └── k_oxon/                # K-Oxon datasource (GIS + e-Stat)
 │       ├── dataset.yml
+│       ├── pipeline.py
 │       └── transform/
 ├── src/
-│   └── queria/                # Build & deploy CLI tool
-│       ├── cli.py             # CLI entry point
-│       ├── run.py             # DuckLake init + dbt execution + metadata generation
-│       ├── push.py            # R2 upload / local copy
-│       └── models.py          # Pydantic model definitions for catalog output
+│   └── queria/                # DuckLake catalog management CLI
+│       ├── cli.py             # CLI entry point (init, pull, push, metadata, gc)
+│       ├── ducklake.py        # DuckLake catalog initialization
+│       ├── pull.py            # S3 download
+│       ├── push.py            # S3 upload / local copy
+│       ├── metadata.py        # metadata.json generation
+│       └── gc.py              # Orphaned Parquet file cleanup
 └── pyproject.toml
 ```
 
@@ -87,30 +91,31 @@ profiles.yml is included in each datasource's transform/ directory.
 ### Pipeline Execution
 
 ```bash
+cd datasets/tsukuba
+
 # Build a specific datasource locally
-uv run queria run datasets/tsukuba
+uv run python pipeline.py
 
 # Production build + deploy
-uv run queria run datasets/tsukuba --target prd
-uv run queria push datasets/tsukuba --bucket queria-dev
-
-# Freeze to local directory
-uv run queria push datasets/tsukuba --output-dir ./out
+uv run queria pull
+uv run python pipeline.py
+uv run queria metadata
+uv run queria push
 ```
 
-The pipeline is split into two commands: `run` and `push`:
-- `queria run <path>`: DuckLake init -> dbt deps/run/docs -> metadata generation. Does not touch R2
-- `queria push <path>`: Uploads to R2 or copies locally
+Each dataset has a `pipeline.py` entry point that handles dbt execution.
+The `queria` CLI manages DuckLake catalog operations (init, pull, push, metadata, gc).
 
 The catalog dataset reads metadata from other datasources on R2, so run it last:
 
 ```bash
-uv run queria run datasets/tsukuba --target prd
-uv run queria run datasets/k_oxon --target prd
-uv run queria push datasets/tsukuba
-uv run queria push datasets/k_oxon
-uv run queria run datasets/catalog --target prd
-uv run queria push datasets/catalog
+# 1. Build and push each dataset
+cd datasets/tsukuba
+uv run queria pull && uv run python pipeline.py && uv run queria metadata && uv run queria push
+
+# 2. Build and push catalog last
+cd datasets/catalog
+uv run queria pull && uv run python pipeline.py && uv run queria metadata && uv run queria push
 ```
 
 The `push` command and prd target require the following environment variables:

@@ -15,23 +15,24 @@ cp ../../.env.example ../../.env  # S3 認証情報を設定
 
 ## CLI コマンド
 
-データセットディレクトリ内（または配下）で実行する。カレントディレクトリから上方向に `dataset.yml` を探索して自動検出する。
+queria CLI は DuckLake カタログ管理に特化している。データセットディレクトリ内（または配下）で実行する。カレントディレクトリから上方向に `dataset.yml` を探索して自動検出する。
 
 ```bash
 cd datasets/tsukuba
 uv run queria init          # DuckLake カタログ初期化
 uv run queria pull          # S3 から ducklake.duckdb + metadata.json をダウンロード
-uv run queria run           # ビルド (DuckLake 初期化 → dbt run → メタデータ生成)
+uv run python pipeline.py   # dbt ビルド (各データセットの pipeline.py)
+uv run queria metadata      # metadata.json 生成 + dbt docs コピー
 uv run queria push          # S3 またはローカルへデプロイ
+uv run queria gc            # R2 上の孤立 Parquet ファイルを削除
 ```
-
-`queria new <path>` のみ path 引数を取る（新規スキャフォールド用）。
 
 ビルドスクリプト:
 
 ```bash
-scripts/dev-build.sh    # 全データセットをローカルビルド (dev ターゲット)
-scripts/prd-deploy.sh   # 全データセットをビルド + S3 アップロード (prd ターゲット)
+scripts/build.sh dev    # 全データセットをローカルビルド (.dev-serve)
+scripts/build.sh stg    # 全データセットを queria-dev バケットへデプロイ
+scripts/build.sh prd    # 全データセットを本番バケットへデプロイ
 ```
 
 ## プロジェクト構造
@@ -40,9 +41,9 @@ scripts/prd-deploy.sh   # 全データセットをビルド + S3 アップロー
 datasets/
   {datasource}/
     dataset.yml              # メタデータ定義 (title, description, ducklake_url, schemas)
-    pyproject.toml           # queria を dependency として指定
-    ingestion/               # (オプション) データ取得スクリプト
-      pipeline.py            # main() を実装
+    pyproject.toml           # queria + dbt-core + dbt-duckdb を dependency として指定
+    pipeline.py              # ビルドエントリポイント (ingestion + dbt deps/run/docs generate)
+    tables.yml               # (dlt 使用時) テーブル定義
     transform/               # dbt プロジェクト
       dbt_project.yml
       profiles.yml           # dev (ローカル) / prd (S3) ターゲット
@@ -58,25 +59,23 @@ datasets/
 
 src/queria/
   cli.py              # Typer CLI エントリポイント
-  ingestion.py         # パイプラインスクリプト実行 + SQLite→DuckDB 自動変換
-  dlt.py              # dlt + DuckLake destination ヘルパー (create_destination)
-  ducklake.py          # DuckLake DuckDB カタログ初期化
-  transform.py         # ビルドパイプライン (init_ducklake, dbt run, メタデータ生成)
-  push.py              # S3 アップロード / ローカルコピー
-  pull.py              # S3 ダウンロード
-  init.py              # データセットスキャフォールド
-  config_schema.py     # Pydantic DatasetConfig モデル
+  ducklake.py          # DuckLake DuckDB/SQLite カタログ初期化
+  pull.py              # S3 ダウンロード (init or fetch)
+  push.py              # S3 アップロード / ローカルコピー (SQLite→DuckDB 自動変換)
+  metadata.py          # metadata.json 生成
   metadata_schema.py   # Pydantic メタデータモデル
+  config_schema.py     # Pydantic DatasetConfig モデル
+  gc.py                # 孤立 Parquet ファイルの GC
+  s3.py                # boto3 S3 クライアントファクトリ
 ```
 
-## ingestion 規約
+## ingestion パターン
 
-データセット側の `ingestion/pipeline.py` は引数なしの `main()` 関数を実装する。
-フレームワークがコンテキスト（dataset_dir 等）を管理するため、パイプライン作者はフレームワーク内部を意識する必要がない。
+データ取得ロジックは `pipeline.py` 内の `_ingest()` 関数として実装する。
 
-ingestion パターン:
+パターン:
 
-1. dlt パイプライン: `queria.dlt.create_destination()` で DuckLake destination を取得し dlt 経由で書き込み。SQLite→DuckDB 変換はフレームワークが自動実行
+1. dlt パイプライン: `_create_destination()` で DuckLake destination を構築し、DuckLake に書き込む。`queria init --sqlite` で事前に SQLite カタログを作成しておく
 2. ファイル取得: ローカルにファイル/DB を用意するだけ。dbt raw 層が参照
 
 ## dbt モデル構造
@@ -100,17 +99,27 @@ profiles.yml の各データセットに dev/prd ターゲットがある:
 duckdb-wasm からは絶対 HTTP URL でしか Parquet ファイルを参照できない。
 そのため DATA_PATH を空文字にしてはいけない。
 
-フロー:
-1. init_ducklake: dataset.yml の ducklake_url から公開 URL を導出し DATA_PATH に設定
-   - 例: `https://data.queria.io/tsukuba/ducklake.duckdb.files/`
-2. dbt run (prd target): OVERRIDE_DATA_PATH で S3 書き込み先に一時的に上書き
-   - OVERRIDE_DATA_PATH はセッション限定でメタデータの data_path を変更しない
+カタログ形式:
+- dlt の ducklake destination は SQLite カタログのみ使用（META_TYPE sqlite が自動付与される）
+- dbt (dbt-duckdb) は DuckDB カタログ (`ducklake.duckdb`) を読み取る
+- ingestion 後に `queria.ducklake.convert_sqlite_to_duckdb()` で変換が必要
+
+データフロー:
+1. dlt ingestion → `dist/ducklake.sqlite` (SQLite) + `dist/ducklake.duckdb.files/` (Parquet)
+2. `convert_sqlite_to_duckdb()` → SQLite → DuckDB カタログ変換
+3. dbt run → `dist/ducklake.duckdb` (DuckDB) を読み取り
+
+init_ducklake: dataset.yml の ducklake_url から公開 URL を導出し DATA_PATH に設定
+- 例: `https://data.queria.io/tsukuba/ducklake.duckdb.files/`
+
+dbt run (prd target): OVERRIDE_DATA_PATH で S3 書き込み先に一時的に上書き
+- OVERRIDE_DATA_PATH はセッション限定でメタデータの data_path を変更しない
 
 ducklake_url の正規ソースは各データセットの `dataset.yml` ファイル。
 
 ## メタデータ生成
 
-`queria run` は dbt run の後に metadata.json を自動生成する。
+`queria metadata` は dbt run の後に実行し、metadata.json を生成する。
 
 生成フロー:
 1. dataset.yml → DatasetConfig をロード
@@ -137,7 +146,7 @@ s3://{bucket}/
 - S3_ACCESS_KEY_ID / S3_SECRET_ACCESS_KEY: R2 認証情報
 - S3_BUCKET: バケット名 (dev: `queria-dev`, prd: `queria`)
 
-CI/CD: GitHub Actions で main push 時に `scripts/prd-deploy.sh` を実行。
+CI/CD: GitHub Actions で main push 時に自動デプロイ（`.github/workflows/deploy.yml`）。
 catalog データセットは他のデータセットの metadata.json に依存するため最後にビルドされる。
 
 ## コーディング規約

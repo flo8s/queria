@@ -1,102 +1,112 @@
 # CLI リファレンス
 
-queria CLI は Typer ベースのコマンドラインツール。
-`uv run queria` で実行する。
+queria CLI は DuckLake カタログ管理に特化したコマンドラインツール。
+データセットディレクトリ内で `uv run queria` で実行する。カレントディレクトリから上方向に `dataset.yml` を探索して自動検出する。
+
+ビルド（dbt 実行）は各データセットの `pipeline` エントリポイントが担当する。
 
 ## queria init
 
-新規データセットのスカフォルディング。
+DuckLake カタログを初期化する。
 
 ```bash
-uv run queria init <path>
+uv run queria init [--sqlite]
 ```
 
-| 引数 | 説明 |
+| オプション | 説明 |
 |---|---|
-| path | データセットディレクトリのパス（例: `datasets/my_city`） |
+| --sqlite | SQLite 形式でカタログを初期化する（dlt 連携用） |
 
-対話形式で Title, Description, Tags, DuckLake URL を入力する。
-以下のファイルが生成される:
+`dist/ducklake.duckdb` を作成し、`dataset.yml` の `ducklake_url` から DATA_PATH を設定する。
+`--sqlite` を指定した場合は `dist/ducklake.sqlite` を作成する（dlt が SQLite カタログに書き込み、push 時に DuckDB へ変換される）。
 
-- `dataset.yml` - データセットメタデータ
-- `transform/dbt_project.yml` - dbt プロジェクト設定
-- `transform/profiles.yml` - dbt プロファイル（dev/prd）
-- `transform/packages.yml` - dbt パッケージ依存（queria_common）
-- `transform/models/raw/`, `stg/`, `mart/` - モデルディレクトリ
+S3 上にカタログが存在しない場合、`queria pull` が自動的に `init` を実行する。
 
 ## queria pull
 
 S3/R2 から ducklake.duckdb と metadata.json をダウンロードする。
-CI 環境で既存データを取得する場合に使う。
+S3 上にファイルが存在しない場合は `queria init` で新規作成する。
 
 ```bash
-uv run queria pull <path>
+uv run queria pull
 ```
 
-| 引数/オプション | 説明 |
+| オプション | 説明 |
 |---|---|
-| path | データセットディレクトリのパス |
 | --bucket | S3 バケット名（環境変数 `S3_BUCKET` でも指定可） |
 
 ダウンロードしたファイルは `dist/` に配置される。
-S3 上にファイルが存在しない場合はスキップする。
 
 環境変数 `S3_ENDPOINT`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY` が必要。
 
-## queria run
+## queria metadata
 
-データセットのビルドを実行する。
+metadata.json を生成し、dbt ドキュメントを dist/ にコピーする。
 
 ```bash
-uv run queria run <path> [--target <target>] [--vars <json>]
+uv run queria metadata
 ```
 
-| 引数/オプション | デフォルト | 説明 |
-|---|---|---|
-| path | | データセットディレクトリのパス |
-| --target | dev | dbt ターゲット（profiles.yml で定義） |
-| --vars | | dbt 変数（JSON 文字列） |
+dbt の成果物（manifest.json, catalog.json）と dataset.yml から metadata.json を構築する。
+`uv run pipeline` の後に実行する。
 
-内部処理の流れ:
-
-1. DuckLake 初期化（`dist/ducklake.duckdb` がなければ作成）
-2. `dbt deps` - パッケージインストール
-3. `dbt run` - モデル実行
-4. `dbt docs generate` - ドキュメント生成
-5. metadata.json 生成（dataset.yml + manifest.json + catalog.json から構築）
-
-ビルド成果物は `dist/` に出力される:
+生成されるファイル:
 
 | ファイル | 説明 |
 |---|---|
-| ducklake.duckdb | DuckLake カタログファイル |
-| ducklake.duckdb.files/ | Parquet データファイル |
-| metadata.json | メタデータ（フロントエンド用） |
-| docs/ | dbt ドキュメント（index.html, manifest.json, catalog.json） |
-
-### ターゲット
-
-- dev: ローカルファイルシステムに Parquet を書き込む
-- prd: S3/R2 パスに Parquet を書き込む（環境変数が必要）
+| dist/metadata.json | メタデータ（フロントエンド用） |
+| dist/docs/ | dbt ドキュメント（index.html, manifest.json, catalog.json） |
 
 ## queria push
 
 ビルド成果物を S3/R2 にアップロード、またはローカルディレクトリにコピーする。
+SQLite カタログ（dlt 使用時）がある場合は DuckDB 形式に自動変換してからアップロードする。
 
 ```bash
 # S3 にアップロード
-uv run queria push <path> --bucket <bucket>
+uv run queria push
 
 # ローカルにコピー
-uv run queria push <path> --output-dir <dir>
+uv run queria push --output-dir <dir>
 ```
 
-| 引数/オプション | 説明 |
+| オプション | 説明 |
 |---|---|
-| path | データセットディレクトリのパス |
 | --bucket | S3 バケット名（環境変数 `S3_BUCKET` でも指定可） |
 | --output-dir | ローカル出力ディレクトリ |
 
 `--bucket` と `--output-dir` のどちらか一方は必須。両方指定した場合は両方に出力する。
 
 S3 アップロード時、ducklake.duckdb には `Cache-Control: no-cache` が設定される（クライアントが常に最新版を取得するため）。
+
+## queria gc
+
+R2 上の孤立した Parquet ファイルを削除する。
+
+```bash
+uv run queria gc --bucket <bucket> [--force] [--older-than-days <days>]
+```
+
+| オプション | デフォルト | 説明 |
+|---|---|---|
+| --bucket | | S3 バケット名（環境変数 `S3_BUCKET` でも指定可） |
+| --force | false | 確認なしで削除する |
+| --older-than-days | 7 | 指定日数以上経過したファイルのみ対象 |
+
+## pipeline エントリポイント
+
+各データセットに `pipeline.py` が配置されており、`uv run python pipeline.py` で dbt ビルドを実行する。
+
+```bash
+uv run python pipeline.py
+```
+
+典型的なワークフロー:
+
+```bash
+cd datasets/tsukuba
+uv run queria pull
+uv run python pipeline.py
+uv run queria metadata
+uv run queria push
+```
