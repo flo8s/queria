@@ -1,96 +1,117 @@
 """queria CLI entry point."""
 
 from pathlib import Path
-from typing import Optional
 
 import typer
 from typer.main import Typer
 
-from queria.gc import gc_datasource
-from queria.ingestion import has_ingestion_script, ingest_datasource
-from queria.init import init_dataset
-from queria.pull import pull_datasource
-from queria.push import push_datasource
-from queria.transform import build_datasource
+from queria import DIST_DIR
 
 app = typer.Typer()
 
 
 @app.callback()
 def callback() -> None:
-    """queria: dbt + DuckLake data pipeline CLI"""
+    """queria: DuckLake catalog management CLI"""
 
 
 @app.command()
-def new(
-    path: Path = typer.Argument(..., help="Path to the dataset directory to create"),
+def init(
+    sqlite: bool = typer.Option(
+        False, help="Initialize as SQLite (for dlt compatibility)"
+    ),
 ) -> None:
-    """Scaffold a new dataset"""
-    init_dataset(path.resolve())
+    """Initialize DuckLake catalog"""
+    from queria.ducklake import init_ducklake
+
+    dataset_dir = Path.cwd()
+    init_ducklake(dataset_dir / DIST_DIR, dataset_dir, sqlite=sqlite)
 
 
 @app.command()
 def pull(
-    bucket: str = typer.Option(..., envvar="S3_BUCKET", help="S3 bucket name"),
+    source: str = typer.Argument(None, help="Source (local path or s3://bucket)"),
+    sqlite: bool = typer.Option(
+        False, help="Initialize as SQLite (for dlt compatibility)"
+    ),
 ) -> None:
-    """Pull ducklake.duckdb from S3"""
-    pull_datasource(Path.cwd(), bucket=bucket)
+    """Pull DuckLake catalog from source (init if not found)"""
+    from queria.config_schema import load_dataset_config
+    from queria.ducklake import init_ducklake
 
+    dataset_dir = Path.cwd()
+    dist_dir = dataset_dir / DIST_DIR
+    config = load_dataset_config(dataset_dir)
+    datasource = config.name
 
-@app.command()
-def ingest() -> None:
-    """Run dataset-specific ingestion script"""
-    ingest_datasource(Path.cwd())
+    source = source or config.s3_url
+    if not source:
+        raise typer.BadParameter("source argument or 's3_url' in dataset.yml required")
 
+    print(f"--- pull: {datasource} ---")
 
-@app.command()
-def transform(
-    target: str = typer.Option("dev", help="dbt target (defined in profiles.yml)"),
-    vars: Optional[str] = typer.Option(None, help="dbt vars (JSON string)"),
-) -> None:
-    """Transform a dataset"""
-    build_datasource(Path.cwd(), target, dbt_vars=vars)
+    if source.startswith("s3://"):
+        from queria.pull import fetch_from_s3
+        from queria.s3 import create_s3_client
 
+        bucket = source.removeprefix("s3://")
+        client = create_s3_client()
+        fetched = fetch_from_s3(client, bucket, dist_dir, datasource)
+    else:
+        from queria.pull import pull_from_local
 
-@app.command()
-def run(
-    target: str = typer.Option("dev", help="dbt target (defined in profiles.yml)"),
-    vars: Optional[str] = typer.Option(None, help="dbt vars (JSON string)"),
-) -> None:
-    """Build a dataset (ingest + transform)"""
-    cwd = Path.cwd()
-    if has_ingestion_script(cwd):
-        ingest()
-    transform(target, vars)
+        fetched = pull_from_local(Path(source), dist_dir, datasource)
+
+    if not fetched:
+        print("Catalog not found, initializing locally")
+        init_ducklake(dist_dir, dataset_dir, sqlite=sqlite)
 
 
 @app.command()
 def push(
-    bucket: Optional[str] = typer.Option(
-        None, envvar="S3_BUCKET", help="S3 bucket name"
-    ),
-    output_dir: Optional[Path] = typer.Option(None, help="Local output directory"),
+    dest: str = typer.Argument(None, help="Destination (local path or s3://bucket)"),
 ) -> None:
-    """Push build artifacts to S3 or local directory"""
-    if not bucket and not output_dir:
-        typer.echo("Error: specify --bucket or --output-dir", err=True)
-        raise typer.Exit(1)
+    """Push build artifacts"""
+    from queria.config_schema import load_dataset_config
+    from queria.ducklake import convert_sqlite_to_duckdb
 
-    push_datasource(Path.cwd(), bucket=bucket, output_dir=output_dir)
+    dataset_dir = Path.cwd()
+    dist_dir = dataset_dir / DIST_DIR
+    config = load_dataset_config(dataset_dir)
+    datasource = config.name
+
+    dest = dest or config.s3_url
+    if not dest:
+        raise typer.BadParameter("dest argument or 's3_url' in dataset.yml required")
+
+    print(f"--- push: {datasource} ---")
+    convert_sqlite_to_duckdb(dataset_dir)
+
+    if dest.startswith("s3://"):
+        from queria.push import push_to_s3
+        from queria.s3 import create_s3_client
+
+        bucket = dest.removeprefix("s3://")
+        client = create_s3_client()
+        push_to_s3(client, bucket, dist_dir, datasource)
+    else:
+        from queria.push import push_to_local
+
+        push_to_local(Path(dest), dist_dir, datasource)
 
 
 @app.command()
-def gc(
-    bucket: str = typer.Option(..., envvar="S3_BUCKET", help="S3 bucket name"),
-    force: bool = typer.Option(False, help="Skip confirmation prompt"),
-    older_than_days: Optional[int] = typer.Option(
-        None, help="Only delete files older than N days"
-    ),
+def metadata(
+    target_dir: str = typer.Argument(..., help="dbt target directory path"),
 ) -> None:
-    """Clean up orphaned Parquet files on R2"""
-    gc_datasource(
-        Path.cwd(), bucket=bucket, force=force, older_than_days=older_than_days
-    )
+    """Generate metadata.json from dbt artifacts"""
+    from queria.metadata import _copy_docs_to_dist, generate_metadata
+
+    dataset_dir = Path.cwd()
+    dist_dir = dataset_dir / DIST_DIR
+    target_path = Path(target_dir)
+    generate_metadata(dataset_dir, dist_dir, target_path)
+    _copy_docs_to_dist(target_path, dist_dir)
 
 
 main: Typer = app

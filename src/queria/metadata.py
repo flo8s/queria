@@ -9,7 +9,7 @@ from dbt.artifacts.resources.v1.model import Model
 from dbt.artifacts.schemas.catalog import CatalogArtifact
 from dbt.artifacts.schemas.manifest import WritableManifest
 
-from queria import DIST_DIR, METADATA_JSON, TRANSFORM_DIR
+from queria import METADATA_JSON
 from queria.config_schema import DatasetConfig, load_dataset_config
 from queria.metadata_schema import (
     ColumnInfo,
@@ -162,32 +162,31 @@ def build_metadata(
     )
 
 
-def load_manifest(dataset_dir: Path) -> WritableManifest:
+def load_manifest(target_dir: Path) -> WritableManifest:
     """Load dbt manifest.json from the target directory."""
-    path = dataset_dir / TRANSFORM_DIR / "target" / "manifest.json"
+    path = target_dir / "manifest.json"
     if not path.exists():
         raise FileNotFoundError(f"{path} not found. Run dbt run first.")
     return WritableManifest.read_and_check_versions(str(path))
 
 
-def load_catalog(dataset_dir: Path) -> CatalogArtifact | None:
+def load_catalog(target_dir: Path) -> CatalogArtifact | None:
     """Load dbt catalog.json if it exists."""
-    path = dataset_dir / TRANSFORM_DIR / "target" / "catalog.json"
+    path = target_dir / "catalog.json"
     if not path.exists():
         return None
     return CatalogArtifact.read_and_check_versions(str(path))
 
 
-def generate_metadata(dataset_dir: Path) -> None:
+def generate_metadata(dataset_dir: Path, dist_dir: Path, target_dir: Path) -> None:
     """I/O wrapper: ファイル読み書き + ログ出力"""
     dataset_config = load_dataset_config(dataset_dir)
     datasource = dataset_config.name
-    manifest = load_manifest(dataset_dir)
-    catalog = load_catalog(dataset_dir)
+    manifest = load_manifest(target_dir)
+    catalog = load_catalog(target_dir)
 
     output = build_metadata(dataset_config, manifest, catalog, datasource)
 
-    dist_dir = dataset_dir / DIST_DIR
     dist_dir.mkdir(parents=True, exist_ok=True)
     output_path = dist_dir / METADATA_JSON
     with open(output_path, "w") as f:
@@ -198,10 +197,9 @@ def generate_metadata(dataset_dir: Path) -> None:
     print(f"  Datasource: {datasource} / Public tables: {total_tables}")
 
 
-def _copy_docs_to_dist(dataset_dir: Path) -> None:
-    """Copy dbt docs files from transform/target/ to dist/docs/."""
-    target_dir = dataset_dir / TRANSFORM_DIR / "target"
-    docs_dir = dataset_dir / DIST_DIR / "docs"
+def _copy_docs_to_dist(target_dir: Path, dist_dir: Path) -> None:
+    """Copy dbt docs files from target directory to dist/docs/."""
+    docs_dir = dist_dir / "docs"
     docs_dir.mkdir(parents=True, exist_ok=True)
     for name in ("index.html", "manifest.json", "catalog.json"):
         src = target_dir / name

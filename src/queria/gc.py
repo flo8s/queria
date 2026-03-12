@@ -6,7 +6,7 @@ from pathlib import Path
 
 import duckdb
 
-from queria import DIST_DIR, DUCKLAKE_FILE
+from queria import DUCKLAKE_FILE, ducklake_data_path
 from queria.s3 import create_s3_client
 from queria.config_schema import load_dataset_config
 
@@ -38,7 +38,7 @@ def _cleanup_scheduled_files(
     ducklake_file: Path, datasource: str, bucket: str
 ) -> int:
     """Run ducklake_cleanup_old_files to delete scheduled files from R2."""
-    data_path = f"s3://{bucket}/{datasource}/{DUCKLAKE_FILE}.files/"
+    data_path = ducklake_data_path(f"s3://{bucket}/{datasource}/{DUCKLAKE_FILE}")
     conn = duckdb.connect(":memory:")
     try:
         conn.execute("INSTALL ducklake; LOAD ducklake;")
@@ -92,6 +92,7 @@ def _list_r2_files(client, bucket: str, prefix: str) -> dict[str, dict]:
 
 def gc_datasource(
     dataset_dir: Path,
+    dist_dir: Path,
     *,
     bucket: str,
     force: bool = False,
@@ -102,7 +103,7 @@ def gc_datasource(
     datasource = config.name
     print(f"--- gc: {datasource} ---")
 
-    ducklake_file = dataset_dir / DIST_DIR / DUCKLAKE_FILE
+    ducklake_file = dist_dir / DUCKLAKE_FILE
     if not ducklake_file.exists():
         raise FileNotFoundError(
             f"{ducklake_file} not found. Run 'queria pull' first."
@@ -118,7 +119,7 @@ def gc_datasource(
     active_files = _get_active_files(ducklake_file)
 
     client = create_s3_client()
-    prefix = f"{datasource}/{DUCKLAKE_FILE}.files/"
+    prefix = f"{datasource}/{ducklake_data_path(DUCKLAKE_FILE)}"
     r2_files = _list_r2_files(client, bucket, prefix)
 
     orphaned = {}

@@ -1,40 +1,61 @@
-"""Pull: download ducklake.duckdb and metadata.json from S3."""
+"""Pull: download DuckLake catalog from S3 or local directory."""
 
+import shutil
 from pathlib import Path
 
 from botocore.exceptions import ClientError
 
-from queria import DIST_DIR, DUCKLAKE_FILE, METADATA_JSON
-from queria.s3 import create_s3_client
-from queria.config_schema import load_dataset_config
+from queria import DUCKLAKE_FILE, DUCKLAKE_SQLITE, METADATA_JSON
 
 
-def _download_file(client, bucket: str, key: str, dest: Path) -> None:
+def pull_from_local(source_dir: Path, dist_dir: Path, datasource: str) -> bool:
+    """Copy catalog from a local directory into dist/.
+
+    Returns True if catalog was found.
+    """
+    src = source_dir / datasource
+    if not src.exists():
+        return False
+
+    dist_dir.mkdir(parents=True, exist_ok=True)
+
+    for name in [DUCKLAKE_FILE, DUCKLAKE_SQLITE, METADATA_JSON]:
+        src_file = src / name
+        if src_file.exists():
+            print(f"  {datasource}/{name}")
+            shutil.copy2(src_file, dist_dir / name)
+
+    return True
+
+
+def _download_file(client, bucket: str, key: str, dest: Path) -> bool:
+    """Download a single file. Returns True if successful, False if 404."""
     try:
         print(f"  {key}")
         client.download_file(bucket, key, str(dest))
+        return True
     except ClientError as e:
         if e.response["Error"]["Code"] == "404":
-            print(f"  {key} not found in S3, skipping")
-            return
+            print(f"  {key} not found, skipping")
+            return False
         raise
 
 
-def pull_from_s3(client, bucket: str, dataset_dir: Path, datasource: str) -> None:
-    """Download ducklake.duckdb and metadata.json from S3."""
-    dist_dir = dataset_dir / DIST_DIR
+def fetch_from_s3(client, bucket: str, dist_dir: Path, datasource: str) -> bool:
+    """Download DuckLake catalog files from S3.
+
+    Returns True if ducklake.duckdb was found (fetch succeeded).
+    """
     dist_dir.mkdir(parents=True, exist_ok=True)
 
-    _download_file(client, bucket, f"{datasource}/ducklake.duckdb", dist_dir / DUCKLAKE_FILE)
-    _download_file(client, bucket, f"{datasource}/metadata.json", dist_dir / METADATA_JSON)
+    found = _download_file(
+        client, bucket, f"{datasource}/{DUCKLAKE_FILE}", dist_dir / DUCKLAKE_FILE
+    )
+    _download_file(
+        client, bucket, f"{datasource}/{DUCKLAKE_SQLITE}", dist_dir / DUCKLAKE_SQLITE
+    )
+    _download_file(
+        client, bucket, f"{datasource}/{METADATA_JSON}", dist_dir / METADATA_JSON
+    )
 
-
-def pull_datasource(dataset_dir: Path, *, bucket: str) -> None:
-    """Pull ducklake.duckdb from S3."""
-    config = load_dataset_config(dataset_dir)
-    datasource = config.name
-
-    print(f"--- pull: {datasource} ---")
-
-    client = create_s3_client()
-    pull_from_s3(client, bucket, dataset_dir, datasource)
+    return found

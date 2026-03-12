@@ -1,11 +1,42 @@
-"""Push: S3 upload / local copy."""
+"""Push: upload DuckLake catalog artifacts to S3 or local directory."""
 
 import shutil
 from pathlib import Path
 
-from queria import DIST_DIR, DUCKLAKE_FILE, METADATA_JSON
-from queria.config_schema import load_dataset_config
-from queria.s3 import create_s3_client
+from queria import DUCKLAKE_FILE, DUCKLAKE_SQLITE, METADATA_JSON
+
+
+def push_to_local(output_dir: Path, dist_dir: Path, datasource: str) -> None:
+    """Copy artifacts to a local directory."""
+    dest = output_dir / datasource
+    dest.mkdir(parents=True, exist_ok=True)
+
+    for name in [DUCKLAKE_FILE, DUCKLAKE_SQLITE, METADATA_JSON]:
+        src = dist_dir / name
+        if src.exists():
+            print(f"  {datasource}/{name}")
+            shutil.copy2(src, dest / name)
+
+    # Data files (ducklake.duckdb.files/)
+    ducklake_data_dir = f"{DUCKLAKE_FILE}.files"
+    data_src = dist_dir / ducklake_data_dir
+    if data_src.exists():
+        data_dest = dest / ducklake_data_dir
+        if data_dest.exists():
+            shutil.rmtree(data_dest)
+        print(f"  {datasource}/{ducklake_data_dir}/")
+        shutil.copytree(data_src, data_dest)
+
+    # docs
+    docs_src = dist_dir / "docs"
+    if docs_src.exists():
+        docs_dest = dest / "docs"
+        docs_dest.mkdir(exist_ok=True)
+        for name in ("index.html", "manifest.json", "catalog.json"):
+            src = docs_src / name
+            if src.exists():
+                print(f"  {datasource}/docs/{name}")
+                shutil.copy2(src, docs_dest / name)
 
 
 def _upload(
@@ -27,87 +58,56 @@ def _upload(
     client.upload_file(str(file_path), bucket, key, ExtraArgs=extra_args or None)
 
 
-def push_to_s3(client, bucket: str, dataset_dir: Path, datasource: str) -> None:
+def _upload_if_exists(
+    client,
+    bucket: str,
+    key: str,
+    file_path: Path,
+    content_type: str | None = None,
+    cache_control: str | None = None,
+) -> None:
+    """Upload a file to S3 only if it exists locally."""
+    if file_path.exists():
+        _upload(client, bucket, key, file_path, content_type, cache_control)
+
+
+def push_to_s3(client, bucket: str, dist_dir: Path, datasource: str) -> None:
     """Upload artifacts to S3."""
-    dist_dir = dataset_dir / DIST_DIR
 
     _upload(
-        client, bucket,
-        f"{datasource}/ducklake.duckdb",
+        client,
+        bucket,
+        f"{datasource}/{DUCKLAKE_FILE}",
         dist_dir / DUCKLAKE_FILE,
         cache_control="no-cache",
     )
 
-    _upload(
-        client, bucket,
+    _upload_if_exists(
+        client,
+        bucket,
+        f"{datasource}/{DUCKLAKE_SQLITE}",
+        dist_dir / DUCKLAKE_SQLITE,
+    )
+
+    _upload_if_exists(
+        client,
+        bucket,
         f"{datasource}/{METADATA_JSON}",
         dist_dir / METADATA_JSON,
         content_type="application/json; charset=utf-8",
     )
 
     docs_dir = dist_dir / "docs"
-    _upload(
-        client, bucket,
-        f"{datasource}/docs/index.html",
-        docs_dir / "index.html",
-        content_type="text/html; charset=utf-8",
-    )
-    _upload(
-        client, bucket,
-        f"{datasource}/docs/manifest.json",
-        docs_dir / "manifest.json",
-        content_type="application/json; charset=utf-8",
-    )
-    _upload(
-        client, bucket,
-        f"{datasource}/docs/catalog.json",
-        docs_dir / "catalog.json",
-        content_type="application/json; charset=utf-8",
-    )
-
-
-def push_to_local(output_dir: Path, dataset_dir: Path, datasource: str) -> None:
-    """Copy artifacts to a local directory."""
-    dist_dir = dataset_dir / DIST_DIR
-    dest = output_dir / datasource
-    dest.mkdir(parents=True, exist_ok=True)
-
-    shutil.copy2(dist_dir / DUCKLAKE_FILE, dest / DUCKLAKE_FILE)
-
-    # Data files (ducklake.duckdb.files/)
-    ducklake_data_dir = f"{DUCKLAKE_FILE}.files"
-    data_dir = dist_dir / ducklake_data_dir
-    if data_dir.exists():
-        dest_data = dest / ducklake_data_dir
-        if dest_data.exists():
-            shutil.rmtree(dest_data)
-        shutil.copytree(data_dir, dest_data)
-
-    shutil.copy2(dist_dir / METADATA_JSON, dest / METADATA_JSON)
-
-    docs_dir = dest / "docs"
-    docs_dir.mkdir(exist_ok=True)
-    src_docs_dir = dist_dir / "docs"
-    for name in ("index.html", "manifest.json", "catalog.json"):
-        src = src_docs_dir / name
-        if src.exists():
-            shutil.copy2(src, docs_dir / name)
-
-
-def push_datasource(
-    dataset_dir: Path,
-    *,
-    bucket: str | None = None,
-    output_dir: Path | None = None,
-) -> None:
-    """Push datasource artifacts."""
-    datasource = load_dataset_config(dataset_dir).name
-
-    print(f"--- push: {datasource} ---")
-
-    if bucket:
-        client = create_s3_client()
-        push_to_s3(client, bucket, dataset_dir, datasource)
-
-    if output_dir:
-        push_to_local(output_dir, dataset_dir, datasource)
+    if docs_dir.exists():
+        for name, ct in [
+            ("index.html", "text/html; charset=utf-8"),
+            ("manifest.json", "application/json; charset=utf-8"),
+            ("catalog.json", "application/json; charset=utf-8"),
+        ]:
+            _upload_if_exists(
+                client,
+                bucket,
+                f"{datasource}/docs/{name}",
+                docs_dir / name,
+                content_type=ct,
+            )
