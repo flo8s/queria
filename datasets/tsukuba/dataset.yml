@@ -2,7 +2,8 @@ title: "つくば市オープンデータ"
 description: "つくば市が公開している統計データ"
 cover: "🏙️"
 tags: ["オープンデータ", "つくば市"]
-ducklake_url: "https://data.queria.io/tsukuba/ducklake.duckdb"
+public_url: "https://data.queria.io"
+s3_url: "{% if env_var('S3_BUCKET', '') %}s3://{{ env_var('S3_BUCKET') }}{% endif %}"
 
 schemas:
   main:

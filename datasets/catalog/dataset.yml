@@ -1,7 +1,8 @@
 title: "Queriaカタログ"
 description: "Queriaで公開している全データセット・テーブルのメタデータ"
 tags: ["カタログ", "Queria"]
-ducklake_url: "https://data.queria.io/catalog/ducklake.duckdb"
+public_url: "https://data.queria.io"
+s3_url: "{% if env_var('S3_BUCKET', '') %}s3://{{ env_var('S3_BUCKET') }}{% endif %}"
 schemas:
   main:
     title: "メイン"

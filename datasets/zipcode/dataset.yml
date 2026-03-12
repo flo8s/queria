@@ -2,7 +2,8 @@ title: "郵便番号データ"
 description: "日本郵便が公開している全国の郵便番号データ"
 cover: "📮"
 tags: ["郵便番号", "住所", "日本郵便"]
-ducklake_url: "https://data.queria.io/zipcode/ducklake.duckdb"
+public_url: "https://data.queria.io"
+s3_url: "{% if env_var('S3_BUCKET', '') %}s3://{{ env_var('S3_BUCKET') }}{% endif %}"
 
 schemas:
   main:
