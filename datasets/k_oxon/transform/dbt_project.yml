@@ -25,6 +25,7 @@ models:
       mart:
         +materialized: view
     e_stat:
+      +enabled: false
       raw:
         +materialized: view
       mart:
