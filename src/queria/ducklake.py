@@ -44,6 +44,7 @@ def create_destination(storage_path: str = str(DIST_DIR)):
             catalog=f"sqlite:///{DIST_DIR / DUCKLAKE_SQLITE}",
             storage=storage,
         ),
+        override_data_path=True,
     )
 
 
