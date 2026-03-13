@@ -39,6 +39,9 @@ def main():
                 write_disposition="merge" if t.get("merge_keys") else "replace",
                 primary_key=t.get("merge_keys"),
                 app_id=app_id,
+                incremental=dlt.sources.incremental("time", initial_value="0000000000")
+                if t.get("incremental")
+                else None,
             )
             for t in tables_config["tables"]
         ],
