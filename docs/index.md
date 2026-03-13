@@ -1,4 +1,4 @@
-# queria
+# fdl
 
 dbt + DuckLake + Cloudflare R2 によるオープンデータ公開パイプライン。
 

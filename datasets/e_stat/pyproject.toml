@@ -1,10 +1,10 @@
 [project]
-name = "queria-estat"
+name = "fdl-estat"
 version = "0.1.0"
-description = "e-Stat dataset for queria"
+description = "e-Stat dataset for fdl"
 requires-python = ">=3.13"
 dependencies = [
-    "queria",
+    "fdl",
     "dbt-core>=1.10.0",
     "dbt-duckdb>=1.10.0",
     "dlt[ducklake]>=1.17.0",
@@ -13,4 +13,4 @@ dependencies = [
 ]
 
 [tool.uv.sources]
-queria = { path = "../../", editable = true }
+fdl = { path = "../../", editable = true }

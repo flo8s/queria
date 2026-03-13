@@ -3,15 +3,15 @@
 ## 全体の流れ
 
 ```
-スキャフォールド → モデル実装 → python pipeline.py → 動作確認 → queria push
+スキャフォールド → モデル実装 → python pipeline.py → 動作確認 → fdl push
 ```
 
 1. データセットディレクトリを作成し、`dataset.yml` にメタデータを定義
-2. `pyproject.toml` に `queria`, `dbt-core`, `dbt-duckdb` を依存に追加
+2. `pyproject.toml` に `fdl`, `dbt-core`, `dbt-duckdb` を依存に追加
 3. `pipeline.py` でビルドエントリポイントを実装
 4. dbt モデルを実装（raw → stg → mart）
-5. `uv run python pipeline.py` + `uv run queria metadata` でローカルビルド・確認
-6. `uv run queria pull` + `uv run python pipeline.py` + `uv run queria metadata` + `uv run queria push` で本番デプロイ
+5. `uv run python pipeline.py` + `uv run fdl metadata` でローカルビルド・確認
+6. `uv run fdl pull` + `uv run python pipeline.py` + `uv run fdl metadata` + `uv run fdl push` で本番デプロイ
 
 ## 1. データセットを作成する
 
@@ -39,10 +39,10 @@ datasets/my_city/
 name = "dataset-my-city"
 version = "0.1.0"
 requires-python = ">=3.13"
-dependencies = ["queria", "dbt-core>=1.11.2", "dbt-duckdb>=1.10.0"]
+dependencies = ["fdl", "dbt-core>=1.11.2", "dbt-duckdb>=1.10.0"]
 
 [tool.uv.sources]
-queria = { path = "../../", editable = true }
+fdl = { path = "../../", editable = true }
 ```
 
 ### pipeline.py
@@ -296,7 +296,7 @@ models:
 | published | No | `true` にするとフロントエンドのデータセット一覧に表示される（UI表示制御） |
 
 `access: public` は dbt のモデルアクセス制御で、他の dbt プロジェクトから `ref()` できるようにする設定。
-`meta.published: true` は queria 独自のフラグで、フロントエンドのデータセット一覧に表示するかどうかを制御する。metadata.json にはすべてのモデル（raw/stg/mart）が含まれる。
+`meta.published: true` は fdl 独自のフラグで、フロントエンドのデータセット一覧に表示するかどうかを制御する。metadata.json にはすべてのモデル（raw/stg/mart）が含まれる。
 
 `config.contract.enforced: true` を設定すると、カラムの `data_type` と `constraints` がビルド時に検証される。mart 層では設定を推奨する。
 
@@ -307,7 +307,7 @@ cd datasets/my_city
 
 # 単一データセットのビルド
 uv run python pipeline.py
-uv run queria metadata
+uv run fdl metadata
 
 # 全データセットの一括ビルド
 ../../scripts/build.sh dev
@@ -353,20 +353,20 @@ cd /path/to/queria-web && pnpm dev
 
 ```bash
 cd datasets/my_city
-uv run queria pull
+uv run fdl pull
 uv run python pipeline.py
-uv run queria metadata
-uv run queria push
+uv run fdl metadata
+uv run fdl push
 ```
 
 新しいデータセットを追加した場合、catalog の再ビルドも必要:
 
 ```bash
 cd datasets/catalog
-uv run queria pull
+uv run fdl pull
 uv run python pipeline.py
-uv run queria metadata
-uv run queria push
+uv run fdl metadata
+uv run fdl push
 ```
 
 GitHub Actions で main ブランチに push すると、自動デプロイが実行される。
@@ -413,7 +413,7 @@ datasets/my_api/
 dlt は SQLite 形式の DuckLake カタログに書き込む。事前に初期化が必要:
 
 ```bash
-uv run queria init --sqlite
+uv run fdl init --sqlite
 ```
 
 ### pipeline.py

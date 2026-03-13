@@ -9,7 +9,7 @@ import yaml
 from dbt.cli.main import dbtRunner
 from estat_api_dlt_helper import estat_source, estat_table
 
-from queria.ducklake import create_destination
+from fdl.ducklake import create_destination
 
 # dlt の ArrowExtractor が merge 時に出す column hints 差異の WARNING を抑制
 logging.getLogger("dlt.extract.extractors").setLevel(logging.ERROR)

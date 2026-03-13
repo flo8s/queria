@@ -1,18 +1,18 @@
-"""queria CLI entry point."""
+"""fdl CLI entry point."""
 
 from pathlib import Path
 
 import typer
 from typer.main import Typer
 
-from queria import DIST_DIR
+from fdl import DIST_DIR
 
 app = typer.Typer()
 
 
 @app.callback()
 def callback() -> None:
-    """queria: DuckLake catalog management CLI"""
+    """fdl: DuckLake catalog management CLI"""
 
 
 @app.command()
@@ -22,7 +22,7 @@ def init(
     ),
 ) -> None:
     """Initialize DuckLake catalog"""
-    from queria.ducklake import init_ducklake
+    from fdl.ducklake import init_ducklake
 
     dataset_dir = Path.cwd()
     init_ducklake(dataset_dir / DIST_DIR, dataset_dir, sqlite=sqlite)
@@ -36,8 +36,8 @@ def pull(
     ),
 ) -> None:
     """Pull DuckLake catalog from source (init if not found)"""
-    from queria.config_schema import load_dataset_config
-    from queria.ducklake import init_ducklake
+    from fdl.config_schema import load_dataset_config
+    from fdl.ducklake import init_ducklake
 
     dataset_dir = Path.cwd()
     dist_dir = dataset_dir / DIST_DIR
@@ -51,14 +51,14 @@ def pull(
     print(f"--- pull: {datasource} ---")
 
     if source.startswith("s3://"):
-        from queria.pull import fetch_from_s3
-        from queria.s3 import create_s3_client
+        from fdl.pull import fetch_from_s3
+        from fdl.s3 import create_s3_client
 
         bucket = source.removeprefix("s3://")
         client = create_s3_client()
         fetched = fetch_from_s3(client, bucket, dist_dir, datasource)
     else:
-        from queria.pull import pull_from_local
+        from fdl.pull import pull_from_local
 
         fetched = pull_from_local(Path(source), dist_dir, datasource)
 
@@ -72,8 +72,8 @@ def push(
     dest: str = typer.Argument(None, help="Destination (local path or s3://bucket)"),
 ) -> None:
     """Push build artifacts"""
-    from queria.config_schema import load_dataset_config
-    from queria.ducklake import convert_sqlite_to_duckdb
+    from fdl.config_schema import load_dataset_config
+    from fdl.ducklake import convert_sqlite_to_duckdb
 
     dataset_dir = Path.cwd()
     dist_dir = dataset_dir / DIST_DIR
@@ -88,14 +88,14 @@ def push(
     convert_sqlite_to_duckdb(dataset_dir)
 
     if dest.startswith("s3://"):
-        from queria.push import push_to_s3
-        from queria.s3 import create_s3_client
+        from fdl.push import push_to_s3
+        from fdl.s3 import create_s3_client
 
         bucket = dest.removeprefix("s3://")
         client = create_s3_client()
         push_to_s3(client, bucket, dist_dir, datasource)
     else:
-        from queria.push import push_to_local
+        from fdl.push import push_to_local
 
         push_to_local(Path(dest), dist_dir, datasource)
 
@@ -105,7 +105,7 @@ def metadata(
     target_dir: str = typer.Argument(..., help="dbt target directory path"),
 ) -> None:
     """Generate metadata.json from dbt artifacts"""
-    from queria.metadata import _copy_docs_to_dist, generate_metadata
+    from fdl.metadata import _copy_docs_to_dist, generate_metadata
 
     dataset_dir = Path.cwd()
     dist_dir = dataset_dir / DIST_DIR

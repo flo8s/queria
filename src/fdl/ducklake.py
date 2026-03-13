@@ -5,8 +5,8 @@ from pathlib import Path
 
 import duckdb
 
-from queria import DIST_DIR, DUCKLAKE_FILE, DUCKLAKE_SQLITE, ducklake_data_path
-from queria.config_schema import load_dataset_config
+from fdl import DIST_DIR, DUCKLAKE_FILE, DUCKLAKE_SQLITE, ducklake_data_path
+from fdl.config_schema import load_dataset_config
 
 
 def create_destination(storage_path: str = str(DIST_DIR)):

@@ -47,10 +47,10 @@ for ds in "$REPO_DIR"/datasets/*/; do
   fi
   if (
     cd "$ds" && uv sync --quiet && \
-    uv run queria pull "$PULL_PUSH_DEST" && \
+    uv run fdl pull "$PULL_PUSH_DEST" && \
     uv run python pipeline.py && \
-    uv run queria metadata "$dbt_target" && \
-    uv run queria push "$PULL_PUSH_DEST"
+    uv run fdl metadata "$dbt_target" && \
+    uv run fdl push "$PULL_PUSH_DEST"
   ); then
     :
   else
@@ -72,10 +72,10 @@ fi
 (
   cd "$REPO_DIR/datasets/catalog" &&
   uv sync --quiet && \
-  uv run queria pull "$PULL_PUSH_DEST" && \
+  uv run fdl pull "$PULL_PUSH_DEST" && \
   env "${CATALOG_ENV[@]}" uv run python pipeline.py && \
-  uv run queria metadata transform/target && \
-  uv run queria push "$PULL_PUSH_DEST"
+  uv run fdl metadata transform/target && \
+  uv run fdl push "$PULL_PUSH_DEST"
 )
 
 if [ ${#failed[@]} -gt 0 ]; then

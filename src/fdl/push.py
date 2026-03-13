@@ -3,7 +3,7 @@
 import shutil
 from pathlib import Path
 
-from queria import DUCKLAKE_FILE, DUCKLAKE_SQLITE, METADATA_JSON
+from fdl import DUCKLAKE_FILE, DUCKLAKE_SQLITE, METADATA_JSON
 
 
 def push_to_local(output_dir: Path, dist_dir: Path, datasource: str) -> None:

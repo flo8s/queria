@@ -7,7 +7,7 @@ import urllib.request
 from pathlib import Path
 
 from dbt.cli.main import dbtRunner
-from queria import DIST_DIR
+from fdl import DIST_DIR
 
 
 def main():

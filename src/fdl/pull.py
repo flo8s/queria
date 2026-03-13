@@ -5,7 +5,7 @@ from pathlib import Path
 
 from botocore.exceptions import ClientError
 
-from queria import DUCKLAKE_FILE, DUCKLAKE_SQLITE, METADATA_JSON
+from fdl import DUCKLAKE_FILE, DUCKLAKE_SQLITE, METADATA_JSON
 
 
 def pull_from_local(source_dir: Path, dist_dir: Path, datasource: str) -> bool:

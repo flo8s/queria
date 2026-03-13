@@ -6,9 +6,9 @@ from pathlib import Path
 
 import duckdb
 
-from queria import DUCKLAKE_FILE, ducklake_data_path
-from queria.s3 import create_s3_client
-from queria.config_schema import load_dataset_config
+from fdl import DUCKLAKE_FILE, ducklake_data_path
+from fdl.s3 import create_s3_client
+from fdl.config_schema import load_dataset_config
 
 
 def _format_size(size_bytes: int) -> str:
@@ -106,7 +106,7 @@ def gc_datasource(
     ducklake_file = dist_dir / DUCKLAKE_FILE
     if not ducklake_file.exists():
         raise FileNotFoundError(
-            f"{ducklake_file} not found. Run 'queria pull' first."
+            f"{ducklake_file} not found. Run 'fdl pull' first."
         )
 
     # Step 1: Handle files scheduled for deletion by DuckLake

@@ -40,7 +40,7 @@ queria/
 ├── packages/
 │   └── queria_common/     # 共有 dbt マクロ
 ├── src/
-│   └── queria/            # DuckLake カタログ管理 CLI
+│   └── fdl/               # DuckLake カタログ管理 CLI
 ├── scripts/               # ビルド・デプロイスクリプト
 └── pyproject.toml
 ```
@@ -54,7 +54,7 @@ queria/
 ```bash
 cd datasets/tsukuba
 uv run python pipeline.py
-uv run queria metadata
+uv run fdl metadata
 ```
 
 ### 全データセットの一括ビルド
@@ -84,10 +84,10 @@ R2 の `queria-dev` バケットにデプロイして動作確認する:
 
 ```bash
 cd datasets/tsukuba
-uv run queria pull
+uv run fdl pull
 uv run python pipeline.py
-uv run queria metadata
-uv run queria push
+uv run fdl metadata
+uv run fdl push
 ```
 
 catalog データセットは他データセットの metadata.json を参照するため、最後にビルドする:
@@ -95,13 +95,13 @@ catalog データセットは他データセットの metadata.json を参照す
 ```bash
 # 1. 各データセットをビルド・デプロイ
 cd datasets/tsukuba
-uv run queria pull && uv run python pipeline.py && uv run queria metadata && uv run queria push
+uv run fdl pull && uv run python pipeline.py && uv run fdl metadata && uv run fdl push
 cd ../k_oxon
-uv run queria pull && uv run python pipeline.py && uv run queria metadata && uv run queria push
+uv run fdl pull && uv run python pipeline.py && uv run fdl metadata && uv run fdl push
 
 # 2. 最後に catalog をビルド・デプロイ
 cd ../catalog
-uv run queria pull && uv run python pipeline.py && uv run queria metadata && uv run queria push
+uv run fdl pull && uv run python pipeline.py && uv run fdl metadata && uv run fdl push
 ```
 
 ### GitHub Actions

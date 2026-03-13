@@ -9,9 +9,9 @@ from dbt.artifacts.resources.v1.model import Model
 from dbt.artifacts.schemas.catalog import CatalogArtifact
 from dbt.artifacts.schemas.manifest import WritableManifest
 
-from queria import METADATA_JSON
-from queria.config_schema import DatasetConfig, load_dataset_config
-from queria.metadata_schema import (
+from fdl import METADATA_JSON
+from fdl.config_schema import DatasetConfig, load_dataset_config
+from fdl.metadata_schema import (
     ColumnInfo,
     DatasetMetadata,
     LineageInfo,

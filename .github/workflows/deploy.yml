@@ -57,10 +57,10 @@ jobs:
           DUCKLAKE_STORAGE: "s3://${{ vars.S3_BUCKET }}/${{ matrix.dataset }}"
         run: |
           cd "datasets/${{ matrix.dataset }}"
-          uv run queria pull
+          uv run fdl pull
           uv run python pipeline.py
-          uv run queria metadata
-          uv run queria push
+          uv run fdl metadata
+          uv run fdl push
 
   deploy-catalog:
     runs-on: ubuntu-latest
@@ -90,10 +90,10 @@ jobs:
           DUCKLAKE_STORAGE: "s3://${{ vars.S3_BUCKET }}/catalog"
         run: |
           cd datasets/catalog
-          uv run queria pull
+          uv run fdl pull
           uv run python pipeline.py
-          uv run queria metadata
-          uv run queria push
+          uv run fdl metadata
+          uv run fdl push
 
       - name: Sync catalog to D1
         run: uv run --with cloudflare python scripts/sync_catalog_d1.py

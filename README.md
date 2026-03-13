@@ -71,7 +71,7 @@ queria/
 │       ├── pipeline.py
 │       └── transform/
 ├── src/
-│   └── queria/                # DuckLake catalog management CLI
+│   └── fdl/                   # DuckLake catalog management CLI
 │       ├── cli.py             # CLI entry point (init, pull, push, metadata, gc)
 │       ├── ducklake.py        # DuckLake catalog initialization
 │       ├── pull.py            # S3 download
@@ -97,25 +97,25 @@ cd datasets/tsukuba
 uv run python pipeline.py
 
 # Production build + deploy
-uv run queria pull
+uv run fdl pull
 uv run python pipeline.py
-uv run queria metadata
-uv run queria push
+uv run fdl metadata
+uv run fdl push
 ```
 
 Each dataset has a `pipeline.py` entry point that handles dbt execution.
-The `queria` CLI manages DuckLake catalog operations (init, pull, push, metadata, gc).
+The `fdl` CLI manages DuckLake catalog operations (init, pull, push, metadata, gc).
 
 The catalog dataset reads metadata from other datasources on R2, so run it last:
 
 ```bash
 # 1. Build and push each dataset
 cd datasets/tsukuba
-uv run queria pull && uv run python pipeline.py && uv run queria metadata && uv run queria push
+uv run fdl pull && uv run python pipeline.py && uv run fdl metadata && uv run fdl push
 
 # 2. Build and push catalog last
 cd datasets/catalog
-uv run queria pull && uv run python pipeline.py && uv run queria metadata && uv run queria push
+uv run fdl pull && uv run python pipeline.py && uv run fdl metadata && uv run fdl push
 ```
 
 The `push` command and prd target require the following environment variables:

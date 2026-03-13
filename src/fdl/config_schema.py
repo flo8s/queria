@@ -7,7 +7,7 @@ import yaml
 from jinja2 import Environment
 from pydantic import BaseModel
 
-from queria import DATASET_YML, DUCKLAKE_FILE
+from fdl import DATASET_YML, DUCKLAKE_FILE
 
 
 def _env_var(name: str, default: str | None = None) -> str:

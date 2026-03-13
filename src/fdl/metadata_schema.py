@@ -4,7 +4,7 @@ from typing import Literal
 
 from pydantic import BaseModel
 
-from queria.config_schema import DependencyInfo
+from fdl.config_schema import DependencyInfo
 
 Materialization = Literal["table", "view", "incremental"]
 

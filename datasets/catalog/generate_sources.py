@@ -15,7 +15,7 @@ from pathlib import Path
 
 import yaml
 
-from queria.config_schema import load_dataset_config
+from fdl.config_schema import load_dataset_config
 
 CATALOG_DIR = Path(__file__).resolve().parent
 DATASOURCES_YML = CATALOG_DIR / "datasources.yml"
