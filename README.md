@@ -60,16 +60,15 @@ queria/
 │   ├── tsukuba/               # Tsukuba city datasource
 │   │   ├── dataset.yml        # Dataset metadata definition
 │   │   ├── pipeline.py        # Build entry point (dbt execution)
-│   │   └── transform/         # dbt project
-│   │       ├── models/
-│   │       │   ├── raw/       # External CSV ingestion
-│   │       │   ├── stg/       # Data transformation
-│   │       │   └── mart/      # Public views
-│   │       └── profiles.yml   # dbt profiles (dev/prd)
+│   │   ├── dbt_project.yml
+│   │   ├── profiles.yml       # dbt profiles (dev/prd)
+│   │   └── models/
+│   │       ├── raw/           # External CSV ingestion
+│   │       ├── stg/           # Data transformation
+│   │       └── mart/          # Public views
 │   └── k_oxon/                # K-Oxon datasource (GIS + e-Stat)
 │       ├── dataset.yml
-│       ├── pipeline.py
-│       └── transform/
+│       └── pipeline.py
 ├── src/
 │   └── fdl/                   # DuckLake catalog management CLI
 │       ├── cli.py             # CLI entry point (init, pull, push, metadata, gc)
@@ -83,7 +82,7 @@ queria/
 
 ### dbt Profiles
 
-profiles.yml is included in each datasource's transform/ directory.
+profiles.yml is included in each datasource's directory.
 
 - dev target: writes Parquet locally
 - prd target: writes directly to R2 S3 path (requires environment variables)

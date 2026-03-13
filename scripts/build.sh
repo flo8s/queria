@@ -33,12 +33,6 @@ for ds in "$REPO_DIR"/datasets/*/; do
   name="$(basename "$ds")"
   echo ""
   echo "--- $name ---"
-  # dbt target directory depends on project layout
-  if [ -f "$ds/dbt_project.yml" ]; then
-    dbt_target="target"
-  else
-    dbt_target="transform/target"
-  fi
   # stg/prd: DUCKLAKE_STORAGE をストレージベースパスに設定
   if [[ "$MODE" == "stg" || "$MODE" == "prd" ]]; then
     export DUCKLAKE_STORAGE="s3://$S3_BUCKET/$name"
@@ -49,7 +43,7 @@ for ds in "$REPO_DIR"/datasets/*/; do
     cd "$ds" && uv sync --quiet && \
     uv run fdl pull "$PULL_PUSH_DEST" && \
     uv run python pipeline.py && \
-    uv run fdl metadata "$dbt_target" && \
+    uv run fdl metadata && \
     uv run fdl push "$PULL_PUSH_DEST"
   ); then
     :
@@ -74,7 +68,7 @@ fi
   uv sync --quiet && \
   uv run fdl pull "$PULL_PUSH_DEST" && \
   env "${CATALOG_ENV[@]}" uv run python pipeline.py && \
-  uv run fdl metadata transform/target && \
+  uv run fdl metadata && \
   uv run fdl push "$PULL_PUSH_DEST"
 )
 

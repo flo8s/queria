@@ -44,14 +44,13 @@ datasets/
     pyproject.toml           # fdl + dbt-core + dbt-duckdb を dependency として指定
     pipeline.py              # ビルドエントリポイント (ingestion + dbt deps/run/docs generate)
     tables.yml               # (dlt 使用時) テーブル定義
-    transform/               # dbt プロジェクト
-      dbt_project.yml
-      profiles.yml           # dev (ローカル) / prd (S3) ターゲット
-      models/
-        raw/                 # 外部データ取り込み (materialized: table)
-        stg/                 # 変換・正規化 (materialized: view)
-        mart/                # 公開用ビュー (materialized: view)
-      macros/
+    dbt_project.yml
+    profiles.yml             # dev (ローカル) / prd (S3) ターゲット
+    models/
+      raw/                   # 外部データ取り込み (materialized: table)
+      stg/                   # 変換・正規化 (materialized: view)
+      mart/                  # 公開用ビュー (materialized: view)
+    macros/
     dist/                    # ビルド成果物 (生成物)
       ducklake.duckdb
       ducklake.duckdb.files/ # Parquet データ

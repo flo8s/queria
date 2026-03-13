@@ -4,19 +4,15 @@
 # dbt (per dataset)
 datasets/*/target/
 datasets/*/dbt_packages/
+datasets/*/dbt_internal_packages/
 datasets/*/logs/
 datasets/*/.user.yml
-# legacy: transform/ サブディレクトリを使うデータセット
-datasets/*/transform/target/
-datasets/*/transform/dbt_packages/
-datasets/*/transform/logs/
-datasets/*/transform/.user.yml
 
 # dlt pipeline state
 datasets/*/dist/.dlt_pipelines/
 datasets/*/ingestion/.dlt/
 
-# DuckLake (transform/ 内の一時ファイル)
+# DuckLake
 *.ducklake
 *.ducklake.files/
 *.ducklake.wal

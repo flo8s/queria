@@ -22,14 +22,13 @@ datasets/my_city/
 ├── dataset.yml
 ├── pyproject.toml
 ├── pipeline.py
-└── transform/
-    ├── dbt_project.yml
-    ├── profiles.yml
-    ├── packages.yml
-    └── models/
-        ├── raw/
-        ├── stg/
-        └── mart/
+├── dbt_project.yml
+├── profiles.yml
+├── packages.yml
+└── models/
+    ├── raw/
+    ├── stg/
+    └── mart/
 ```
 
 ### pyproject.toml
@@ -61,19 +60,17 @@ def main():
     target = sys.argv[1] if len(sys.argv) > 1 else "dev"
 
     dbt = dbtRunner()
-
-    dbt_args = ["--project-dir", "transform"]
     target_args = ["--target", target]
 
-    result = dbt.invoke(["deps", *dbt_args])
+    result = dbt.invoke(["deps"])
     if not result.success:
         raise SystemExit("dbt deps failed")
 
-    result = dbt.invoke(["run", *dbt_args, *target_args])
+    result = dbt.invoke(["run", *target_args])
     if not result.success:
         raise SystemExit("dbt run failed")
 
-    result = dbt.invoke(["docs", "generate", *dbt_args, *target_args])
+    result = dbt.invoke(["docs", "generate", *target_args])
     if not result.success:
         raise SystemExit("dbt docs generate failed")
 ```
@@ -153,7 +150,7 @@ ducklake_url は `https://data.queria.io/{データセット名}/ducklake.duckdb
 ) }}
 ```
 
-取り込み用のマクロは `transform/macros/` に定義する。
+取り込み用のマクロは `macros/` に定義する。
 Shift-JIS の CSV を読む場合の例:
 
 ```sql
@@ -400,12 +397,11 @@ datasets/my_api/
 ├── pyproject.toml
 ├── pipeline.py            # ingestion + dbt + metadata
 ├── tables.yml             # テーブル定義（API パラメータ、merge_keys）
-└── transform/
-    ├── dbt_project.yml
-    ├── profiles.yml
-    └── models/
-        ├── raw/           # SELECT columns FROM source (view)
-        └── mart/          # フィルタ・加工ビュー (view)
+├── dbt_project.yml
+├── profiles.yml
+└── models/
+    ├── raw/               # SELECT columns FROM source (view)
+    └── mart/              # フィルタ・加工ビュー (view)
 ```
 
 ### 事前準備

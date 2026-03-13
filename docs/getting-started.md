@@ -28,12 +28,12 @@ queria/
 │   ├── tsukuba/           #   つくば市オープンデータ
 │   │   ├── dataset.yml    #     メタデータ定義
 │   │   ├── pipeline.py    #     ビルドエントリポイント
-│   │   └── transform/     #     dbt プロジェクト
-│   │       ├── models/
-│   │       │   ├── raw/   #       外部データ取り込み
-│   │       │   ├── stg/   #       変換・正規化
-│   │       │   └── mart/  #       公開用ビュー
-│   │       └── profiles.yml
+│   │   ├── dbt_project.yml
+│   │   ├── profiles.yml
+│   │   └── models/        #     dbt モデル
+│   │       ├── raw/       #       外部データ取り込み
+│   │       ├── stg/       #       変換・正規化
+│   │       └── mart/      #       公開用ビュー
 │   ├── zipcode/
 │   ├── k_oxon/            #   K-Oxon データ (GIS + e-Stat)
 │   └── catalog/           #   全データセットの統合カタログ

@@ -1,0 +1,4 @@
+packages:
+- local: ../../packages/queria_common
+  name: queria_common
+sha1_hash: 409935bea359e76f4e806af7d0b387f02d4bf130

@@ -12,17 +12,15 @@ def main():
     # dbt ビルド
     dbt = dbtRunner()
 
-    dbt_args = ["--project-dir", "transform", "--profiles-dir", "transform"]
-
-    result = dbt.invoke(["deps", *dbt_args])
+    result = dbt.invoke(["deps"])
     if not result.success:
         raise SystemExit("dbt deps failed")
 
-    result = dbt.invoke(["run", *dbt_args])
+    result = dbt.invoke(["run"])
     if not result.success:
         raise SystemExit("dbt run failed")
 
-    result = dbt.invoke(["docs", "generate", *dbt_args])
+    result = dbt.invoke(["docs", "generate"])
     if not result.success:
         raise SystemExit("dbt docs generate failed")
 

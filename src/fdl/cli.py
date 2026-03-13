@@ -102,7 +102,7 @@ def push(
 
 @app.command()
 def metadata(
-    target_dir: str = typer.Argument(..., help="dbt target directory path"),
+    target_dir: str = typer.Argument("target", help="dbt target directory path"),
 ) -> None:
     """Generate metadata.json from dbt artifacts"""
     from fdl.metadata import _copy_docs_to_dist, generate_metadata
