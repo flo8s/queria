@@ -2,7 +2,7 @@ from pathlib import Path
 
 DATASET_YML = "dataset.yml"
 METADATA_JSON = "metadata.json"
-DIST_DIR = Path("dist")
+DIST_DIR = Path(".fdl")
 DUCKLAKE_FILE = "ducklake.duckdb"
 DUCKLAKE_SQLITE = "ducklake.sqlite"
 

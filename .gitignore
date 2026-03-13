@@ -9,7 +9,7 @@ datasets/*/logs/
 datasets/*/.user.yml
 
 # dlt pipeline state
-datasets/*/dist/.dlt_pipelines/
+datasets/*/.fdl/.dlt_pipelines/
 datasets/*/ingestion/.dlt/
 
 # DuckLake
@@ -31,6 +31,9 @@ docs/research/*_raw.json
 
 # MkDocs
 site/
+
+# fdl
+.fdl/
 
 # Node.js
 node_modules/

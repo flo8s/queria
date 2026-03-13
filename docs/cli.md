@@ -17,8 +17,8 @@ uv run fdl init [--sqlite]
 |---|---|
 | --sqlite | SQLite 形式でカタログを初期化する（dlt 連携用） |
 
-`dist/ducklake.duckdb` を作成し、`dataset.yml` の `ducklake_url` から DATA_PATH を設定する。
-`--sqlite` を指定した場合は `dist/ducklake.sqlite` を作成する（dlt が SQLite カタログに書き込み、push 時に DuckDB へ変換される）。
+`.fdl/ducklake.duckdb` を作成し、`dataset.yml` の `ducklake_url` から DATA_PATH を設定する。
+`--sqlite` を指定した場合は `.fdl/ducklake.sqlite` を作成する（dlt が SQLite カタログに書き込み、push 時に DuckDB へ変換される）。
 
 S3 上にカタログが存在しない場合、`fdl pull` が自動的に `init` を実行する。
 
@@ -35,13 +35,13 @@ uv run fdl pull
 |---|---|
 | --bucket | S3 バケット名（環境変数 `S3_BUCKET` でも指定可） |
 
-ダウンロードしたファイルは `dist/` に配置される。
+ダウンロードしたファイルは `.fdl/` に配置される。
 
 環境変数 `S3_ENDPOINT`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY` が必要。
 
 ## fdl metadata
 
-metadata.json を生成し、dbt ドキュメントを dist/ にコピーする。
+metadata.json を生成し、dbt ドキュメントを .fdl/ にコピーする。
 
 ```bash
 uv run fdl metadata
@@ -54,8 +54,8 @@ dbt の成果物（manifest.json, catalog.json）と dataset.yml から metadata
 
 | ファイル | 説明 |
 |---|---|
-| dist/metadata.json | メタデータ（フロントエンド用） |
-| dist/docs/ | dbt ドキュメント（index.html, manifest.json, catalog.json） |
+| .fdl/metadata.json | メタデータ（フロントエンド用） |
+| .fdl/docs/ | dbt ドキュメント（index.html, manifest.json, catalog.json） |
 
 ## fdl push
 
