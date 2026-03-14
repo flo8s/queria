@@ -17,7 +17,7 @@ catalog:
         s3_endpoint: "{{ env_var('S3_ENDPOINT', '') }}"
         s3_region: auto
       attach:
-        - path: "ducklake:dist/ducklake.duckdb"
+        - path: "ducklake:.fdl/ducklake.duckdb"
           alias: catalog
           is_ducklake: true
           options:
