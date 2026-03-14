@@ -1,0 +1,11 @@
+[project]
+name = "reinfolib"
+version = "0.1.0"
+description = "不動産情報ライブラリ API クライアント"
+requires-python = ">=3.13"
+license = "MIT"
+dependencies = ["requests>=2.32"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
