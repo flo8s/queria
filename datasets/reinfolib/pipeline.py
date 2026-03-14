@@ -44,7 +44,7 @@ def ingest() -> None:
 
     with connect() as conn, ReinfolibClient(api_key) as client:
         conn.execute("CREATE SCHEMA IF NOT EXISTS reinfolib._source")
-        quarters = _pending_quarters(conn, all_quarters)
+        quarters = _pending_quarters(conn, all_quarters, area_count=len(areas))
         if not quarters:
             print("  新しいデータなし")
             return
@@ -60,8 +60,12 @@ def ingest_trade_prices(
     quarters: list[YearQuarter],
 ) -> None:
     """XIT001: 取引価格・成約価格を取得。"""
+    current = quarters[-1]
+    completed = _completed_pairs(conn)
 
     for area, (year, quarter) in product(areas, quarters):
+        if (area, year, quarter) in completed and (year, quarter) != current:
+            continue
         rows = client.get_real_estate_prices(
             year=year,
             quarter=quarter,
@@ -83,21 +87,41 @@ def ingest_trade_prices(
             f"CREATE TABLE IF NOT EXISTS {TABLE} AS SELECT * FROM _batch WITH NO DATA"
         )
         # 同一パーティションの既存データを削除して再挿入（冪等性を保証）
+        # トランザクションで囲み、中断時にDELETEだけ残らないようにする
+        conn.execute("BEGIN")
         conn.execute(
             f"DELETE FROM {TABLE} WHERE _area_code = ? AND _year = ? AND _quarter = ?",
             [area, year, quarter],
         )
         conn.execute(f"INSERT INTO {TABLE} SELECT * FROM _batch")
+        conn.execute("COMMIT")
         conn.unregister("_batch")
 
         print(f"  XIT001 area={area} {year}Q{quarter}: {len(rows)} rows")
 
 
+def _completed_pairs(
+    conn: duckdb.DuckDBPyConnection,
+) -> set[tuple[str, int, int]]:
+    """取得済みの (area_code, year, quarter) ペアを返す。"""
+    try:
+        return {
+            (row[0], row[1], row[2])
+            for row in conn.execute(
+                f"SELECT DISTINCT _area_code, _year, _quarter FROM {TABLE}"
+            ).fetchall()
+        }
+    except duckdb.CatalogException:
+        return set()
+
+
 def _pending_quarters(
     conn: duckdb.DuckDBPyConnection,
     quarters: list[YearQuarter],
+    *,
+    area_count: int,
 ) -> list[YearQuarter]:
-    """未取得の四半期を返す。最新四半期は常に再取得対象。"""
+    """未取得・不完全な四半期を返す。最新四半期は常に再取得対象。"""
     exists = conn.execute(
         "SELECT count(*) FROM information_schema.tables "
         "WHERE table_catalog = 'reinfolib' AND table_schema = '_source' "
@@ -107,15 +131,19 @@ def _pending_quarters(
     if not exists:
         return quarters
 
-    existing = {
+    # 全 area が揃っている四半期のみ「完了」とみなす
+    complete = {
         (row[0], row[1])
         for row in conn.execute(
-            f"SELECT DISTINCT _year, _quarter FROM {TABLE}"
+            f"SELECT _year, _quarter FROM {TABLE} "
+            f"GROUP BY _year, _quarter "
+            f"HAVING COUNT(DISTINCT _area_code) >= ?",
+            [area_count],
         ).fetchall()
     }
 
     current = quarters[-1]
-    return [q for q in quarters if q not in existing or q == current]
+    return [q for q in quarters if q not in complete or q == current]
 
 
 def _generate_quarters(

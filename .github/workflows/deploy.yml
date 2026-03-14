@@ -59,6 +59,10 @@ jobs:
         run: |
           cd "datasets/${{ matrix.dataset }}"
           uv run fdl pull
+
+          # 中断時にカタログをS3に保全（データファイルは既にS3上にある）
+          trap 'echo "--- interrupted: pushing catalog ---"; uv run fdl push' INT TERM
+
           uv run python pipeline.py
           uv run fdl metadata
           uv run fdl push
