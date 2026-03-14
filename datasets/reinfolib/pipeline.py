@@ -29,19 +29,23 @@ def main():
     api_key = os.environ["REINFOLIB_API_KEY"]
     areas = [f"{a:02d}" for a in range(1, 48)]
     all_quarters = _generate_quarters(START)
+    logger.info("start: %d areas × %d quarters", len(areas), len(all_quarters))
 
     with connect() as conn, ReinfolibClient(api_key) as client:
         conn.execute("CREATE SCHEMA IF NOT EXISTS reinfolib._source")
         ingest_trade_prices(conn, client, areas=areas, quarters=all_quarters)
 
+    logger.info("dbt deps")
     result = dbtRunner().invoke(["deps"])
     if not result.success:
         raise SystemExit("dbt deps failed")
 
+    logger.info("dbt run")
     result = dbtRunner().invoke(["run"])
     if not result.success:
         raise SystemExit("dbt run failed")
 
+    logger.info("dbt docs generate")
     result = dbtRunner().invoke(["docs", "generate"])
     if not result.success:
         raise SystemExit("dbt docs generate failed")
@@ -57,7 +61,10 @@ def ingest_trade_prices(
     """XIT001: 取引価格・成約価格を取得。"""
     current = quarters[-1]
     completed = _completed_pairs(conn)
+    total = len(areas) * len(quarters)
+    logger.info("completed: %d / %d pairs", len(completed), total)
 
+    fetched = 0
     for area, (year, quarter) in product(areas, quarters):
         # すでに取得済みの (area, year, quarter) はスキップ。ただし最新の四半期は再取得して更新する
         if (area, year, quarter) in completed and (year, quarter) != current:
@@ -70,7 +77,9 @@ def ingest_trade_prices(
             price_classification=PRICE_CLASSIFICATION,
         )
         if not rows:
+            logger.info("XIT001 area=%s %dQ%d: empty", area, year, quarter)
             continue
+        fetched += 1
 
         # DELETE-INSERT の冪等性キーとしてリクエストパラメータを付与
         for row in rows:
@@ -95,6 +104,8 @@ def ingest_trade_prices(
         conn.unregister("_batch")
 
         logger.info("XIT001 area=%s %dQ%d: %d rows", area, year, quarter, len(rows))
+
+    logger.info("ingest done: %d partitions fetched", fetched)
 
 
 def _completed_pairs(
