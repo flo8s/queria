@@ -33,12 +33,21 @@ def connect(
         raise FileNotFoundError(msg)
 
     if storage is None:
-        storage = str(DIST_DIR)
+        storage = os.environ.get("DUCKLAKE_STORAGE", str(DIST_DIR))
     data_path = ducklake_data_path(f"{storage}/{DUCKLAKE_FILE}")
 
     conn = duckdb.connect()
     try:
         conn.execute("INSTALL ducklake; LOAD ducklake;")
+        if storage.startswith("s3://"):
+            conn.execute("INSTALL httpfs; LOAD httpfs;")
+            conn.execute(f"""
+                SET s3_url_style = 'path';
+                SET s3_access_key_id = '{os.environ["S3_ACCESS_KEY_ID"]}';
+                SET s3_secret_access_key = '{os.environ["S3_SECRET_ACCESS_KEY"]}';
+                SET s3_endpoint = '{os.environ["S3_ENDPOINT"]}';
+                SET s3_region = 'auto';
+            """)
         conn.execute(f"""
             ATTACH 'ducklake:{ducklake_path}' AS {name} (
                 DATA_PATH '{data_path}',
