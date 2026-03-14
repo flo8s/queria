@@ -2,7 +2,7 @@
 
 SELECT '{{ datasource }}' AS datasource, *
 FROM read_json(
-    '{{ dist_dir() }}/metadata.json',
+    '{{ queria_common.dist_dir() }}/metadata.json',
     columns={
         title: 'VARCHAR',
         description: 'VARCHAR',
@@ -11,7 +11,8 @@ FROM read_json(
         ducklake_url: 'VARCHAR',
         schemas: 'JSON',
         dependencies: 'JSON',
-        lineage: 'JSON'
+        lineage: 'JSON',
+        readme: 'VARCHAR'
     }
 )
 

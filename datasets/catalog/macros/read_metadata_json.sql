@@ -11,7 +11,8 @@ FROM read_json(
         ducklake_url: 'VARCHAR',
         schemas: 'JSON',
         dependencies: 'JSON',
-        lineage: 'JSON'
+        lineage: 'JSON',
+        readme: 'VARCHAR'
     }
 )
 

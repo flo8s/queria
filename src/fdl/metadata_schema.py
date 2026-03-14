@@ -61,3 +61,4 @@ class DatasetMetadata(BaseModel):
     schemas: dict[str, SchemaInfo]
     lineage: LineageInfo
     dependencies: list[DependencyInfo] | None = None
+    readme: str | None = None

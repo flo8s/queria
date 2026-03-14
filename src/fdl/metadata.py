@@ -135,6 +135,7 @@ def build_metadata(
     manifest: WritableManifest,
     catalog: CatalogArtifact | None,
     datasource: str,
+    readme: str | None = None,
 ) -> DatasetMetadata:
     """Pure function: DatasetConfig → DatasetMetadata"""
     tables_by_schema = extract_models(manifest, catalog, datasource)
@@ -159,6 +160,7 @@ def build_metadata(
         schemas=schemas,
         lineage=lineage,
         dependencies=dataset_config.dependencies,
+        readme=readme,
     )
 
 
@@ -185,7 +187,10 @@ def generate_metadata(dataset_dir: Path, dist_dir: Path, target_dir: Path) -> No
     manifest = load_manifest(target_dir)
     catalog = load_catalog(target_dir)
 
-    output = build_metadata(dataset_config, manifest, catalog, datasource)
+    readme_path = dataset_dir / "README.md"
+    readme = readme_path.read_text() if readme_path.exists() else None
+
+    output = build_metadata(dataset_config, manifest, catalog, datasource, readme=readme)
 
     dist_dir.mkdir(parents=True, exist_ok=True)
     output_path = dist_dir / METADATA_JSON
