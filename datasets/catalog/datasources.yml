@@ -9,6 +9,8 @@ datasources:
     description: 郵便番号データセット
   - name: e_stat
     description: e-Stat 統計データ
+  - name: reinfolib
+    description: 不動産情報ライブラリ
   - name: catalog
     description: Queriaカタログ
     self: true
