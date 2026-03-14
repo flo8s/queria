@@ -13,18 +13,16 @@ from fdl import DIST_DIR
 def main():
     _ingest()
 
-    # dbt ビルド
-    dbt = dbtRunner()
-
-    result = dbt.invoke(["deps"])
+    # dbt ビルド (invoke ごとに新しいインスタンスを使い、deps 後のマクロ解決を確実にする)
+    result = dbtRunner().invoke(["deps"])
     if not result.success:
         raise SystemExit("dbt deps failed")
 
-    result = dbt.invoke(["run"])
+    result = dbtRunner().invoke(["run"])
     if not result.success:
         raise SystemExit("dbt run failed")
 
-    result = dbt.invoke(["docs", "generate"])
+    result = dbtRunner().invoke(["docs", "generate"])
     if not result.success:
         raise SystemExit("dbt docs generate failed")
 

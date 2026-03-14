@@ -23,17 +23,15 @@ START: YearQuarter = (2005, 3)
 def main():
     ingest()
 
-    dbt = dbtRunner()
-
-    result = dbt.invoke(["deps"])
+    result = dbtRunner().invoke(["deps"])
     if not result.success:
         raise SystemExit("dbt deps failed")
 
-    result = dbt.invoke(["run"])
+    result = dbtRunner().invoke(["run"])
     if not result.success:
         raise SystemExit("dbt run failed")
 
-    result = dbt.invoke(["docs", "generate"])
+    result = dbtRunner().invoke(["docs", "generate"])
     if not result.success:
         raise SystemExit("dbt docs generate failed")
 
