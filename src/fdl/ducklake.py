@@ -1,12 +1,53 @@
 """DuckLake catalog management."""
 
 import os
+from collections.abc import Generator
+from contextlib import contextmanager
 from pathlib import Path
 
 import duckdb
 
 from fdl import DIST_DIR, DUCKLAKE_FILE, DUCKLAKE_SQLITE, ducklake_data_path
 from fdl.config_schema import load_dataset_config
+
+
+@contextmanager
+def connect(
+    *,
+    storage: str | None = None,
+) -> Generator[duckdb.DuckDBPyConnection]:
+    """DuckLake カタログに接続し DuckDB 接続を返す。
+
+    データセット名は dataset.yml (または cwd のディレクトリ名) から自動検出する。
+    データファイルのパスは DUCKLAKE_STORAGE 環境変数で制御 (デフォルト "dist")。
+
+    Args:
+        storage: データファイルのベースパス。省略時は環境変数から読み取り。
+    """
+    config = load_dataset_config(Path.cwd())
+    name = config.name
+
+    ducklake_path = DIST_DIR / DUCKLAKE_FILE
+    if not ducklake_path.exists():
+        msg = f"{ducklake_path} not found. Run 'fdl init' or 'fdl pull' first."
+        raise FileNotFoundError(msg)
+
+    if storage is None:
+        storage = os.environ.get("DUCKLAKE_STORAGE", "dist")
+    data_path = ducklake_data_path(f"{storage}/{DUCKLAKE_FILE}")
+
+    conn = duckdb.connect()
+    try:
+        conn.execute("INSTALL ducklake; LOAD ducklake;")
+        conn.execute(f"""
+            ATTACH 'ducklake:{ducklake_path}' AS {name} (
+                DATA_PATH '{data_path}',
+                OVERRIDE_DATA_PATH true
+            )
+        """)
+        yield conn
+    finally:
+        conn.close()
 
 
 def create_destination(storage_path: str = str(DIST_DIR)):
