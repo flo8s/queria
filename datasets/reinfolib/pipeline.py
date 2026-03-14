@@ -1,5 +1,6 @@
 """不動産情報ライブラリ API 取得 + dbt ビルドパイプライン。"""
 
+import logging
 import os
 from datetime import date
 from itertools import product
@@ -11,6 +12,8 @@ from reinfolib import ReinfolibClient
 
 from fdl.ducklake import connect
 
+logger = logging.getLogger(__name__)
+
 type Year = int
 type Quarter = int
 type YearQuarter = tuple[Year, Quarter]
@@ -21,7 +24,13 @@ START: YearQuarter = (2005, 3)
 
 
 def main():
-    ingest()
+    api_key = os.environ["REINFOLIB_API_KEY"]
+    areas = [f"{a:02d}" for a in range(1, 48)]
+    all_quarters = _generate_quarters(START)
+
+    with connect() as conn, ReinfolibClient(api_key) as client:
+        conn.execute("CREATE SCHEMA IF NOT EXISTS reinfolib._source")
+        ingest_trade_prices(conn, client, areas=areas, quarters=all_quarters)
 
     result = dbtRunner().invoke(["deps"])
     if not result.success:
@@ -36,22 +45,6 @@ def main():
         raise SystemExit("dbt docs generate failed")
 
 
-def ingest() -> None:
-    """API からデータを取得し DuckLake に直接書き込む。"""
-    api_key = os.environ["REINFOLIB_API_KEY"]
-    areas = [f"{a:02d}" for a in range(1, 48)]
-    all_quarters = _generate_quarters(START)
-
-    with connect() as conn, ReinfolibClient(api_key) as client:
-        conn.execute("CREATE SCHEMA IF NOT EXISTS reinfolib._source")
-        quarters = _pending_quarters(conn, all_quarters, area_count=len(areas))
-        if not quarters:
-            print("  新しいデータなし")
-            return
-        print(f"  取得対象: {len(quarters)} 四半期")
-        ingest_trade_prices(conn, client, areas=areas, quarters=quarters)
-
-
 def ingest_trade_prices(
     conn: duckdb.DuckDBPyConnection,
     client: ReinfolibClient,
@@ -64,8 +57,10 @@ def ingest_trade_prices(
     completed = _completed_pairs(conn)
 
     for area, (year, quarter) in product(areas, quarters):
+        # すでに取得済みの (area, year, quarter) はスキップ。ただし最新の四半期は再取得して更新する
         if (area, year, quarter) in completed and (year, quarter) != current:
             continue
+
         rows = client.get_real_estate_prices(
             year=year,
             quarter=quarter,
@@ -97,7 +92,7 @@ def ingest_trade_prices(
         conn.execute("COMMIT")
         conn.unregister("_batch")
 
-        print(f"  XIT001 area={area} {year}Q{quarter}: {len(rows)} rows")
+        logger.info("XIT001 area=%s %dQ%d: %d rows", area, year, quarter, len(rows))
 
 
 def _completed_pairs(
@@ -113,37 +108,6 @@ def _completed_pairs(
         }
     except duckdb.CatalogException:
         return set()
-
-
-def _pending_quarters(
-    conn: duckdb.DuckDBPyConnection,
-    quarters: list[YearQuarter],
-    *,
-    area_count: int,
-) -> list[YearQuarter]:
-    """未取得・不完全な四半期を返す。最新四半期は常に再取得対象。"""
-    exists = conn.execute(
-        "SELECT count(*) FROM information_schema.tables "
-        "WHERE table_catalog = 'reinfolib' AND table_schema = '_source' "
-        "AND table_name = 'trade_prices'"
-    ).fetchone()[0] > 0
-
-    if not exists:
-        return quarters
-
-    # 全 area が揃っている四半期のみ「完了」とみなす
-    complete = {
-        (row[0], row[1])
-        for row in conn.execute(
-            f"SELECT _year, _quarter FROM {TABLE} "
-            f"GROUP BY _year, _quarter "
-            f"HAVING COUNT(DISTINCT _area_code) >= ?",
-            [area_count],
-        ).fetchall()
-    }
-
-    current = quarters[-1]
-    return [q for q in quarters if q not in complete or q == current]
 
 
 def _generate_quarters(
