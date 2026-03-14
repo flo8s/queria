@@ -30,6 +30,9 @@ models:
       - name: tags_json
         description: タグ（JSON 配列）
         data_type: JSON
+      - name: readme
+        description: データセットの説明（Markdown）
+        data_type: VARCHAR
 
   - name: mart_schemas
     description: データセットのスキーマ一覧
