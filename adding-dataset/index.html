@@ -1,0 +1,1482 @@
+
+<!doctype html>
+<html lang="ja" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="dbt + DuckLake + Cloudflare R2 によるオープンデータ公開パイプライン">
+      
+      
+      
+      
+        <link rel="prev" href="../getting-started/">
+      
+      
+        <link rel="next" href="../cli/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.3">
+    
+    
+      
+        <title>データセット追加ガイド - Queria</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#_1" class="md-skip">
+          コンテンツにスキップ
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="ヘッダー">
+    <a href=".." title="Queria" class="md-header__button md-logo" aria-label="Queria" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Queria
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              データセット追加ガイド
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="検索" placeholder="検索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="検索">
+        
+        <button type="reset" class="md-search__icon md-icon" title="クリア" aria-label="クリア" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            検索を初期化
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/flo8s/queria" title="リポジトリへ" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="ナビゲーション" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Queria" class="md-nav__button md-logo" aria-label="Queria" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Queria
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/flo8s/queria" title="リポジトリへ" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    はじめに
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    データセット追加ガイド
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    データセット追加ガイド
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="目次">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目次
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        全体の流れ
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. データセットを作成する
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. データセットを作成する">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pyprojecttoml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pyproject.toml
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pipelinepy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pipeline.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-datasetyml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. dataset.yml を編集する
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. dataset.yml を編集する">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#tsukuba" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        基本例（tsukuba）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#k_oxon" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        依存関係がある例（k_oxon）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        フィールド一覧
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-dbt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. dbt モデルを実装する
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. dbt モデルを実装する">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-raw" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1. raw: 外部データの取り込み
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-stg" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2. stg: データ変換・正規化
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-mart" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3. mart: 公開用ビューとメタ情報設定
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#meta" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        meta フィールドの説明
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. ローカルでビルド・確認する
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. 本番デプロイ
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dlt-ducklake-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        パターン: dlt + DuckLake による API データ取得
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="パターン: dlt + DuckLake による API データ取得">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        アーキテクチャ
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ディレクトリ構成
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        事前準備
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pipelinepy_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pipeline.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#state" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        state 管理による増分スキップ
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dbt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        dbt モデル
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#prd" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        prd 環境への切り替え
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI リファレンス
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="目次">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目次
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        全体の流れ
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. データセットを作成する
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. データセットを作成する">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pyprojecttoml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pyproject.toml
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pipelinepy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pipeline.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-datasetyml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. dataset.yml を編集する
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. dataset.yml を編集する">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#tsukuba" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        基本例（tsukuba）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#k_oxon" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        依存関係がある例（k_oxon）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        フィールド一覧
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-dbt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. dbt モデルを実装する
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. dbt モデルを実装する">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-raw" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1. raw: 外部データの取り込み
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-stg" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2. stg: データ変換・正規化
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-mart" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3. mart: 公開用ビューとメタ情報設定
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#meta" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        meta フィールドの説明
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. ローカルでビルド・確認する
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. 本番デプロイ
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dlt-ducklake-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        パターン: dlt + DuckLake による API データ取得
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="パターン: dlt + DuckLake による API データ取得">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        アーキテクチャ
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ディレクトリ構成
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        事前準備
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pipelinepy_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pipeline.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#state" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        state 管理による増分スキップ
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dbt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        dbt モデル
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#prd" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        prd 環境への切り替え
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="_1">データセット追加ガイド</h1>
+<h2 id="_2">全体の流れ</h2>
+<pre><code>スキャフォールド → モデル実装 → python pipeline.py → 動作確認 → fdl push
+</code></pre>
+<ol>
+<li>データセットディレクトリを作成し、<code>dataset.yml</code> にメタデータを定義</li>
+<li><code>pyproject.toml</code> に <code>fdl</code>, <code>dbt-core</code>, <code>dbt-duckdb</code> を依存に追加</li>
+<li><code>pipeline.py</code> でビルドエントリポイントを実装</li>
+<li>dbt モデルを実装（raw → stg → mart）</li>
+<li><code>uv run python pipeline.py</code> + <code>uv run fdl metadata</code> でローカルビルド・確認</li>
+<li><code>uv run fdl pull</code> + <code>uv run python pipeline.py</code> + <code>uv run fdl metadata</code> + <code>uv run fdl push</code> で本番デプロイ</li>
+</ol>
+<h2 id="1">1. データセットを作成する</h2>
+<p>データセットディレクトリを作成し、以下のファイルを配置する:</p>
+<pre><code>datasets/my_city/
+├── dataset.yml
+├── pyproject.toml
+├── pipeline.py
+├── dbt_project.yml
+├── profiles.yml
+├── packages.yml
+└── models/
+    ├── raw/
+    ├── stg/
+    └── mart/
+</code></pre>
+<h3 id="pyprojecttoml">pyproject.toml</h3>
+<pre><code class="language-toml">[project]
+name = &quot;dataset-my-city&quot;
+version = &quot;0.1.0&quot;
+requires-python = &quot;&gt;=3.13&quot;
+dependencies = [&quot;fdl&quot;, &quot;dbt-core&gt;=1.11.2&quot;, &quot;dbt-duckdb&gt;=1.10.0&quot;]
+
+[tool.uv.sources]
+fdl = { path = &quot;../../&quot;, editable = true }
+</code></pre>
+<h3 id="pipelinepy">pipeline.py</h3>
+<p>dbt のみのデータセット（最も一般的なパターン）:</p>
+<pre><code class="language-python">&quot;&quot;&quot;dbt ビルド + メタデータ生成パイプライン。&quot;&quot;&quot;
+
+import sys
+
+from dbt.cli.main import dbtRunner
+
+
+def main():
+    target = sys.argv[1] if len(sys.argv) &gt; 1 else &quot;default&quot;
+
+    dbt = dbtRunner()
+    target_args = [&quot;--target&quot;, target]
+
+    result = dbt.invoke([&quot;deps&quot;])
+    if not result.success:
+        raise SystemExit(&quot;dbt deps failed&quot;)
+
+    result = dbt.invoke([&quot;run&quot;, *target_args])
+    if not result.success:
+        raise SystemExit(&quot;dbt run failed&quot;)
+
+    result = dbt.invoke([&quot;docs&quot;, &quot;generate&quot;, *target_args])
+    if not result.success:
+        raise SystemExit(&quot;dbt docs generate failed&quot;)
+</code></pre>
+<h2 id="2-datasetyml">2. dataset.yml を編集する</h2>
+<p>dataset.yml はデータセット全体のメタデータを定義するファイル。
+フロントエンドのデータセット一覧画面やメタデータ生成に使われる。</p>
+<h3 id="tsukuba">基本例（tsukuba）</h3>
+<pre><code class="language-yaml">title: &quot;つくば市オープンデータ&quot;
+description: &quot;つくば市が公開している統計データ&quot;
+cover: &quot;🏙️&quot;
+tags: [&quot;オープンデータ&quot;, &quot;つくば市&quot;]
+ducklake_url: &quot;https://data.queria.io/tsukuba/ducklake.duckdb&quot;
+
+schemas:
+  main:
+    title: &quot;メイン&quot;
+</code></pre>
+<h3 id="k_oxon">依存関係がある例（k_oxon）</h3>
+<p>他のデータセットを参照する場合は <code>dependencies</code> を指定する:</p>
+<pre><code class="language-yaml">title: &quot;K-Oxon データ&quot;
+description: &quot;K-Oxon が公開するオープンデータ&quot;
+cover: &quot;🗾&quot;
+tags: [&quot;GIS&quot;, &quot;行政区域&quot;, &quot;境界&quot;, &quot;地図&quot;]
+ducklake_url: &quot;https://data.queria.io/k_oxon/ducklake.duckdb&quot;
+dependencies:
+  - alias: &quot;dwh&quot;
+    ducklake_url: &quot;https://data.oxon-data.work/fdl_experiment/dwh.ducklake&quot;
+
+schemas:
+  japan_map_for_bi:
+    title: &quot;Japan map for BI&quot;
+  e_stat:
+    title: &quot;E-Stat 統計データ&quot;
+</code></pre>
+<h3 id="_3">フィールド一覧</h3>
+<table>
+<thead>
+<tr>
+<th>フィールド</th>
+<th>必須</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>title</td>
+<td>Yes</td>
+<td>データセットの表示名</td>
+</tr>
+<tr>
+<td>description</td>
+<td>Yes</td>
+<td>データセットの説明</td>
+</tr>
+<tr>
+<td>cover</td>
+<td>No</td>
+<td>カバー画像（絵文字）</td>
+</tr>
+<tr>
+<td>tags</td>
+<td>No</td>
+<td>分類タグの配列</td>
+</tr>
+<tr>
+<td>ducklake_url</td>
+<td>Yes</td>
+<td>R2 上の DuckLake 公開 URL</td>
+</tr>
+<tr>
+<td>schemas</td>
+<td>No</td>
+<td>スキーマ名と表示名のマッピング</td>
+</tr>
+<tr>
+<td>dependencies</td>
+<td>No</td>
+<td>他データセットへの依存</td>
+</tr>
+</tbody>
+</table>
+<p>ducklake_url は <code>https://data.queria.io/{データセット名}/ducklake.duckdb</code> の形式で命名する。</p>
+<h2 id="3-dbt">3. dbt モデルを実装する</h2>
+<p>データモデルは raw → stg → mart の3層構成。</p>
+<h3 id="31-raw">3.1. raw: 外部データの取り込み</h3>
+<p>外部の CSV/JSON を DuckDB の <code>read_csv</code> / <code>read_json</code> で直接取り込む。</p>
+<pre><code class="language-sql">-- models/raw/raw_my_city_population_20240401.sql
+{{
+    config(
+        materialized='table'
+    )
+}}
+
+{{ read_population_csv(
+    'https://example.com/data/population_20240401.csv'
+) }}
+</code></pre>
+<p>取り込み用のマクロは <code>macros/</code> に定義する。
+Shift-JIS の CSV を読む場合の例:</p>
+<pre><code class="language-sql">-- macros/read_population_csv.sql
+{% macro read_population_csv(url) %}
+select *
+from read_csv(
+    '{{ url }}',
+    header=true,
+    encoding='shift_jis',
+    null_padding=true,
+    dtypes={
+        '全国地方公共団体コード': 'VARCHAR',
+        '地域コード': 'VARCHAR',
+        '調査年月日': 'DATE'
+    }
+)
+{% endmacro %}
+</code></pre>
+<p>同じ構造の CSV が複数期間ある場合、期間ごとにモデルを作成する:</p>
+<pre><code>models/raw/
+├── raw_my_city_population_20240401.sql
+├── raw_my_city_population_20240501.sql
+└── raw_my_city_population_20241001.sql
+</code></pre>
+<p>raw 層のスキーマ定義（<code>models/raw/_schema.yml</code>）:</p>
+<pre><code class="language-yaml">version: 2
+
+models:
+  - name: raw_my_city_population_20240401
+    description: 人口データ（2024年4月1日時点）の生データ
+    columns: &amp;raw_columns
+      - name: '&quot;全国地方公共団体コード&quot;'
+        description: 全国地方公共団体コード
+      - name: '&quot;調査年月日&quot;'
+        description: 調査年月日
+  - name: raw_my_city_population_20240501
+    description: 人口データ（2024年5月1日時点）の生データ
+    columns: *raw_columns
+</code></pre>
+<p>YAML アンカー（<code>&amp;raw_columns</code> / <code>*raw_columns</code>）で同じカラム定義を共有できる。</p>
+<h3 id="32-stg">3.2. stg: データ変換・正規化</h3>
+<p>raw データを正規化する。日本語カラム名の英語化、UNPIVOT、型変換などを行う。</p>
+<pre><code class="language-sql">-- models/stg/stg_my_city_population_20240401.sql
+{{ config(materialized='view') }}
+
+{{ transform_population(ref('raw_my_city_population_20240401')) }}
+</code></pre>
+<p>変換用マクロで UNPIVOT や名前変換を実装する:</p>
+<pre><code class="language-sql">-- macros/transform_population.sql
+{% macro transform_population(source_table) %}
+WITH renamed AS (
+    SELECT
+        &quot;全国地方公共団体コード&quot; as lg_code,
+        &quot;調査年月日&quot; as reference_date,
+        &quot;地域名&quot; as area_name,
+        ...
+    FROM {{ source_table }}
+)
+SELECT * FROM renamed
+{% endmacro %}
+</code></pre>
+<h3 id="33-mart">3.3. mart: 公開用ビューとメタ情報設定</h3>
+<p>mart 層は外部に公開するビュー。ここでのメタ情報設定がフロントエンドの表示に直結する。</p>
+<p>SQL ファイル（複数の stg を UNION ALL で統合）:</p>
+<pre><code class="language-sql">-- models/mart/mart_my_city_population.sql
+{{ config(materialized='view') }}
+
+SELECT * FROM {{ ref('stg_my_city_population_20240401') }}
+UNION ALL SELECT * FROM {{ ref('stg_my_city_population_20240501') }}
+UNION ALL SELECT * FROM {{ ref('stg_my_city_population_20241001') }}
+</code></pre>
+<p>スキーマ定義ファイルでメタ情報を設定する:</p>
+<pre><code class="language-yaml"># models/mart/mart_my_city_population.yml
+version: 2
+
+models:
+  - name: mart_my_city_population
+    description: 全期間の人口データを統合したマートテーブル
+    access: public
+    config:
+      contract:
+        enforced: true
+    meta:
+      title: &quot;人口統計&quot;
+      tags: [&quot;人口&quot;, &quot;統計&quot;]
+      license: &quot;CC BY 4.0&quot;
+      license_url: &quot;https://creativecommons.org/licenses/by/4.0/&quot;
+      source_url: &quot;https://example.com/&quot;
+      published: true
+    columns:
+      - name: lg_code
+        description: 全国地方公共団体コード
+        data_type: VARCHAR
+        constraints:
+          - type: not_null
+      - name: reference_date
+        description: データの調査年月日
+        data_type: DATE
+        constraints:
+          - type: not_null
+      - name: area_name
+        description: 地域の名称
+        data_type: VARCHAR
+        constraints:
+          - type: not_null
+</code></pre>
+<h3 id="meta">meta フィールドの説明</h3>
+<table>
+<thead>
+<tr>
+<th>フィールド</th>
+<th>必須</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>title</td>
+<td>Yes</td>
+<td>フロントエンドでの表示名</td>
+</tr>
+<tr>
+<td>tags</td>
+<td>No</td>
+<td>分類タグの配列</td>
+</tr>
+<tr>
+<td>license</td>
+<td>No</td>
+<td>ライセンス名（例: "CC BY 4.0"）</td>
+</tr>
+<tr>
+<td>license_url</td>
+<td>No</td>
+<td>ライセンスの URL</td>
+</tr>
+<tr>
+<td>source_url</td>
+<td>No</td>
+<td>データの出典 URL</td>
+</tr>
+<tr>
+<td>published</td>
+<td>No</td>
+<td><code>true</code> にするとフロントエンドのデータセット一覧に表示される（UI表示制御）</td>
+</tr>
+</tbody>
+</table>
+<p><code>access: public</code> は dbt のモデルアクセス制御で、他の dbt プロジェクトから <code>ref()</code> できるようにする設定。
+<code>meta.published: true</code> は fdl 独自のフラグで、フロントエンドのデータセット一覧に表示するかどうかを制御する。metadata.json にはすべてのモデル（raw/stg/mart）が含まれる。</p>
+<p><code>config.contract.enforced: true</code> を設定すると、カラムの <code>data_type</code> と <code>constraints</code> がビルド時に検証される。mart 層では設定を推奨する。</p>
+<h2 id="4">4. ローカルでビルド・確認する</h2>
+<pre><code class="language-bash">cd datasets/my_city
+
+# 単一データセットのビルド
+uv run python pipeline.py
+uv run fdl metadata
+
+# 全データセットの一括ビルド
+../../scripts/build.sh dev
+</code></pre>
+<p>ビルドすると <code>.fdl/</code> 内に以下のファイルが配置される:</p>
+<pre><code>datasets/my_city/.fdl/
+├── ducklake.duckdb          # DuckLake カタログファイル
+├── ducklake.duckdb.files/   # Parquet ファイル群
+├── metadata.json            # メタデータ（フロントエンド用）
+└── docs/                    # dbt ドキュメント
+</code></pre>
+<p>DuckDB CLI でデータを確認:</p>
+<pre><code class="language-bash">duckdb &quot;ducklake:datasets/my_city/.fdl/ducklake.duckdb&quot; \
+    -c &quot;SELECT * FROM mart_my_city_population LIMIT 10&quot;
+</code></pre>
+<p>metadata.json の内容を確認:</p>
+<pre><code class="language-bash">cat datasets/my_city/.fdl/metadata.json | python -m json.tool
+</code></pre>
+<p>フロントエンド（queria-web）と合わせて確認する場合:</p>
+<pre><code class="language-bash"># パイプライン側
+./scripts/build.sh dev
+./scripts/dev-serve.sh
+
+# フロントエンド側（別ターミナル）
+cd /path/to/queria-web &amp;&amp; pnpm dev
+</code></pre>
+<h2 id="5">5. 本番デプロイ</h2>
+<p>環境変数を設定し（<code>.env.example</code> 参照）、本番ターゲットでビルド・デプロイする:</p>
+<pre><code class="language-bash">cd datasets/my_city
+uv run fdl pull
+uv run python pipeline.py
+uv run fdl metadata
+uv run fdl push
+</code></pre>
+<p>新しいデータセットを追加した場合、catalog の再ビルドも必要:</p>
+<pre><code class="language-bash">cd datasets/catalog
+uv run fdl pull
+uv run python pipeline.py
+uv run fdl metadata
+uv run fdl push
+</code></pre>
+<p>GitHub Actions で main ブランチに push すると、自動デプロイが実行される。</p>
+<h2 id="dlt-ducklake-api">パターン: dlt + DuckLake による API データ取得</h2>
+<p>外部 API からデータを取得し、dlt パイプライン経由で DuckLake に直接書き込むパターン。
+dlt の state 管理により、2回目以降のロードで既取得データをスキップできる。</p>
+<h3 id="_4">アーキテクチャ</h3>
+<pre><code>[外部 API]
+    ↓  dlt resource (ページネーション + パース)
+[dlt pipeline (DuckLake destination)]
+    ↓  write_disposition=&quot;merge&quot; で upsert
+    ↓  _dlt_pipeline_state に state 保存
+[.fdl/ducklake.sqlite]
+    ↓  queria push 時に DuckDB へ自動変換
+[.fdl/ducklake.duckdb]
+    ↓  dbt (ビューのみ)
+    ↓  metadata.json 生成
+[R2]
+</code></pre>
+<h3 id="_5">ディレクトリ構成</h3>
+<pre><code>datasets/my_api/
+├── dataset.yml
+├── pyproject.toml
+├── pipeline.py            # ingestion + dbt + metadata
+├── tables.yml             # テーブル定義（API パラメータ、merge_keys）
+├── dbt_project.yml
+├── profiles.yml
+└── models/
+    ├── raw/               # SELECT columns FROM source (view)
+    └── mart/              # フィルタ・加工ビュー (view)
+</code></pre>
+<h3 id="_6">事前準備</h3>
+<p>dlt は SQLite 形式の DuckLake カタログに書き込む。事前に初期化が必要:</p>
+<pre><code class="language-bash">uv run fdl init --sqlite
+</code></pre>
+<h3 id="pipelinepy_1">pipeline.py</h3>
+<p>ingestion（dlt パイプライン）と dbt ビルドを <code>pipeline.py</code> にまとめる。
+<code>_create_destination</code> で DuckLake destination を構築する:</p>
+<pre><code class="language-python">import os
+from pathlib import Path
+
+import dlt
+from dlt.destinations import ducklake
+from dlt.destinations.impl.ducklake.configuration import DuckLakeCredentials
+
+DIST_DIR = Path(&quot;.fdl&quot;)
+
+def _create_destination():
+    bucket = os.environ.get(&quot;S3_BUCKET&quot;)
+    dataset_name = Path.cwd().name
+    if bucket:
+        storage = f&quot;s3://{bucket}/{dataset_name}/ducklake.duckdb.files/&quot;
+    else:
+        storage = str(DIST_DIR / &quot;ducklake.duckdb.files&quot;) + &quot;/&quot;
+
+    return ducklake(
+        credentials=DuckLakeCredentials(
+            catalog=str(DIST_DIR / &quot;ducklake.sqlite&quot;),
+            storage=storage,
+        ),
+    )
+
+def _ingest():
+    destination = _create_destination()
+
+    pipeline = dlt.pipeline(
+        pipeline_name=&quot;my_pipeline&quot;,
+        destination=destination,
+        dataset_name=&quot;_source&quot;,
+    )
+
+    # dlt resource からデータを取得して DuckLake に書き込み
+    load_info = pipeline.run(my_resource, write_disposition=&quot;merge&quot;)
+</code></pre>
+<h3 id="state">state 管理による増分スキップ</h3>
+<p>dlt は <code>_dlt_pipeline_state</code> テーブルにロード状態を保存する。
+<code>dlt.current.resource_state()</code> を使って、既に取得済みのデータをスキップできる:</p>
+<pre><code class="language-python">@dlt.resource(write_disposition=&quot;merge&quot;, primary_key=[&quot;id&quot;])
+def my_resource():
+    state = dlt.current.resource_state()
+    if state.get(&quot;loaded&quot;):
+        return  # 取得済み → API 呼び出しをスキップ
+    yield fetch_data()
+    state[&quot;loaded&quot;] = True
+</code></pre>
+<h3 id="dbt">dbt モデル</h3>
+<p><code>_ingest()</code> が <code>_source</code> スキーマにテーブルを作成し、dbt がビューを作成する。
+dlt が追加する <code>_dlt_load_id</code>, <code>_dlt_id</code> カラムは raw ビューで除外する:</p>
+<pre><code class="language-sql">-- models/raw/raw_my_table.sql
+SELECT col1, col2, col3
+FROM {{ source('my_source', 'my_table') }}
+</code></pre>
+<p>全て <code>materialized: view</code> にすることで、データの再コピーが発生せず増分更新と相性が良い。</p>
+<h3 id="prd">prd 環境への切り替え</h3>
+<p><code>_create_destination</code> は <code>S3_BUCKET</code> 環境変数の有無で dev/prd を自動判定する:</p>
+<ul>
+<li>dev (S3_BUCKET 未設定): ローカルパス</li>
+<li>prd (S3_BUCKET 設定済): <code>s3://{bucket}/{dataset}/ducklake.duckdb.files/</code></li>
+</ul>
+<p>実装例は <code>datasets/e_stat/</code> を参照。</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": [], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u30b3\u30d4\u30fc\u3057\u307e\u3057\u305f", "clipboard.copy": "\u30af\u30ea\u30c3\u30d7\u30dc\u30fc\u30c9\u3078\u30b3\u30d4\u30fc", "search.result.more.one": "\u3053\u306e\u30da\u30fc\u30b8\u5185\u306b\u3082\u30461\u4ef6\u898b\u3064\u304b\u308a\u307e\u3057\u305f", "search.result.more.other": "\u3053\u306e\u30da\u30fc\u30b8\u5185\u306b\u3042\u3068#\u4ef6\u898b\u3064\u304b\u308a\u307e\u3057\u305f", "search.result.none": "\u4f55\u3082\u898b\u3064\u304b\u308a\u307e\u305b\u3093\u3067\u3057\u305f", "search.result.one": "1\u4ef6\u898b\u3064\u304b\u308a\u307e\u3057\u305f", "search.result.other": "#\u4ef6\u898b\u3064\u304b\u308a\u307e\u3057\u305f", "search.result.placeholder": "\u691c\u7d22\u30ad\u30fc\u30ef\u30fc\u30c9\u3092\u5165\u529b\u3057\u3066\u304f\u3060\u3055\u3044", "search.result.term.missing": "\u691c\u7d22\u306b\u542b\u307e\u308c\u306a\u3044", "select.version": "\u30d0\u30fc\u30b8\u30e7\u30f3\u5207\u308a\u66ff\u3048"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
