@@ -42,10 +42,15 @@ def ingest() -> None:
     """API からデータを取得し DuckLake に直接書き込む。"""
     api_key = os.environ["REINFOLIB_API_KEY"]
     areas = [f"{a:02d}" for a in range(1, 48)]
-    quarters = _generate_quarters(START)
+    all_quarters = _generate_quarters(START)
 
     with connect() as conn, ReinfolibClient(api_key) as client:
         conn.execute("CREATE SCHEMA IF NOT EXISTS reinfolib._source")
+        quarters = _pending_quarters(conn, all_quarters)
+        if not quarters:
+            print("  新しいデータなし")
+            return
+        print(f"  取得対象: {len(quarters)} 四半期")
         ingest_trade_prices(conn, client, areas=areas, quarters=quarters)
 
 
@@ -88,6 +93,31 @@ def ingest_trade_prices(
         conn.unregister("_batch")
 
         print(f"  XIT001 area={area} {year}Q{quarter}: {len(rows)} rows")
+
+
+def _pending_quarters(
+    conn: duckdb.DuckDBPyConnection,
+    quarters: list[YearQuarter],
+) -> list[YearQuarter]:
+    """未取得の四半期を返す。最新四半期は常に再取得対象。"""
+    exists = conn.execute(
+        "SELECT count(*) FROM information_schema.tables "
+        "WHERE table_catalog = 'reinfolib' AND table_schema = '_source' "
+        "AND table_name = 'trade_prices'"
+    ).fetchone()[0] > 0
+
+    if not exists:
+        return quarters
+
+    existing = {
+        (row[0], row[1])
+        for row in conn.execute(
+            f"SELECT DISTINCT _year, _quarter FROM {TABLE}"
+        ).fetchall()
+    }
+
+    current = quarters[-1]
+    return [q for q in quarters if q not in existing or q == current]
 
 
 def _generate_quarters(
