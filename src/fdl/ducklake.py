@@ -33,7 +33,7 @@ def connect(
         raise FileNotFoundError(msg)
 
     if storage is None:
-        storage = os.environ.get("DUCKLAKE_STORAGE", "dist")
+        storage = str(DIST_DIR)
     data_path = ducklake_data_path(f"{storage}/{DUCKLAKE_FILE}")
 
     conn = duckdb.connect()
