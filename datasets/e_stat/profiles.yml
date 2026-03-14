@@ -1,7 +1,7 @@
 e_stat:
-  target: dev
+  target: default
   outputs:
-    dev:
+    default:
       type: duckdb
       path: ":memory:"
       database: e_stat

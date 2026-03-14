@@ -57,7 +57,7 @@ from dbt.cli.main import dbtRunner
 
 
 def main():
-    target = sys.argv[1] if len(sys.argv) > 1 else "dev"
+    target = sys.argv[1] if len(sys.argv) > 1 else "default"
 
     dbt = dbtRunner()
     target_args = ["--target", target]

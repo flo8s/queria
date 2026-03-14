@@ -1,7 +1,7 @@
 zipcode:
-  target: dev
+  target: default
   outputs:
-    dev:
+    default:
       type: duckdb
       path: ":memory:"
       database: zipcode

@@ -45,7 +45,7 @@ datasets/
     pipeline.py              # ビルドエントリポイント (ingestion + dbt deps/run/docs generate)
     tables.yml               # (dlt 使用時) テーブル定義
     dbt_project.yml
-    profiles.yml             # dev (ローカル) / prd (S3) ターゲット
+    profiles.yml             # dbt ターゲット設定 (環境変数で出力先切替)
     models/
       raw/                   # 外部データ取り込み (materialized: table)
       stg/                   # 変換・正規化 (materialized: view)
@@ -89,9 +89,9 @@ raw → stg → mart の 3 層構成:
 
 公開フラグ: dbt モデルの YAML で `meta.published: true` を設定するとフロントエンドのデータセット一覧に表示される（UI表示制御のみ。metadata.json にはすべてのモデルが含まれる）。
 
-profiles.yml の各データセットに dev/prd ターゲットがある:
-- dev: `:memory:` パス、ローカルファイルアタッチ
-- prd: `:memory:` パス、S3 設定 (環境変数から読み込み)
+profiles.yml の各データセットに default ターゲットがある:
+- `:memory:` パス、DuckLake アタッチ
+- 出力先は環境変数 (DUCKLAKE_STORAGE, S3_*) で切替
 
 ## DuckLake 設計
 

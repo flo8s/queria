@@ -84,8 +84,7 @@ queria/
 
 profiles.yml is included in each datasource's directory.
 
-- dev target: writes Parquet locally
-- prd target: writes directly to R2 S3 path (requires environment variables)
+- default target: writes Parquet locally or to R2 S3 (controlled by environment variables)
 
 ### Pipeline Execution
 
