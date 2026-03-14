@@ -24,6 +24,8 @@ START: YearQuarter = (2005, 3)
 
 
 def main():
+    logging.basicConfig(level=logging.INFO, format="  %(message)s")
+
     api_key = os.environ["REINFOLIB_API_KEY"]
     areas = [f"{a:02d}" for a in range(1, 48)]
     all_quarters = _generate_quarters(START)
